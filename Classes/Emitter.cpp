@@ -22,45 +22,40 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#include "Mirror.h"
-
-static const float DEGTORAD = 0.0174532925199432957f;
-static const float RADTODEG = 57.295779513082320876f;
+#include "Emitter.h"
 
 USING_NS_CC;
 
 /**
  *
  */
-Mirror::Mirror() : Node() {
+Emitter::Emitter() : Node() {
 }
 
 /**
  *
  */
-Mirror::~Mirror() {
+Emitter::~Emitter() {
 }
 
 /**
  * on "init" you need to initialize your instance
  */
-bool Mirror::init() {
+bool Emitter::init() {
 	//////////////////////////////
 	// 1. super init first
 	if (!Node::init()) {
 		return false;
 	}
 
-	this->rotatable = true;
-	this->rotating = false;
 	this->direction = 0;
-	this->sprite = Sprite::create("mirror.png");
+	this->sprite = Sprite::create("emitter.png");
 
 	this->sprite->setPositionNormalized(Vec2(0.5f, 0.5f));
 	this->addChild(this->sprite);
 
 	this->setContentSize(this->sprite->getContentSize());
-	this->setAnchorPoint(Vec2(0.33f, 0.33f));
+	this->setAnchorPoint(Vec2(0.5f, 0.5f));
 
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -75,25 +70,14 @@ bool Mirror::init() {
   touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
 		bool consuming = false;
 
-		if (!this->isRotating()) {
-			if (this->getBoundingBox().containsPoint(touch->getLocation())) {
-				consuming = true;
-				this->runAction(Sequence::create(
-					CallFunc::create([&]() {
-						this->setRotating(true);
-					}),
-					RotateBy::create(Mirror::ROTATION_TIME, 90.0f),
-					CallFunc::create([&]() {
-						if (this->getRotation() < 0.0f) {
-							this->setRotation(this->getRotation() + 360.0f);
-						} else if (this->getRotation() >= 360.0f) {
-							this->setRotation(this->getRotation() - 360.0f);
-						}
-						this->setRotating(false);
-					}),
-					nullptr
-				));
-			}
+		if (this->getBoundingBox().containsPoint(touch->getLocation())) {
+			consuming = true;
+			this->runAction(Sequence::create(
+				CallFunc::create([&]() {
+					this->setActive(!this->isActive());
+				}),
+				nullptr
+			));
 		}
 
     return consuming;
@@ -111,51 +95,5 @@ bool Mirror::init() {
   this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
 
 	return true;
-}
-
-/**
- *
- */
-void Mirror::rotateCounterclockwise() {
-	rotate(false);
-}
-
-/**
- *
- */
-void Mirror::rotateClockwise() {
-	rotate(true);
-}
-
-/**
- *
- */
-void Mirror::rotate(bool clockwise) {
-	if (this->isRotatable()) {
-		if (clockwise) {
-			this->direction = (this->direction + 1) % 4;
-		} else {
-			this->direction = (this->direction - 1) % 4;
-		}
-
-		if (this->direction < 0) {
-			this->direction += 4;
-		}
-
-		switch (this->direction) {
-			case 0: {
-				this->sprite->runAction(RotateTo::create(Mirror::ROTATION_TIME, 0.0f));
-			} break;
-			case 1: {
-				this->sprite->runAction(RotateTo::create(Mirror::ROTATION_TIME, 90.0f));
-			} break;
-			case 2: {
-				this->sprite->runAction(RotateTo::create(Mirror::ROTATION_TIME, 180.0f));
-			} break;
-			case 3: {
-				this->sprite->runAction(RotateTo::create(Mirror::ROTATION_TIME, 270.0f));
-			} break;
-		}
-	}
 }
 
