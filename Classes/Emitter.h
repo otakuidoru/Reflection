@@ -42,10 +42,11 @@ public:
 
 	virtual bool init() override;
 
-	short getDirection() const { return direction; }
+	inline short getDirection() const { return direction; }
+	inline void setDirection(short direction) { this->direction = direction % 4; }
 
-	bool isActive() const { return active; }
-	void setActive(bool active) { this->active = active; }
+	inline bool isActive() const { return active; }
+	inline void setActive(bool active) { this->active = active; }
 };
 
 #endif // __EMITTER_H__

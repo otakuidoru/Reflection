@@ -72,12 +72,7 @@ bool Emitter::init() {
 
 		if (this->getBoundingBox().containsPoint(touch->getLocation())) {
 			consuming = true;
-			this->runAction(Sequence::create(
-				CallFunc::create([&]() {
-					this->setActive(!this->isActive());
-				}),
-				nullptr
-			));
+			this->setActive(!this->isActive());
 		}
 
     return consuming;

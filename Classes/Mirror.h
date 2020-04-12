@@ -47,13 +47,14 @@ public:
 
 	virtual bool init() override;
 
-	bool isRotatable() const { return rotatable; }
-	void setRotatable(bool rotatable) { this->rotatable = rotatable; }
+	inline bool isRotatable() const { return rotatable; }
+	inline void setRotatable(bool rotatable) { this->rotatable = rotatable; }
 
-	bool isRotating() const { return rotating; }
-	void setRotating(bool rotating) { this->rotating = rotating; }
+	inline bool isRotating() const { return rotating; }
+	inline void setRotating(bool rotating) { this->rotating = rotating; }
 
-	short getDirection() const { return direction; }
+	inline short getDirection() const { return direction; }
+	inline void setDirection(short direction) { this->direction = direction % 4; }
 
 	void rotateCounterclockwise();
 	void rotateClockwise();
