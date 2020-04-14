@@ -25,6 +25,7 @@
 #ifndef __EMITTER_H__
 #define __EMITTER_H__
 
+#include <functional>
 #include "cocos2d.h"
 
 class Emitter : public cocos2d::Node {
@@ -47,6 +48,9 @@ public:
 
 	inline bool isActive() const { return active; }
 	inline void setActive(bool active) { this->active = active; }
+
+	std::function<void(Emitter*)> onActivate;
+	std::function<void(Emitter*)> onDeactivate;
 };
 
 #endif // __EMITTER_H__

@@ -58,6 +58,8 @@ public:
 
 	void rotateCounterclockwise();
 	void rotateClockwise();
+
+	void update(float dt) override;
 };
 
 #endif // __MIRROR_H__

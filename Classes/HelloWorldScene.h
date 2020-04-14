@@ -26,6 +26,8 @@
 #define __HELLOWORLD_SCENE_H__
 
 #include "cocos2d.h"
+#include "Emitter.h"
+#include "Laser.h"
 #include "Mirror.h"
 
 class HelloWorld : public cocos2d::Scene {

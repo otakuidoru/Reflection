@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include "Emitter.h"
+#include "Laser.h"
 
 USING_NS_CC;
 
@@ -73,6 +74,7 @@ bool Emitter::init() {
 		if (this->getBoundingBox().containsPoint(touch->getLocation())) {
 			consuming = true;
 			this->setActive(!this->isActive());
+			this->onActivate(this);
 		}
 
     return consuming;

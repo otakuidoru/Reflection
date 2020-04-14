@@ -24,6 +24,8 @@
 
 #include "HelloWorldScene.h"
 
+typedef void (*FuncPtrVoidEmitterPtr)(Emitter*);
+
 USING_NS_CC;
 
 /**
@@ -59,9 +61,9 @@ bool HelloWorld::init() {
 	// add a label shows "Hello World"
 	// create and initialize a label
 
-	auto label = Label::createWithTTF("Hello World", "fonts/Marker Felt.ttf", 48);
+	auto label = Label::createWithTTF("Reflection", "fonts/motioncontrol-bold.ttf", 48);
 	if (label == nullptr) {
-		problemLoading("'fonts/Marker Felt.ttf'");
+		problemLoading("'fonts/motioncontrol-bold.ttf'");
 	} else {
 		// position the label on the center of the screen
 		label->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height - label->getContentSize().height));
@@ -70,11 +72,26 @@ bool HelloWorld::init() {
 		background->addChild(label, 1);
 	}
 
-	// Add the mirror
+	// Add the mirrors
 
 	Mirror* mirror = Mirror::create();
 	mirror->setPosition(Vec2(visibleSize.width/2, visibleSize.height/2));
 	background->addChild(mirror);
+
+	// Add the emitters
+
+	Emitter* emitter = Emitter::create();
+	emitter->setPosition(Vec2(visibleSize.width/2, emitter->getContentSize().height));
+	emitter->setRotation(-90.0f);
+	emitter->onActivate = [&](Emitter* e) {
+		Laser* laser = Laser::create();
+		//laser->setRotation(e->getRotation());
+		laser->setPosition(Vec2(0.0f, -64.0f));
+		laser->runAction(ScaleTo::create(5.0f, 1024.0f, 1.0f));
+		e->addChild(laser);
+	};
+	emitter->onDeactivate = [&](Emitter* e) {};
+	background->addChild(emitter);
 
 	return true;
 }
@@ -83,10 +100,10 @@ bool HelloWorld::init() {
  *
  */
 void HelloWorld::menuCloseCallback(Ref* pSender) {
-	//Close the cocos2d-x game scene and quit the application
+	// Close the cocos2d-x game scene and quit the application
 	Director::getInstance()->end();
 
-	/*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() as given above,instead trigger a custom event created in RootViewController.mm as below*/
+	/*To navigate back to native iOS screen(if present) without quitting the application, do not use Director::getInstance()->end() as given above, instead trigger a custom event created in RootViewController.mm as below*/
 
 	//EventCustom customEndEvent("game_scene_close_event");
 	//_eventDispatcher->dispatchEvent(&customEndEvent);

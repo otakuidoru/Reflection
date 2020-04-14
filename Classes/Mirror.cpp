@@ -159,3 +159,9 @@ void Mirror::rotate(bool clockwise) {
 	}
 }
 
+/**
+ *
+ */
+void Mirror::update(float dt) {
+}
+
