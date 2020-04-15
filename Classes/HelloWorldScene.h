@@ -37,9 +37,6 @@ public:
 	// implement the "static create()" method manually
 	CREATE_FUNC(HelloWorld);
 	virtual bool init();
-
-	// a selector callback
-	void menuCloseCallback(cocos2d::Ref* pSender);
 };
 
 #endif // __HELLOWORLD_SCENE_H__

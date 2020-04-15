@@ -22,45 +22,57 @@
  THE SOFTWARE.
  ****************************************************************************/
 
+#include <cmath>
 #include "Mirror.h"
-
-static const float DEGTORAD = 0.0174532925199432957f;
-static const float RADTODEG = 57.295779513082320876f;
 
 USING_NS_CC;
 
 /**
  *
  */
-Mirror::Mirror() : Node() {
+Mirror::Mirror() : Sprite() {
 }
 
 /**
  *
  */
 Mirror::~Mirror() {
+	if (this->plane) {
+		delete this->plane;
+	}
+}
+
+/**
+ *
+ */
+Mirror* Mirror::create() {
+	Mirror* mirror = new (std::nothrow) Mirror();
+	if (mirror && mirror->initWithFile("mirror.png")) {
+		mirror->autorelease();
+		return mirror;
+	}
+	CC_SAFE_DELETE(mirror);
+	return nullptr;
 }
 
 /**
  * on "init" you need to initialize your instance
  */
-bool Mirror::init() {
+bool Mirror::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
-	if (!Node::init()) {
+	if (!Sprite::initWithFile(filename)) {
 		return false;
 	}
 
 	this->rotatable = true;
 	this->rotating = false;
 	this->direction = 0;
-	this->sprite = Sprite::create("mirror.png");
+	this->reflectionNormal = this->direction + 45.0f;
+	this->plane = new Plane(Vec3(std::cosf(this->reflectionNormal), std::cosf(this->reflectionNormal), 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
+	this->updateNeeded = false;
 
-	this->sprite->setPositionNormalized(Vec2(0.5f, 0.5f));
-	this->addChild(this->sprite);
-
-	this->setContentSize(this->sprite->getContentSize());
-	this->setAnchorPoint(Vec2(0.33f, 0.33f));
+	this->setAnchorPoint(Vec2(0.5f, 0.5f));
 
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -110,6 +122,8 @@ bool Mirror::init() {
   // add listener
   this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
 
+	this->scheduleUpdate();
+
 	return true;
 }
 
@@ -117,14 +131,14 @@ bool Mirror::init() {
  *
  */
 void Mirror::rotateCounterclockwise() {
-	rotate(false);
+	this->rotate(false);
 }
 
 /**
  *
  */
 void Mirror::rotateClockwise() {
-	rotate(true);
+	this->rotate(true);
 }
 
 /**
@@ -144,16 +158,16 @@ void Mirror::rotate(bool clockwise) {
 
 		switch (this->direction) {
 			case 0: {
-				this->sprite->runAction(RotateTo::create(Mirror::ROTATION_TIME, 0.0f));
+				this->runAction(RotateTo::create(Mirror::ROTATION_TIME, 0.0f));
 			} break;
 			case 1: {
-				this->sprite->runAction(RotateTo::create(Mirror::ROTATION_TIME, 90.0f));
+				this->runAction(RotateTo::create(Mirror::ROTATION_TIME, 90.0f));
 			} break;
 			case 2: {
-				this->sprite->runAction(RotateTo::create(Mirror::ROTATION_TIME, 180.0f));
+				this->runAction(RotateTo::create(Mirror::ROTATION_TIME, 180.0f));
 			} break;
 			case 3: {
-				this->sprite->runAction(RotateTo::create(Mirror::ROTATION_TIME, 270.0f));
+				this->runAction(RotateTo::create(Mirror::ROTATION_TIME, 270.0f));
 			} break;
 		}
 	}
@@ -162,6 +176,112 @@ void Mirror::rotate(bool clockwise) {
 /**
  *
  */
+void Mirror::setScaleX(float scaleX) {
+	this->updateNeeded = true;
+	Sprite::setScaleX(scaleX);
+}
+
+/**
+ *
+ */ 
+void Mirror::setScaleY(float scaleY) {
+	this->updateNeeded = true;
+	Sprite::setScaleY(scaleY);
+}
+
+/**
+ *
+ */
+void Mirror::setScale(float scale) {
+	this->updateNeeded = true;
+	Sprite::setScale(scale);
+}
+
+/**
+ *
+ */
+void Mirror::setScale(float scaleX, float scaleY) {
+	this->updateNeeded = true;
+	Sprite::setScale(scaleX, scaleY);
+}
+
+/**
+ *
+ */
+void Mirror::setPosition(const Vec2& position) {
+	this->updateNeeded = true;
+	Sprite::setPosition(position);
+}
+
+/**
+ *
+ */
+void Mirror::setPositionNormalized(const Vec2& position) {
+	this->updateNeeded = true;
+	Sprite::setPositionNormalized(position);
+}
+
+/**
+ *
+ */
+void Mirror::setNormalizedPosition(const Vec2& position) {
+	this->updateNeeded = true;
+	Sprite::setNormalizedPosition(position);
+}
+
+/**
+ *
+ */
+void Mirror::setPosition(float x, float y) {
+	this->updateNeeded = true;
+	Sprite::setPosition(x, y);
+}
+
+/**
+ *
+ */
+void Mirror::setPositionX(float x) {
+	this->updateNeeded = true;
+	Sprite::setPositionX(x);
+}
+
+/**
+ *
+ */
+void Mirror::setPositionY(float y) {
+	this->updateNeeded = true;
+	Sprite::setPositionY(y);
+}
+
+/**
+ *
+ */
+void Mirror::setRotation(float rotation) {
+	this->updateNeeded = true;
+	Sprite::setRotation(rotation);
+}
+
+/**
+ *
+ */
+void Mirror::setRotation3D(const Vec3& rotation) {
+	this->updateNeeded = true;
+	Sprite::setRotation3D(rotation);
+}
+
+/**
+ *
+ */
 void Mirror::update(float dt) {
+	if (this->needsUpdate()) {
+		this->reflectionNormal = this->getRotation() + 45.0f;
+
+		if (this->plane) {
+			delete this->plane;
+		}
+		this->plane = new Plane(Vec3(std::cosf(this->reflectionNormal), std::cosf(this->reflectionNormal), 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
+
+		this->updateNeeded = false;
+	}
 }
 

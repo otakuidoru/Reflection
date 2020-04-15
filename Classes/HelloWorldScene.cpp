@@ -85,27 +85,14 @@ bool HelloWorld::init() {
 	emitter->setRotation(-90.0f);
 	emitter->onActivate = [&](Emitter* e) {
 		Laser* laser = Laser::create();
-		//laser->setRotation(e->getRotation());
-		laser->setPosition(Vec2(0.0f, -64.0f));
-		laser->runAction(ScaleTo::create(5.0f, 1024.0f, 1.0f));
+		laser->setPositionNormalized(Vec2(1.0f, 0.5f));
 		e->addChild(laser);
+
+		laser->runAction(ScaleTo::create(5.0f, 2048.0f, 1.0f));
 	};
 	emitter->onDeactivate = [&](Emitter* e) {};
 	background->addChild(emitter);
 
 	return true;
-}
-
-/**
- *
- */
-void HelloWorld::menuCloseCallback(Ref* pSender) {
-	// Close the cocos2d-x game scene and quit the application
-	Director::getInstance()->end();
-
-	/*To navigate back to native iOS screen(if present) without quitting the application, do not use Director::getInstance()->end() as given above, instead trigger a custom event created in RootViewController.mm as below*/
-
-	//EventCustom customEndEvent("game_scene_close_event");
-	//_eventDispatcher->dispatchEvent(&customEndEvent);
 }
 

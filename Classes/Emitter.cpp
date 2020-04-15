@@ -50,6 +50,7 @@ bool Emitter::init() {
 	}
 
 	this->direction = 0;
+	this->active = false;
 	this->sprite = Sprite::create("emitter.png");
 
 	this->sprite->setPositionNormalized(Vec2(0.5f, 0.5f));
@@ -74,23 +75,36 @@ bool Emitter::init() {
 		if (this->getBoundingBox().containsPoint(touch->getLocation())) {
 			consuming = true;
 			this->setActive(!this->isActive());
-			this->onActivate(this);
 		}
 
     return consuming;
   };
 
-  // triggered when moving touch
-  touchListener->onTouchMoved = [&](Touch* touch, Event* event) {
-  };
+	// triggered when moving touch
+	touchListener->onTouchMoved = [&](Touch* touch, Event* event) {
+	};
 
-  // triggered when released
-  touchListener->onTouchEnded = [&](Touch* touch, Event* event) {
-  };
+	// triggered when released
+	touchListener->onTouchEnded = [&](Touch* touch, Event* event) {
+	};
 
-  // add listener
-  this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
+	// add listener
+	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
 
 	return true;
+}
+
+/**
+ *
+ */
+void Emitter::setActive(bool active) {
+	const bool prevActive = this->active;
+	this->active = active;
+
+	if (!prevActive && this->active) {
+		this->onActivate(this);
+	} else if (prevActive && !this->active) {
+		this->onDeactivate(this);
+	}
 }
 

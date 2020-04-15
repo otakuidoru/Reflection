@@ -47,7 +47,7 @@ public:
 	inline void setDirection(short direction) { this->direction = direction % 4; }
 
 	inline bool isActive() const { return active; }
-	inline void setActive(bool active) { this->active = active; }
+	void setActive(bool active);
 
 	std::function<void(Emitter*)> onActivate;
 	std::function<void(Emitter*)> onDeactivate;

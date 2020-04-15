@@ -25,14 +25,17 @@
 #ifndef __MIRROR_H__
 #define __MIRROR_H__
 
+#include <string>
 #include "cocos2d.h"
 
-class Mirror : public cocos2d::Node {
+class Mirror : public cocos2d::Sprite {
 protected:
 	bool rotatable;
 	bool rotating;
 	short direction;
-	cocos2d::Sprite* sprite;
+	float reflectionNormal;
+	cocos2d::Plane* plane;
+	bool updateNeeded;
 
 	Mirror();
 
@@ -41,11 +44,10 @@ protected:
 public:
 	constexpr static float ROTATION_TIME = 0.5f;
 
-	// implement the "static create()" method manually
-	CREATE_FUNC(Mirror);
+	static Mirror* create();
 	virtual ~Mirror();
 
-	virtual bool init() override;
+	virtual bool initWithFile(const std::string& filename) override;
 
 	inline bool isRotatable() const { return rotatable; }
 	inline void setRotatable(bool rotatable) { this->rotatable = rotatable; }
@@ -56,8 +58,25 @@ public:
 	inline short getDirection() const { return direction; }
 	inline void setDirection(short direction) { this->direction = direction % 4; }
 
+	bool needsUpdate() const { return updateNeeded; }
+
 	void rotateCounterclockwise();
 	void rotateClockwise();
+
+	virtual float getReflectionNormal() { return reflectionNormal; }
+
+	virtual void setScaleX(float scaleX) override;
+	virtual void setScaleY(float scaleY) override;
+	virtual void setScale(float scale) override;
+	virtual void setScale(float scaleX, float scaleY) override;
+	virtual void setPosition(const cocos2d::Vec2& position) override;
+	virtual void setPositionNormalized(const cocos2d::Vec2& position) override;
+	virtual void setNormalizedPosition(const cocos2d::Vec2& position) override;
+	virtual void setPosition(float x, float y) override;
+	virtual void setPositionX (float x) override;
+	virtual void setPositionY(float y) override;
+	virtual void setRotation(float rotation) override;
+	virtual void setRotation3D(const cocos2d::Vec3& rotation) override;
 
 	void update(float dt) override;
 };
