@@ -42,7 +42,7 @@ protected:
 	void rotate(bool right);
 
 public:
-	constexpr static float ROTATION_TIME = 0.5f;
+	constexpr static float ROTATION_TIME = 0.25f;
 
 	static Mirror* create();
 	virtual ~Mirror();
@@ -57,6 +57,8 @@ public:
 
 	inline short getDirection() const { return direction; }
 	inline void setDirection(short direction) { this->direction = direction % 4; }
+
+	inline cocos2d::Plane* getReflectivePlane() const { return plane; }
 
 	bool needsUpdate() const { return updateNeeded; }
 
@@ -73,12 +75,12 @@ public:
 	virtual void setPositionNormalized(const cocos2d::Vec2& position) override;
 	virtual void setNormalizedPosition(const cocos2d::Vec2& position) override;
 	virtual void setPosition(float x, float y) override;
-	virtual void setPositionX (float x) override;
+	virtual void setPositionX(float x) override;
 	virtual void setPositionY(float y) override;
 	virtual void setRotation(float rotation) override;
 	virtual void setRotation3D(const cocos2d::Vec3& rotation) override;
 
-	void update(float dt) override;
+	virtual void update(float dt) override;
 };
 
 #endif // __MIRROR_H__

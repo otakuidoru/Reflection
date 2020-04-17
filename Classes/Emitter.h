@@ -27,27 +27,31 @@
 
 #include <functional>
 #include "cocos2d.h"
+#include "Laser.h"
 
-class Emitter : public cocos2d::Node {
+class Emitter : public cocos2d::Sprite {
 protected:
+	cocos2d::Scene* scene;
 	short direction;
 	bool active;
-	cocos2d::Sprite* sprite;
+	Laser* laser;
 
-	Emitter();
+	Emitter(cocos2d::Scene* scene);
 
 public:
-	// implement the "static create()" method manually
-	CREATE_FUNC(Emitter);
+	static Emitter* create(cocos2d::Scene* scene);
 	virtual ~Emitter();
 
-	virtual bool init() override;
+	virtual bool initWithFile(const std::string& filename) override;
 
 	inline short getDirection() const { return direction; }
 	inline void setDirection(short direction) { this->direction = direction % 4; }
 
 	inline bool isActive() const { return active; }
 	void setActive(bool active);
+
+	Laser* getLaser() const { return laser; }
+	void setLaser(Laser* laser) { this->laser = laser; }
 
 	std::function<void(Emitter*)> onActivate;
 	std::function<void(Emitter*)> onDeactivate;

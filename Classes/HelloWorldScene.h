@@ -36,7 +36,9 @@ public:
 
 	// implement the "static create()" method manually
 	CREATE_FUNC(HelloWorld);
-	virtual bool init();
+	virtual bool init() override;
+
+	virtual void update(float dt) override;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

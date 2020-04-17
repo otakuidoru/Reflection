@@ -83,8 +83,8 @@ bool Mirror::initWithFile(const std::string& filename) {
   auto touchListener = EventListenerTouchOneByOne::create();
   touchListener->setSwallowTouches(true);
 
-  // triggered when pressed
-  touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
+	// triggered when pressed
+	touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
 		bool consuming = false;
 
 		if (!this->isRotating()) {
@@ -108,19 +108,19 @@ bool Mirror::initWithFile(const std::string& filename) {
 			}
 		}
 
-    return consuming;
-  };
+		return consuming;
+	};
 
-  // triggered when moving touch
-  touchListener->onTouchMoved = [&](Touch* touch, Event* event) {
-  };
+	// triggered when moving touch
+	touchListener->onTouchMoved = [&](Touch* touch, Event* event) {
+	};
 
-  // triggered when released
-  touchListener->onTouchEnded = [&](Touch* touch, Event* event) {
-  };
+	// triggered when released
+	touchListener->onTouchEnded = [&](Touch* touch, Event* event) {
+	};
 
-  // add listener
-  this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
+	// add listener
+	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
 
 	this->scheduleUpdate();
 
@@ -279,7 +279,7 @@ void Mirror::update(float dt) {
 		if (this->plane) {
 			delete this->plane;
 		}
-		this->plane = new Plane(Vec3(std::cosf(this->reflectionNormal), std::cosf(this->reflectionNormal), 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
+		this->plane = new Plane(Vec3(std::cosf(this->getRotation()*M_PI/180.0f), std::sinf(this->getRotation()*M_PI/180.0f), 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
 
 		this->updateNeeded = false;
 	}

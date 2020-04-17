@@ -22,42 +22,27 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __MIRROR_H__
-#define __MIRROR_H__
+#ifndef __RECEPTOR_H__
+#define __RECEPTOR_H__
 
+#include <functional>
 #include "cocos2d.h"
 
-class Mirror : public cocos2d::Node {
+class Receptor : public cocos2d::Sprite {
 protected:
-	bool rotatable;
-	bool rotating;
 	short direction;
-	cocos2d::Sprite* sprite;
 
-	Mirror();
-
-	void rotate(bool right);
+	Receptor();
 
 public:
-	constexpr static float ROTATION_TIME = 0.5f;
+	static Receptor* create();
+	virtual ~Receptor();
 
-	// implement the "static create()" method manually
-	CREATE_FUNC(Mirror);
-	virtual ~Mirror();
+	virtual bool initWithFile(const std::string& filename) override;
 
-	virtual bool init() override;
-
-	bool isRotatable() const { return rotatable; }
-	void setRotatable(bool rotatable) { this->rotatable = rotatable; }
-
-	bool isRotating() const { return rotating; }
-	void setRotating(bool rotating) { this->rotating = rotating; }
-
-	short getDirection() const { return direction; }
-
-	void rotateCounterclockwise();
-	void rotateClockwise();
+	inline short getDirection() const { return direction; }
+	inline void setDirection(short direction) { this->direction = direction % 4; }
 };
 
-#endif // __MIRROR_H__
+#endif // __RECEPTOR_H__
 

@@ -30,7 +30,7 @@ USING_NS_CC;
 /**
  *
  */
-Emitter::Emitter() : Node() {
+Emitter::Emitter(cocos2d::Scene* scene) : Sprite(), scene(scene) {
 }
 
 /**
@@ -40,36 +40,43 @@ Emitter::~Emitter() {
 }
 
 /**
+ *
+ */
+Emitter* Emitter::create(cocos2d::Scene* scene) {
+	Emitter* emitter = new (std::nothrow) Emitter(scene);
+	if (emitter && emitter->initWithFile("emitter.png")) {
+		emitter->autorelease();
+		return emitter;
+	}
+	CC_SAFE_DELETE(emitter);
+	return nullptr;
+}
+
+/**
  * on "init" you need to initialize your instance
  */
-bool Emitter::init() {
+bool Emitter::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
-	if (!Node::init()) {
+	if (!Sprite::initWithFile(filename)) {
 		return false;
 	}
 
 	this->direction = 0;
 	this->active = false;
-	this->sprite = Sprite::create("emitter.png");
+	this->laser = nullptr;
 
-	this->sprite->setPositionNormalized(Vec2(0.5f, 0.5f));
-	this->addChild(this->sprite);
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  Create a "one by one" touch event listener (processes one touch at a time)
+	//
+	//////////////////////////////////////////////////////////////////////////////
 
-	this->setContentSize(this->sprite->getContentSize());
-	this->setAnchorPoint(Vec2(0.5f, 0.5f));
+	auto touchListener = EventListenerTouchOneByOne::create();
+	touchListener->setSwallowTouches(true);
 
-  //////////////////////////////////////////////////////////////////////////////
-  //
-  //  Create a "one by one" touch event listener (processes one touch at a time)
-  //
-  //////////////////////////////////////////////////////////////////////////////
-
-  auto touchListener = EventListenerTouchOneByOne::create();
-  touchListener->setSwallowTouches(true);
-
-  // triggered when pressed
-  touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
+	// triggered when pressed
+	touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
 		bool consuming = false;
 
 		if (this->getBoundingBox().containsPoint(touch->getLocation())) {
@@ -77,8 +84,8 @@ bool Emitter::init() {
 			this->setActive(!this->isActive());
 		}
 
-    return consuming;
-  };
+		return consuming;
+	};
 
 	// triggered when moving touch
 	touchListener->onTouchMoved = [&](Touch* touch, Event* event) {
@@ -101,10 +108,31 @@ void Emitter::setActive(bool active) {
 	const bool prevActive = this->active;
 	this->active = active;
 
-	if (!prevActive && this->active) {
-		this->onActivate(this);
-	} else if (prevActive && !this->active) {
-		this->onDeactivate(this);
+	if (!prevActive && active) {
+		this->laser = Laser::create();
+		this->laser->setAnchorPoint(Vec2(0.0f, 0.5f));
+		this->laser->setPositionNormalized(Vec2(1.0f, 0.5f));
+		this->addChild(this->laser);
+		this->laser->runAction(Sequence::create(
+			ScaleTo::create(1.0f, 1024.0f, 1.0f),
+			CallFunc::create([&]() {
+				this->onActivate(this);
+			}),
+			nullptr
+		));
+	} else if (prevActive && !active) {
+		this->laser->runAction(Sequence::create(
+			CallFunc::create([&]() {
+				this->laser->setPosition(this->laser->getPosition() + Vec2(this->laser->getScaleX(), 0.0f));
+				this->laser->setAnchorPoint(Vec2(1.0f, 0.5f));
+			}),
+			ScaleTo::create(1.0f, 0.0f, 1.0f),
+			RemoveSelf::create(),
+			CallFunc::create([&]() {
+				this->onDeactivate(this);
+			}),
+			nullptr
+		));
 	}
 }
 

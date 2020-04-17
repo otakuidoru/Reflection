@@ -24,7 +24,7 @@
 
 #include "HelloWorldScene.h"
 
-typedef void (*FuncPtrVoidEmitterPtr)(Emitter*);
+//typedef void (*FuncPtrVoidEmitterPtr)(Emitter*);
 
 USING_NS_CC;
 
@@ -80,19 +80,21 @@ bool HelloWorld::init() {
 
 	// Add the emitters
 
-	Emitter* emitter = Emitter::create();
+	Emitter* emitter = Emitter::create(this);
 	emitter->setPosition(Vec2(visibleSize.width/2, emitter->getContentSize().height));
 	emitter->setRotation(-90.0f);
-	emitter->onActivate = [&](Emitter* e) {
-		Laser* laser = Laser::create();
-		laser->setPositionNormalized(Vec2(1.0f, 0.5f));
-		e->addChild(laser);
-
-		laser->runAction(ScaleTo::create(5.0f, 2048.0f, 1.0f));
-	};
+	emitter->onActivate = [&](Emitter* e) {};
 	emitter->onDeactivate = [&](Emitter* e) {};
-	background->addChild(emitter);
+	this->addChild(emitter);
+
+	this->scheduleUpdate();
 
 	return true;
+}
+
+/**
+ *
+ */
+void HelloWorld::update(float dt) {
 }
 
