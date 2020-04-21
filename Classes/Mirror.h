@@ -27,6 +27,8 @@
 
 #include <string>
 #include "cocos2d.h"
+#include "external/Box2D/include/Box2D/Box2D.h"
+#include "Laser.h"
 
 class Mirror : public cocos2d::Sprite {
 protected:
@@ -34,6 +36,7 @@ protected:
 	bool rotating;
 	short direction;
 	float reflectionNormal;
+	Laser* laser;
 	cocos2d::Plane* plane;
 	bool updateNeeded;
 
@@ -44,10 +47,10 @@ protected:
 public:
 	constexpr static float ROTATION_TIME = 0.25f;
 
-	static Mirror* create();
+	static Mirror* create(b2World* world);
 	virtual ~Mirror();
 
-	virtual bool initWithFile(const std::string& filename) override;
+	bool initWithFile(const std::string& filename, b2World* world);
 
 	inline bool isRotatable() const { return rotatable; }
 	inline void setRotatable(bool rotatable) { this->rotatable = rotatable; }
@@ -58,12 +61,17 @@ public:
 	inline short getDirection() const { return direction; }
 	inline void setDirection(short direction) { this->direction = direction % 4; }
 
+	inline Laser* getLaser() const { return laser; }
+
 	inline cocos2d::Plane* getReflectivePlane() const { return plane; }
 
 	bool needsUpdate() const { return updateNeeded; }
 
 	void rotateCounterclockwise();
 	void rotateClockwise();
+
+	void startReflect(Laser* originatingLaser);
+	void stopReflect(Laser* originatingLaser);
 
 	virtual float getReflectionNormal() { return reflectionNormal; }
 
@@ -81,6 +89,9 @@ public:
 	virtual void setRotation3D(const cocos2d::Vec3& rotation) override;
 
 	virtual void update(float dt) override;
+
+	std::function<void(Mirror*)> onLaserEnter;
+	std::function<void(Mirror*)> onLaserExit;
 };
 
 #endif // __MIRROR_H__

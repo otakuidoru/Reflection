@@ -27,6 +27,7 @@
 
 #include <functional>
 #include "cocos2d.h"
+#include "external/Box2D/include/Box2D/Box2D.h"
 #include "Laser.h"
 
 class Emitter : public cocos2d::Sprite {
@@ -35,14 +36,17 @@ protected:
 	short direction;
 	bool active;
 	Laser* laser;
+	int id;
 
-	Emitter(cocos2d::Scene* scene);
+	Emitter(int id, cocos2d::Scene* scene);
 
 public:
-	static Emitter* create(cocos2d::Scene* scene);
+	static Emitter* create(int id, b2World* world, cocos2d::Scene* scene);
 	virtual ~Emitter();
 
-	virtual bool initWithFile(const std::string& filename) override;
+	bool initWithFile(const std::string& filename, b2World* world);
+
+	int getId() const { return id; }
 
 	inline short getDirection() const { return direction; }
 	inline void setDirection(short direction) { this->direction = direction % 4; }
@@ -50,8 +54,7 @@ public:
 	inline bool isActive() const { return active; }
 	void setActive(bool active);
 
-	Laser* getLaser() const { return laser; }
-	void setLaser(Laser* laser) { this->laser = laser; }
+	inline Laser* getLaser() const { return laser; }
 
 	std::function<void(Emitter*)> onActivate;
 	std::function<void(Emitter*)> onDeactivate;

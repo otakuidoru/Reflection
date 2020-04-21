@@ -24,8 +24,6 @@
 
 #include "HelloWorldScene.h"
 
-//typedef void (*FuncPtrVoidEmitterPtr)(Emitter*);
-
 USING_NS_CC;
 
 /**
@@ -52,11 +50,15 @@ bool HelloWorld::init() {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+	// Box2D configuration
+
+	this->world = std::unique_ptr<b2World>(new b2World(b2Vec2(0.0f, 0.0f)));
+
 	/////////////////////////////
 	// 2. add your codes below...
 
 	auto background = LayerGradient::create(Color4B(253, 158, 246, 255), Color4B(255, 255, 255, 255), Vec2(1.0f, 1.0f));
-	this->addChild(background);
+	this->addChild(background, -1);
 
 	// add a label shows "Hello World"
 	// create and initialize a label
@@ -69,23 +71,25 @@ bool HelloWorld::init() {
 		label->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height - label->getContentSize().height));
 
 		// add the label as a child to this layer
-		background->addChild(label, 1);
+		this->addChild(label, 1);
 	}
 
 	// Add the mirrors
 
-	Mirror* mirror = Mirror::create();
+	Mirror* mirror = Mirror::create(world.get());
 	mirror->setPosition(Vec2(visibleSize.width/2, visibleSize.height/2));
-	background->addChild(mirror);
+	this->addChild(mirror);
+	this->mirrors.insert(mirror);
 
 	// Add the emitters
 
-	Emitter* emitter = Emitter::create(this);
+	Emitter* emitter = Emitter::create(1, world.get(), this);
 	emitter->setPosition(Vec2(visibleSize.width/2, emitter->getContentSize().height));
 	emitter->setRotation(-90.0f);
 	emitter->onActivate = [&](Emitter* e) {};
 	emitter->onDeactivate = [&](Emitter* e) {};
 	this->addChild(emitter);
+	this->emitters.insert(emitter);
 
 	this->scheduleUpdate();
 
@@ -96,5 +100,12 @@ bool HelloWorld::init() {
  *
  */
 void HelloWorld::update(float dt) {
+	for (auto emitter : this->emitters) {
+		for (auto mirror : this->mirrors) {
+			//if (emitter->getLaser()->getBoundingBox().intersects(mirror->getBoundingBox())) {
+			//	mirror->reflect();
+			//}
+		}
+	}
 }
 

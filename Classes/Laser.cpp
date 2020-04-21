@@ -30,7 +30,7 @@ USING_NS_CC;
 /**
  *
  */
-Laser::Laser() : Sprite() {
+Laser::Laser(int id) : Sprite(), id(id) {
 }
 
 /**
@@ -45,8 +45,8 @@ Laser::~Laser() {
 /**
  *
  */
-Laser* Laser::create() {
-	Laser* laser = new (std::nothrow) Laser();
+Laser* Laser::create(int id) {
+	Laser* laser = new (std::nothrow) Laser(id);
 	if (laser && laser->initWithFile("blue_laser.png")) {
 		laser->autorelease();
 		return laser;

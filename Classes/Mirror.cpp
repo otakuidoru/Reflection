@@ -23,6 +23,8 @@
  ****************************************************************************/
 
 #include <cmath>
+#include <memory>
+#include <utility>
 #include "Mirror.h"
 
 USING_NS_CC;
@@ -45,9 +47,9 @@ Mirror::~Mirror() {
 /**
  *
  */
-Mirror* Mirror::create() {
+Mirror* Mirror::create(b2World* world) {
 	Mirror* mirror = new (std::nothrow) Mirror();
-	if (mirror && mirror->initWithFile("mirror.png")) {
+	if (mirror && mirror->initWithFile("mirror.png", world)) {
 		mirror->autorelease();
 		return mirror;
 	}
@@ -58,7 +60,7 @@ Mirror* Mirror::create() {
 /**
  * on "init" you need to initialize your instance
  */
-bool Mirror::initWithFile(const std::string& filename) {
+bool Mirror::initWithFile(const std::string& filename, b2World* world) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Sprite::initWithFile(filename)) {
@@ -73,6 +75,19 @@ bool Mirror::initWithFile(const std::string& filename) {
 	this->updateNeeded = false;
 
 	this->setAnchorPoint(Vec2(0.5f, 0.5f));
+
+	// Box2D
+
+	b2BodyDef bodyDefinition;
+
+	b2ChainShape shape;
+	std::vector<b2Vec2> vertices;
+	vertices.push_back(b2Vec2(0.0f, 0.0f));
+	vertices.push_back(b2Vec2(1.0f, 0.0f));
+	vertices.push_back(b2Vec2(0.0f, 1.0f));
+	shape.CreateLoop(vertices.data(), vertices.size());
+
+	world->CreateBody(&bodyDefinition);
 
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -171,6 +186,20 @@ void Mirror::rotate(bool clockwise) {
 			} break;
 		}
 	}
+}
+
+/**
+ *
+ */
+void Mirror::startReflect(Laser* originatingLaser) {
+//	this->laser = ;
+}
+
+/**
+ *
+ */
+void Mirror::stopReflect(Laser* originatingLaser) {
+//	this->laser = ;
 }
 
 /**

@@ -30,7 +30,7 @@ USING_NS_CC;
 /**
  *
  */
-Emitter::Emitter(cocos2d::Scene* scene) : Sprite(), scene(scene) {
+Emitter::Emitter(int id, cocos2d::Scene* scene) : Sprite(), id(id), scene(scene) {
 }
 
 /**
@@ -42,9 +42,9 @@ Emitter::~Emitter() {
 /**
  *
  */
-Emitter* Emitter::create(cocos2d::Scene* scene) {
-	Emitter* emitter = new (std::nothrow) Emitter(scene);
-	if (emitter && emitter->initWithFile("emitter.png")) {
+Emitter* Emitter::create(int id, b2World* world, cocos2d::Scene* scene) {
+	Emitter* emitter = new (std::nothrow) Emitter(id, scene);
+	if (emitter && emitter->initWithFile("emitter.png", world)) {
 		emitter->autorelease();
 		return emitter;
 	}
@@ -55,7 +55,7 @@ Emitter* Emitter::create(cocos2d::Scene* scene) {
 /**
  * on "init" you need to initialize your instance
  */
-bool Emitter::initWithFile(const std::string& filename) {
+bool Emitter::initWithFile(const std::string& filename, b2World* world) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Sprite::initWithFile(filename)) {
@@ -109,7 +109,7 @@ void Emitter::setActive(bool active) {
 	this->active = active;
 
 	if (!prevActive && active) {
-		this->laser = Laser::create();
+		this->laser = Laser::create(this->getId());
 		this->laser->setAnchorPoint(Vec2(0.0f, 0.5f));
 		this->laser->setPositionNormalized(Vec2(1.0f, 0.5f));
 		this->addChild(this->laser);

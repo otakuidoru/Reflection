@@ -29,16 +29,19 @@
 
 class Laser : public cocos2d::Sprite {
 protected:
+	const int id;
 	cocos2d::Ray* ray;
 	bool updateNeeded;
 
-	Laser();
+	Laser(int id);
 
 public:
-	static Laser* create();
+	static Laser* create(int id);
 	virtual ~Laser();
 
 	virtual bool initWithFile(const std::string& filename) override;
+
+	int getId() const { return id; }
 
 	bool needsUpdate() const { return updateNeeded; }
 

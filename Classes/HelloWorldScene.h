@@ -25,12 +25,22 @@
 #ifndef __HELLOWORLD_SCENE_H__
 #define __HELLOWORLD_SCENE_H__
 
+#include <memory>
+#include <set>
 #include "cocos2d.h"
+#include "external/Box2D/include/Box2D/Box2D.h"
 #include "Emitter.h"
 #include "Laser.h"
 #include "Mirror.h"
+#include "Receptor.h"
 
 class HelloWorld : public cocos2d::Scene {
+protected:
+	std::unique_ptr<b2World> world;
+	std::set<Emitter*> emitters;
+	std::set<Mirror*> mirrors;
+	std::set<Receptor*> receptors;
+
 public:
 	static cocos2d::Scene* createScene();
 
