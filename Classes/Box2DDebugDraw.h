@@ -22,34 +22,33 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __HELLOWORLD_SCENE_H__
-#define __HELLOWORLD_SCENE_H__
+#ifndef __BOX2D_DEBUG_DRAW_H__
+#define __BOX2D_DEBUG_DRAW_H__
 
-#include <memory>
-#include <set>
+#include "external/Box2D/include/Box2D/Box2D.h"
 #include "cocos2d.h"
-#include "b2WorldNode.h"
-#include "Emitter.h"
-#include "Laser.h"
-#include "Mirror.h"
-#include "Receptor.h"
 
-class HelloWorld : public cocos2d::Scene {
+class Box2DDebugDraw : public b2Draw {
 protected:
-	b2WorldNode* worldNode;
-	std::set<Emitter*> emitters;
-	std::set<Mirror*> mirrors;
-	std::set<Receptor*> receptors;
+	float32 _ratio;
+	cocos2d::DrawNode* _drawNode = nullptr;
 
 public:
-	static cocos2d::Scene* createScene();
+	Box2DDebugDraw(float32 ratio = 1.0f);
+	virtual ~Box2DDebugDraw();
 
-	// implement the "static create()" method manually
-	CREATE_FUNC(HelloWorld);
-	virtual bool init() override;
+	void DrawPolygon(const b2Vec2* vertices, int vertexCount, const b2Color& color) override;
+	void DrawSolidPolygon(const b2Vec2* vertices, int vertexCount, const b2Color& color) override;
+	void DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color) override;
+	void DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) override;
+	void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color) override;
+	void DrawTransform(const b2Transform& xf) override;
+	void DrawPoint(const b2Vec2& p, float32 size, const b2Color& color) override;
 
-	virtual void update(float dt) override;
+	void setRatio(float32 ratio) { _ratio = ratio; }
+
+	cocos2d::DrawNode* GetDrawNode() const { return _drawNode; }
 };
 
-#endif // __HELLOWORLD_SCENE_H__
+#endif // __BOX2D_DEBUG_DRAW_H__
 

@@ -32,13 +32,14 @@
 
 class Emitter : public cocos2d::Sprite {
 protected:
+	int id;
+	b2World* world;
 	cocos2d::Scene* scene;
 	short direction;
 	bool active;
 	Laser* laser;
-	int id;
 
-	Emitter(int id, cocos2d::Scene* scene);
+	Emitter(int id, b2World* world, cocos2d::Scene* scene);
 
 public:
 	static Emitter* create(int id, b2World* world, cocos2d::Scene* scene);

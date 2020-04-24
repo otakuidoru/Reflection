@@ -25,9 +25,13 @@
 #include <cmath>
 #include <memory>
 #include <utility>
+#include "Globals.h"
 #include "Mirror.h"
 
 USING_NS_CC;
+
+static const float DEGTORAD = 0.0174532925199432957f;
+static const float RADTODEG = 57.295779513082320876f;
 
 /**
  *
@@ -71,23 +75,51 @@ bool Mirror::initWithFile(const std::string& filename, b2World* world) {
 	this->rotating = false;
 	this->direction = 0;
 	this->reflectionNormal = this->direction + 45.0f;
-	this->plane = new Plane(Vec3(std::cosf(this->reflectionNormal), std::cosf(this->reflectionNormal), 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
+	this->plane = new Plane(Vec3(std::cosf(this->reflectionNormal)*DEGTORAD, std::cosf(this->reflectionNormal)*DEGTORAD, 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
 	this->updateNeeded = false;
 
 	this->setAnchorPoint(Vec2(0.5f, 0.5f));
 
-	// Box2D
+	//////////////////////////////////////////////////////////////////////
+	//
+	//  Box2D
+	//
+	//////////////////////////////////////////////////////////////////////
+
+	// define the body definition
 
 	b2BodyDef bodyDefinition;
+	bodyDefinition.position.SetZero();
+	auto body = world->CreateBody(&bodyDefinition);
+
+	// define the shape (triangle)
 
 	b2ChainShape shape;
 	std::vector<b2Vec2> vertices;
-	vertices.push_back(b2Vec2(0.0f, 0.0f));
-	vertices.push_back(b2Vec2(1.0f, 0.0f));
-	vertices.push_back(b2Vec2(0.0f, 1.0f));
+	vertices.push_back(b2Vec2(-0.5f, -0.5f));
+	vertices.push_back(b2Vec2(0.5f, -0.5f));
+	vertices.push_back(b2Vec2(-0.5f, 0.5f));
 	shape.CreateLoop(vertices.data(), vertices.size());
 
-	world->CreateBody(&bodyDefinition);
+	// define the filter
+
+//	b2Filter filter;
+//	filter.categoryBits;
+//	filter.maskBits;
+//	filter.groupIndex;
+
+	// define the fixture definition
+
+	b2FixtureDef fixtureDef;
+	fixtureDef.shape = &shape;
+	fixtureDef.userData = nullptr;
+	fixtureDef.friction = 0.0f;
+	fixtureDef.restitution = 0.0f;
+	fixtureDef.density = 1.0f;
+//	fixtureDef.isSensor;
+//	fixtureDef.filter = filter;
+
+	this->fixture = body->CreateFixture(&fixtureDef);
 
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -107,15 +139,18 @@ bool Mirror::initWithFile(const std::string& filename, b2World* world) {
 				consuming = true;
 				this->runAction(Sequence::create(
 					CallFunc::create([&]() {
+						// set rotating flag
 						this->setRotating(true);
 					}),
 					RotateBy::create(Mirror::ROTATION_TIME, 90.0f),
 					CallFunc::create([&]() {
+						// correct for bounds outside [0.0f, 360.0f]
 						if (this->getRotation() < 0.0f) {
 							this->setRotation(this->getRotation() + 360.0f);
 						} else if (this->getRotation() >= 360.0f) {
 							this->setRotation(this->getRotation() - 360.0f);
 						}
+						// set not rotating anymore
 						this->setRotating(false);
 					}),
 					nullptr
@@ -142,51 +177,51 @@ bool Mirror::initWithFile(const std::string& filename, b2World* world) {
 	return true;
 }
 
-/**
- *
- */
-void Mirror::rotateCounterclockwise() {
-	this->rotate(false);
-}
-
-/**
- *
- */
-void Mirror::rotateClockwise() {
-	this->rotate(true);
-}
-
-/**
- *
- */
-void Mirror::rotate(bool clockwise) {
-	if (this->isRotatable()) {
-		if (clockwise) {
-			this->direction = (this->direction + 1) % 4;
-		} else {
-			this->direction = (this->direction - 1) % 4;
-		}
-
-		if (this->direction < 0) {
-			this->direction += 4;
-		}
-
-		switch (this->direction) {
-			case 0: {
-				this->runAction(RotateTo::create(Mirror::ROTATION_TIME, 0.0f));
-			} break;
-			case 1: {
-				this->runAction(RotateTo::create(Mirror::ROTATION_TIME, 90.0f));
-			} break;
-			case 2: {
-				this->runAction(RotateTo::create(Mirror::ROTATION_TIME, 180.0f));
-			} break;
-			case 3: {
-				this->runAction(RotateTo::create(Mirror::ROTATION_TIME, 270.0f));
-			} break;
-		}
-	}
-}
+///**
+// *
+// */
+//void Mirror::rotateCounterclockwise() {
+//	this->rotate(false);
+//}
+//
+///**
+// *
+// */
+//void Mirror::rotateClockwise() {
+//	this->rotate(true);
+//}
+//
+///**
+// *
+// */
+//void Mirror::rotate(bool clockwise) {
+//	if (this->isRotatable()) {
+//		if (clockwise) {
+//			this->direction = (this->direction - 1) % 4;
+//		} else {
+//			this->direction = (this->direction + 1) % 4;
+//		}
+//
+//		if (this->direction < 0) {
+//			this->direction += 4;
+//		}
+//
+//		switch (this->direction) {
+//			case 0: {
+//				this->runAction(RotateTo::create(Mirror::ROTATION_TIME, 0.0f));
+//			} break;
+//			case 1: {
+//				this->runAction(RotateTo::create(Mirror::ROTATION_TIME, 90.0f));
+//			} break;
+//			case 2: {
+//				this->runAction(RotateTo::create(Mirror::ROTATION_TIME, 180.0f));
+//			} break;
+//			case 3: {
+//				this->runAction(RotateTo::create(Mirror::ROTATION_TIME, 270.0f));
+//			} break;
+//		}
+//	}
+//}
 
 /**
  *
@@ -205,97 +240,55 @@ void Mirror::stopReflect(Laser* originatingLaser) {
 /**
  *
  */
-void Mirror::setScaleX(float scaleX) {
-	this->updateNeeded = true;
-	Sprite::setScaleX(scaleX);
-}
-
-/**
- *
- */ 
-void Mirror::setScaleY(float scaleY) {
-	this->updateNeeded = true;
-	Sprite::setScaleY(scaleY);
-}
-
-/**
- *
- */
-void Mirror::setScale(float scale) {
-	this->updateNeeded = true;
-	Sprite::setScale(scale);
-}
-
-/**
- *
- */
-void Mirror::setScale(float scaleX, float scaleY) {
-	this->updateNeeded = true;
-	Sprite::setScale(scaleX, scaleY);
-}
-
-/**
- *
- */
 void Mirror::setPosition(const Vec2& position) {
-	this->updateNeeded = true;
 	Sprite::setPosition(position);
+	this->getBox2DBody()->SetTransform(b2Vec2(position.x / Globals::getInstance().getBox2DScale(), position.y / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->updateNeeded = true;
 }
 
 /**
  *
  */
 void Mirror::setPositionNormalized(const Vec2& position) {
-	this->updateNeeded = true;
 	Sprite::setPositionNormalized(position);
-}
-
-/**
- *
- */
-void Mirror::setNormalizedPosition(const Vec2& position) {
+	this->getBox2DBody()->SetTransform(b2Vec2(this->getParent()->getContentSize().width * position.x / Globals::getInstance().getBox2DScale(), this->getParent()->getContentSize().height * position.y / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
 	this->updateNeeded = true;
-	Sprite::setNormalizedPosition(position);
 }
 
 /**
  *
  */
 void Mirror::setPosition(float x, float y) {
-	this->updateNeeded = true;
 	Sprite::setPosition(x, y);
+	this->getBox2DBody()->SetTransform(b2Vec2(x / Globals::getInstance().getBox2DScale(), y / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->updateNeeded = true;
 }
 
 /**
  *
  */
 void Mirror::setPositionX(float x) {
-	this->updateNeeded = true;
 	Sprite::setPositionX(x);
+	this->getBox2DBody()->SetTransform(b2Vec2(x / Globals::getInstance().getBox2DScale(), this->getPositionY() / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->updateNeeded = true;
 }
 
 /**
  *
  */
 void Mirror::setPositionY(float y) {
-	this->updateNeeded = true;
 	Sprite::setPositionY(y);
+	this->getBox2DBody()->SetTransform(b2Vec2(this->getPositionX() / Globals::getInstance().getBox2DScale(), y / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->updateNeeded = true;
 }
 
 /**
  *
  */
 void Mirror::setRotation(float rotation) {
-	this->updateNeeded = true;
 	Sprite::setRotation(rotation);
-}
-
-/**
- *
- */
-void Mirror::setRotation3D(const Vec3& rotation) {
+	this->getBox2DBody()->SetTransform(b2Vec2(this->getPositionX() / Globals::getInstance().getBox2DScale(), this->getPositionY() / Globals::getInstance().getBox2DScale()), -rotation*DEGTORAD);
 	this->updateNeeded = true;
-	Sprite::setRotation3D(rotation);
 }
 
 /**
@@ -308,7 +301,7 @@ void Mirror::update(float dt) {
 		if (this->plane) {
 			delete this->plane;
 		}
-		this->plane = new Plane(Vec3(std::cosf(this->getRotation()*M_PI/180.0f), std::sinf(this->getRotation()*M_PI/180.0f), 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
+		this->plane = new Plane(Vec3(std::cosf(this->getRotation()*DEGTORAD)*RADTODEG, std::sinf(this->getRotation()*DEGTORAD)*RADTODEG, 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
 
 		this->updateNeeded = false;
 	}

@@ -39,10 +39,11 @@ protected:
 	Laser* laser;
 	cocos2d::Plane* plane;
 	bool updateNeeded;
+	b2Fixture* fixture;
 
 	Mirror();
 
-	void rotate(bool right);
+//	void rotate(bool right);
 
 public:
 	constexpr static float ROTATION_TIME = 0.25f;
@@ -67,26 +68,23 @@ public:
 
 	bool needsUpdate() const { return updateNeeded; }
 
-	void rotateCounterclockwise();
-	void rotateClockwise();
+//	void rotateCounterclockwise();
+//	void rotateClockwise();
 
 	void startReflect(Laser* originatingLaser);
 	void stopReflect(Laser* originatingLaser);
 
+	b2Body* getBox2DBody() const { return this->fixture->GetBody(); }
+	b2Fixture* getBox2DFixture() const { return this->fixture; }
+
 	virtual float getReflectionNormal() { return reflectionNormal; }
 
-	virtual void setScaleX(float scaleX) override;
-	virtual void setScaleY(float scaleY) override;
-	virtual void setScale(float scale) override;
-	virtual void setScale(float scaleX, float scaleY) override;
 	virtual void setPosition(const cocos2d::Vec2& position) override;
 	virtual void setPositionNormalized(const cocos2d::Vec2& position) override;
-	virtual void setNormalizedPosition(const cocos2d::Vec2& position) override;
 	virtual void setPosition(float x, float y) override;
 	virtual void setPositionX(float x) override;
 	virtual void setPositionY(float y) override;
 	virtual void setRotation(float rotation) override;
-	virtual void setRotation3D(const cocos2d::Vec3& rotation) override;
 
 	virtual void update(float dt) override;
 

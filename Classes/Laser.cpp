@@ -23,14 +23,18 @@
  ****************************************************************************/
 
 #include <cmath>
+#include "Globals.h"
 #include "Laser.h"
 
 USING_NS_CC;
 
+static const float DEGTORAD = 0.0174532925199432957f;
+static const float RADTODEG = 57.295779513082320876f;
+
 /**
  *
  */
-Laser::Laser(int id) : Sprite(), id(id) {
+Laser::Laser(int id, b2World* world) : Sprite(), id(id), world(world) {
 }
 
 /**
@@ -45,9 +49,9 @@ Laser::~Laser() {
 /**
  *
  */
-Laser* Laser::create(int id) {
-	Laser* laser = new (std::nothrow) Laser(id);
-	if (laser && laser->initWithFile("blue_laser.png")) {
+Laser* Laser::create(int id, b2World* world) {
+	Laser* laser = new (std::nothrow) Laser(id, world);
+	if (laser && laser->initWithFile("blue_laser.png", world)) {
 		laser->autorelease();
 		return laser;
 	}
@@ -58,7 +62,7 @@ Laser* Laser::create(int id) {
 /**
  * on "init" you need to initialize your instance
  */
-bool Laser::initWithFile(const std::string& filename) {
+bool Laser::initWithFile(const std::string& filename, b2World* world) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Sprite::initWithFile(filename)) {
@@ -67,8 +71,54 @@ bool Laser::initWithFile(const std::string& filename) {
 
 	this->setAnchorPoint(Vec2(0.0f, 0.5f));
 
-	this->ray = new Ray(Vec3(std::cosf(this->getRotation()*M_PI/180.0f), std::sinf(this->getRotation()*M_PI/180.0f), 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
+	this->ray = new Ray(
+		Vec3(std::cosf(this->getRotation()*M_PI/180.0f)*(180.0f/M_PI), -std::sinf(this->getRotation()*M_PI/180.0f)*(180.0f/M_PI), 0.0f),
+		Vec3(this->getPositionX(), this->getPositionY(), 0.0f)
+	);
 	this->updateNeeded = false;
+
+	//////////////////////////////////////////////////////////////////////
+	//
+	//  Box2D
+	//
+	//////////////////////////////////////////////////////////////////////
+
+	// define the body definition
+
+	b2BodyDef bodyDef;
+	bodyDef.type = b2_dynamicBody;
+	bodyDef.position.SetZero();
+	bodyDef.angle = 0.0f;
+	auto body = world->CreateBody(&bodyDef);
+
+	// define the shape (rect)
+
+	b2PolygonShape shape;
+	std::vector<b2Vec2> vertices;
+	vertices.push_back(b2Vec2(0.0f, 0.0f));
+	vertices.push_back(b2Vec2(1.0f, 0.0f));
+	vertices.push_back(b2Vec2(0.0f, 1.0f));
+	shape.Set(vertices.data(), vertices.size());
+
+	// define the filter
+
+//	b2Filter filter;
+//	filter.categoryBits;
+//	filter.maskBits;
+//	filter.groupIndex;
+
+	// define the fixture definition
+
+	b2FixtureDef fixtureDef;
+	fixtureDef.shape = &shape;
+	fixtureDef.userData = nullptr;
+	fixtureDef.friction = 0.0f;
+	fixtureDef.restitution = 0.0f;
+	fixtureDef.density = 1.0f;
+	fixtureDef.isSensor = true;
+//	fixtureDef.filter = filter;
+
+	this->fixture = body->CreateFixture(&fixtureDef);
 
 	return true;
 }
@@ -76,97 +126,55 @@ bool Laser::initWithFile(const std::string& filename) {
 /**
  *
  */
-void Laser::setScaleX(float scaleX) {
-	this->updateNeeded = true;
-	Sprite::setScaleX(scaleX);
-}
-
-/**
- *
- */ 
-void Laser::setScaleY(float scaleY) {
-	this->updateNeeded = true;
-	Sprite::setScaleY(scaleY);
-}
-
-/**
- *
- */
-void Laser::setScale(float scale) {
-	this->updateNeeded = true;
-	Sprite::setScale(scale);
-}
-
-/**
- *
- */
-void Laser::setScale(float scaleX, float scaleY) {
-	this->updateNeeded = true;
-	Sprite::setScale(scaleX, scaleY);
-}
-
-/**
- *
- */
 void Laser::setPosition(const Vec2& position) {
-	this->updateNeeded = true;
 	Sprite::setPosition(position);
+	this->getBox2DBody()->SetTransform(b2Vec2(position.x / Globals::getInstance().getBox2DScale(), position.y / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->updateNeeded = true;
 }
 
 /**
  *
  */
 void Laser::setPositionNormalized(const Vec2& position) {
-	this->updateNeeded = true;
 	Sprite::setPositionNormalized(position);
-}
-
-/**
- *
- */
-void Laser::setNormalizedPosition(const Vec2& position) {
+	this->getBox2DBody()->SetTransform(b2Vec2(this->getParent()->getContentSize().width * position.x / Globals::getInstance().getBox2DScale(), this->getParent()->getContentSize().height * position.y / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
 	this->updateNeeded = true;
-	Sprite::setNormalizedPosition(position);
 }
 
 /**
  *
  */
 void Laser::setPosition(float x, float y) {
-	this->updateNeeded = true;
 	Sprite::setPosition(x, y);
+	this->getBox2DBody()->SetTransform(b2Vec2(x / Globals::getInstance().getBox2DScale(), y / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->updateNeeded = true;
 }
 
 /**
  *
  */
 void Laser::setPositionX(float x) {
-	this->updateNeeded = true;
 	Sprite::setPositionX(x);
+	this->getBox2DBody()->SetTransform(b2Vec2(x / Globals::getInstance().getBox2DScale(), this->getPositionY() / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->updateNeeded = true;
 }
 
 /**
  *
  */
 void Laser::setPositionY(float y) {
-	this->updateNeeded = true;
 	Sprite::setPositionY(y);
+	this->getBox2DBody()->SetTransform(b2Vec2(this->getPositionX() / Globals::getInstance().getBox2DScale(), y / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->updateNeeded = true;
 }
 
 /**
  *
  */
 void Laser::setRotation(float rotation) {
-	this->updateNeeded = true;
 	Sprite::setRotation(rotation);
-}
-
-/**
- *
- */
-void Laser::setRotation3D(const Vec3& rotation) {
+	this->getBox2DBody()->SetTransform(b2Vec2(this->getPositionX() / Globals::getInstance().getBox2DScale(), this->getPositionY() / Globals::getInstance().getBox2DScale()), -rotation*DEGTORAD);
 	this->updateNeeded = true;
-	Sprite::setRotation3D(rotation);
 }
 
 /**
@@ -188,7 +196,7 @@ Vec3 Laser::intersects(const Plane& plane) const {
  */
 void Laser::update(float dt) {
 	if (this->needsUpdate()) {
-		this->ray->set(Vec3(std::cosf(this->getRotation()*M_PI/180.0f), std::sinf(this->getRotation()*M_PI/180.0f), 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
+		this->ray->set(Vec3(std::cosf(this->getRotation()*DEGTORAD)*RADTODEG, -std::sinf(this->getRotation()*DEGTORAD)*RADTODEG, 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
 
 		this->updateNeeded = false;
 	}

@@ -52,7 +52,9 @@ bool HelloWorld::init() {
 
 	// Box2D configuration
 
-	this->world = std::unique_ptr<b2World>(new b2World(b2Vec2(0.0f, 0.0f)));
+	this->worldNode = b2WorldNode::create();
+	//this->setPositionNormalized(Vec2(0.0f, 0.0f));
+	this->addChild(this->worldNode, 1);
 
 	/////////////////////////////
 	// 2. add your codes below...
@@ -60,10 +62,9 @@ bool HelloWorld::init() {
 	auto background = LayerGradient::create(Color4B(253, 158, 246, 255), Color4B(255, 255, 255, 255), Vec2(1.0f, 1.0f));
 	this->addChild(background, -1);
 
-	// add a label shows "Hello World"
-	// create and initialize a label
+	// add a label that shows "Hello World" and create and initialize a label
 
-	auto label = Label::createWithTTF("Reflection", "fonts/motioncontrol-bold.ttf", 48);
+	auto label = Label::createWithTTF("Reflection", "fonts/motioncontrol-bold.ttf", 96);
 	if (label == nullptr) {
 		problemLoading("'fonts/motioncontrol-bold.ttf'");
 	} else {
@@ -76,19 +77,19 @@ bool HelloWorld::init() {
 
 	// Add the mirrors
 
-	Mirror* mirror = Mirror::create(world.get());
+	Mirror* mirror = Mirror::create(worldNode->getb2World());
 	mirror->setPosition(Vec2(visibleSize.width/2, visibleSize.height/2));
-	this->addChild(mirror);
+	this->worldNode->addChild(mirror, 1);
 	this->mirrors.insert(mirror);
 
 	// Add the emitters
 
-	Emitter* emitter = Emitter::create(1, world.get(), this);
+	Emitter* emitter = Emitter::create(1, worldNode->getb2World(), this);
 	emitter->setPosition(Vec2(visibleSize.width/2, emitter->getContentSize().height));
 	emitter->setRotation(-90.0f);
 	emitter->onActivate = [&](Emitter* e) {};
 	emitter->onDeactivate = [&](Emitter* e) {};
-	this->addChild(emitter);
+	this->worldNode->addChild(emitter, 1);
 	this->emitters.insert(emitter);
 
 	this->scheduleUpdate();

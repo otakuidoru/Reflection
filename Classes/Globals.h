@@ -22,34 +22,23 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __HELLOWORLD_SCENE_H__
-#define __HELLOWORLD_SCENE_H__
+#ifndef __GLOBALS_H__
+#define __GLOBALS_H__
 
-#include <memory>
-#include <set>
-#include "cocos2d.h"
-#include "b2WorldNode.h"
-#include "Emitter.h"
-#include "Laser.h"
-#include "Mirror.h"
-#include "Receptor.h"
-
-class HelloWorld : public cocos2d::Scene {
-protected:
-	b2WorldNode* worldNode;
-	std::set<Emitter*> emitters;
-	std::set<Mirror*> mirrors;
-	std::set<Receptor*> receptors;
+class Globals {
+private:
+	Globals();
 
 public:
-	static cocos2d::Scene* createScene();
+	virtual ~Globals();
 
-	// implement the "static create()" method manually
-	CREATE_FUNC(HelloWorld);
-	virtual bool init() override;
+	static Globals& getInstance();
 
-	virtual void update(float dt) override;
+	Globals(Globals const&) = delete;
+	void operator=(Globals const&) = delete;
+
+	inline float getBox2DScale() const { return 128.0f; }
 };
 
-#endif // __HELLOWORLD_SCENE_H__
+#endif // __GLOBALS_H__
 

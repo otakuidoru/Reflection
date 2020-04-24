@@ -22,34 +22,40 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __HELLOWORLD_SCENE_H__
-#define __HELLOWORLD_SCENE_H__
+#ifndef __B2WORLD_NODE_H__
+#define __B2WORLD_NODE_H__
 
 #include <memory>
-#include <set>
 #include "cocos2d.h"
-#include "b2WorldNode.h"
-#include "Emitter.h"
-#include "Laser.h"
-#include "Mirror.h"
-#include "Receptor.h"
+#include "external/Box2D/include/Box2D/Box2D.h"
+#include "Box2DDebugDraw.h"
+#include "Globals.h"
 
-class HelloWorld : public cocos2d::Scene {
+class b2WorldNode : public cocos2d::Node {
 protected:
-	b2WorldNode* worldNode;
-	std::set<Emitter*> emitters;
-	std::set<Mirror*> mirrors;
-	std::set<Receptor*> receptors;
+	std::unique_ptr<b2World> world;
+
+	b2WorldNode();
+
+//#if (CC_BOX2D_DEBUG)
+	std::unique_ptr<Box2DDebugDraw> _debugDrawInst = nullptr;
+//#endif
 
 public:
-	static cocos2d::Scene* createScene();
+	static b2WorldNode* create();
+	virtual ~b2WorldNode();
 
-	// implement the "static create()" method manually
-	CREATE_FUNC(HelloWorld);
 	virtual bool init() override;
+
+	b2World* getb2World() const { return world.get(); }
+	float getPixelsPerMeter() const { return Globals::getInstance().getBox2DScale(); }
+
+//#if (CC_BOX2D_DEBUG)
+	virtual void draw(cocos2d::Renderer* renderer, const cocos2d::Mat4& parentTransform, uint32_t parentFlags) override;
+//#endif
 
 	virtual void update(float dt) override;
 };
 
-#endif // __HELLOWORLD_SCENE_H__
+#endif // __B2WORLD_NODE_H__
 

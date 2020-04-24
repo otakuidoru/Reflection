@@ -57,7 +57,10 @@ endif()
 # add cross-platforms source files and header files 
 list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
+     Classes/b2WorldNode.cpp
+     Classes/Box2DDebugDraw.cpp
      Classes/Emitter.cpp
+     Classes/Globals.cpp
      Classes/HelloWorldScene.cpp
      Classes/Laser.cpp
      Classes/Mirror.cpp
@@ -66,7 +69,10 @@ list(APPEND GAME_SOURCE
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
+     Classes/Box2DDebugDraw.h
+     Classes/b2WorldNode.h
      Classes/Emitter.h
+     Classes/Globals.h
      Classes/HelloWorldScene.h
      Classes/Laser.h
      Classes/Mirror.h

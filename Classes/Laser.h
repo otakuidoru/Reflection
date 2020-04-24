@@ -26,37 +26,37 @@
 #define __LASER_H__
 
 #include "cocos2d.h"
+#include "external/Box2D/include/Box2D/Box2D.h"
 
 class Laser : public cocos2d::Sprite {
 protected:
 	const int id;
+	b2World* world;
 	cocos2d::Ray* ray;
 	bool updateNeeded;
+	b2Fixture* fixture;
 
-	Laser(int id);
+	Laser(int id, b2World* world);
 
 public:
-	static Laser* create(int id);
+	static Laser* create(int id, b2World* world);
 	virtual ~Laser();
 
-	virtual bool initWithFile(const std::string& filename) override;
+	bool initWithFile(const std::string& filename, b2World* world);
 
 	int getId() const { return id; }
 
 	bool needsUpdate() const { return updateNeeded; }
 
-	virtual void setScaleX(float scaleX) override;
-	virtual void setScaleY(float scaleY) override;
-	virtual void setScale(float scale) override;
-	virtual void setScale(float scaleX, float scaleY) override;
+	b2Body* getBox2DBody() const { return this->fixture->GetBody(); }
+	b2Fixture* getBox2DFixture() const { return this->fixture; }
+
 	virtual void setPosition(const cocos2d::Vec2& position) override;
 	virtual void setPositionNormalized(const cocos2d::Vec2& position) override;
-	virtual void setNormalizedPosition(const cocos2d::Vec2& position) override;
 	virtual void setPosition(float x, float y) override;
 	virtual void setPositionX(float x) override;
 	virtual void setPositionY(float y) override;
 	virtual void setRotation(float rotation) override;
-	virtual void setRotation3D(const cocos2d::Vec3& rotation) override;
 
 	float dist(const cocos2d::Plane& plane) const;
 	cocos2d::Vec3 intersects(const cocos2d::Plane& plane) const;
