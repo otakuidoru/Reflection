@@ -71,6 +71,7 @@ list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/Box2DDebugDraw.h
      Classes/b2WorldNode.h
+     Classes/Direction.h
      Classes/Emitter.h
      Classes/Globals.h
      Classes/HelloWorldScene.h

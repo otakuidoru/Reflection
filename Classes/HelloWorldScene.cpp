@@ -84,7 +84,7 @@ bool HelloWorld::init() {
 
 	// Add the emitters
 
-	Emitter* emitter = Emitter::create(1, worldNode->getb2World(), this);
+	Emitter* emitter = Emitter::create(1, worldNode->getb2World());
 	emitter->setPosition(Vec2(visibleSize.width/2, emitter->getContentSize().height));
 	emitter->setRotation(-90.0f);
 	emitter->onActivate = [&](Emitter* e) {};
@@ -101,12 +101,12 @@ bool HelloWorld::init() {
  *
  */
 void HelloWorld::update(float dt) {
-	for (auto emitter : this->emitters) {
-		for (auto mirror : this->mirrors) {
+	//for (auto emitter : this->emitters) {
+		//for (auto mirror : this->mirrors) {
 			//if (emitter->getLaser()->getBoundingBox().intersects(mirror->getBoundingBox())) {
 			//	mirror->reflect();
 			//}
-		}
-	}
+		//}
+	//}
 }
 

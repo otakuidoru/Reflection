@@ -30,7 +30,7 @@ USING_NS_CC;
 /**
  *
  */
-Emitter::Emitter(int id, b2World* world, cocos2d::Scene* scene) : Sprite(), id(id), world(world), scene(scene) {
+Emitter::Emitter(int id, b2World* world) : Sprite(), id(id), world(world) {
 }
 
 /**
@@ -42,8 +42,8 @@ Emitter::~Emitter() {
 /**
  *
  */
-Emitter* Emitter::create(int id, b2World* world, cocos2d::Scene* scene) {
-	Emitter* emitter = new (std::nothrow) Emitter(id, world, scene);
+Emitter* Emitter::create(int id, b2World* world) {
+	Emitter* emitter = new (std::nothrow) Emitter(id, world);
 	if (emitter && emitter->initWithFile("emitter.png", world)) {
 		emitter->autorelease();
 		return emitter;
@@ -108,12 +108,11 @@ void Emitter::setActive(bool active) {
 	const bool prevActive = this->active;
 	this->active = active;
 
-/*
 	if (!prevActive && active) {
-		this->laser = Laser::create(this->getId(), this->world);
+		this->laser = Laser::create(this->getId(), this->world, this);
+		this->addChild(this->laser);
 		this->laser->setAnchorPoint(Vec2(0.0f, 0.5f));
 		this->laser->setPositionNormalized(Vec2(1.0f, 0.5f));
-		this->addChild(this->laser);
 		this->laser->runAction(Sequence::create(
 			ScaleTo::create(1.0f, 1024.0f, 1.0f),
 			CallFunc::create([&]() {
@@ -135,6 +134,5 @@ void Emitter::setActive(bool active) {
 			nullptr
 		));
 	}
-*/
 }
 

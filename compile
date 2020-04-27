@@ -1,0 +1,4 @@
+cocos compile -p android -m debug && \
+rm -f /run/user/1000/gvfs/dav+sd:host=Spice%2520client%2520folder._webdav._tcp.local/Shared/ZenProgramming/Reflection-debug.apk && \
+cp ./bin/debug/android/Reflection-debug.apk /run/user/1000/gvfs/dav+sd:host=Spice%2520client%2520folder._webdav._tcp.local/Shared/ZenProgramming/Reflection-debug.apk
+

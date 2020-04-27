@@ -30,26 +30,28 @@
 
 class Laser : public cocos2d::Sprite {
 protected:
-	const int id;
-	b2World* world;
-	cocos2d::Ray* ray;
-	bool updateNeeded;
-	b2Fixture* fixture;
+	const int id = -1;
+	b2World* world = nullptr;
+	cocos2d::Ray* ray = nullptr;
+	bool updateNeeded = false;
+	b2Body* body = nullptr;
 
 	Laser(int id, b2World* world);
 
+	void initBox2D(b2World* const world, const Node* const parent = nullptr);
+	void redoBox2D();
+
 public:
-	static Laser* create(int id, b2World* world);
+	static Laser* create(int id, b2World* world, const cocos2d::Node* const parent = nullptr);
 	virtual ~Laser();
 
-	bool initWithFile(const std::string& filename, b2World* world);
+	bool initWithFile(const std::string& filename, b2World* world, const Node* const parent = nullptr);
 
 	int getId() const { return id; }
 
 	bool needsUpdate() const { return updateNeeded; }
 
-	b2Body* getBox2DBody() const { return this->fixture->GetBody(); }
-	b2Fixture* getBox2DFixture() const { return this->fixture; }
+	b2Body* getBox2DBody() const { return body; }
 
 	virtual void setPosition(const cocos2d::Vec2& position) override;
 	virtual void setPositionNormalized(const cocos2d::Vec2& position) override;
@@ -57,6 +59,11 @@ public:
 	virtual void setPositionX(float x) override;
 	virtual void setPositionY(float y) override;
 	virtual void setRotation(float rotation) override;
+
+	virtual void setScaleX(float scaleX) override;
+	virtual void setScaleY(float scaleY) override;
+	virtual void setScale(float scale) override;
+	virtual void setScale(float scaleX, float scaleY) override;
 
 	float dist(const cocos2d::Plane& plane) const;
 	cocos2d::Vec3 intersects(const cocos2d::Plane& plane) const;

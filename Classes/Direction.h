@@ -22,43 +22,16 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __EMITTER_H__
-#define __EMITTER_H__
+#ifndef __DIRECTION_H__
+#define __DIRECTION_H__
 
-#include <functional>
-#include "cocos2d.h"
-#include "external/Box2D/include/Box2D/Box2D.h"
-#include "Laser.h"
-
-class Emitter : public cocos2d::Sprite {
-protected:
-	int id;
-	b2World* world;
-	short direction;
-	bool active;
-	Laser* laser;
-
-	Emitter(int id, b2World* world);
-
-public:
-	static Emitter* create(int id, b2World* world);
-	virtual ~Emitter();
-
-	bool initWithFile(const std::string& filename, b2World* world);
-
-	int getId() const { return id; }
-
-	inline short getDirection() const { return direction; }
-	inline void setDirection(short direction) { this->direction = direction % 4; }
-
-	inline bool isActive() const { return active; }
-	void setActive(bool active);
-
-	inline Laser* getLaser() const { return laser; }
-
-	std::function<void(Emitter*)> onActivate;
-	std::function<void(Emitter*)> onDeactivate;
+enum class Direction {
+	NORTHEAST,
+	SOUTHEAST,
+	SOUTHWEST,
+	NORTHWEST,
+	NUM_DIRECTIONS
 };
 
-#endif // __EMITTER_H__
+#endif // __DIRECTION_H__
 
