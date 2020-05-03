@@ -26,32 +26,25 @@
 #define __LASER_H__
 
 #include "cocos2d.h"
-#include "external/Box2D/include/Box2D/Box2D.h"
 
 class Laser : public cocos2d::Sprite {
 protected:
 	const int id = -1;
-	b2World* world = nullptr;
 	cocos2d::Ray* ray = nullptr;
 	bool updateNeeded = false;
-	b2Body* body = nullptr;
+	cocos2d::Vec2 origin;
 
-	Laser(int id, b2World* world);
-
-	void initBox2D(b2World* const world, const Node* const parent = nullptr);
-	void redoBox2D();
+	Laser(int id);
 
 public:
-	static Laser* create(int id, b2World* world, const cocos2d::Node* const parent = nullptr);
+	static Laser* create(int id, const cocos2d::Node* const parent);
 	virtual ~Laser();
 
-	bool initWithFile(const std::string& filename, b2World* world, const Node* const parent = nullptr);
+	bool initWithFile(const std::string& filename, const Node* const parent);
 
 	int getId() const { return id; }
 
 	bool needsUpdate() const { return updateNeeded; }
-
-	b2Body* getBox2DBody() const { return body; }
 
 	virtual void setPosition(const cocos2d::Vec2& position) override;
 	virtual void setPositionNormalized(const cocos2d::Vec2& position) override;
@@ -65,8 +58,8 @@ public:
 	virtual void setScale(float scale) override;
 	virtual void setScale(float scaleX, float scaleY) override;
 
-	float dist(const cocos2d::Plane& plane) const;
-	cocos2d::Vec3 intersects(const cocos2d::Plane& plane) const;
+	cocos2d::Ray* getRay() const { return ray; }
+	float getLength() const { return this->getScaleX(); }
 
 	virtual void update(float dt) override;
 };

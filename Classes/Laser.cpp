@@ -34,15 +34,13 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Laser::Laser(int id, b2World* world) : Sprite(), id(id), world(world) {
+Laser::Laser(int id) : Sprite(), id(id) {
 }
 
 /**
  *
  */
 Laser::~Laser() {
-	this->world->DestroyBody(this->getBox2DBody());
-
 	if (this->ray) {
 		delete this->ray;
 	}
@@ -51,9 +49,9 @@ Laser::~Laser() {
 /**
  *
  */
-Laser* Laser::create(int id, b2World* world, const Node* const parent) {
-	Laser* laser = new (std::nothrow) Laser(id, world);
-	if (laser && laser->initWithFile("blue_laser.png", world, parent)) {
+Laser* Laser::create(int id, const Node* const parent) {
+	Laser* laser = new (std::nothrow) Laser(id);
+	if (laser && laser->initWithFile("blue_laser.png", parent)) {
 		laser->autorelease();
 		return laser;
 	}
@@ -64,66 +62,18 @@ Laser* Laser::create(int id, b2World* world, const Node* const parent) {
 /**
  * on "init" you need to initialize your instance
  */
-bool Laser::initWithFile(const std::string& filename, b2World* world, const Node* const parent) {
+bool Laser::initWithFile(const std::string& filename, const Node* const parent) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Sprite::initWithFile(filename)) {
 		return false;
 	}
 
-	this->setAnchorPoint(Vec2(0.0f, 0.5f));
-
 	this->ray = new Ray(
 		Vec3(std::cosf(this->getRotation()*DEGTORAD)*RADTODEG, -std::sinf(this->getRotation()*DEGTORAD)*RADTODEG, 0.0f),
 		Vec3(this->getPositionX(), this->getPositionY(), 0.0f)
 	);
 	this->updateNeeded = false;
-
-	//////////////////////////////////////////////////////////////////////
-	//
-	//  Box2D
-	//
-	//////////////////////////////////////////////////////////////////////
-
-	b2BodyDef bodyDef;
-	bodyDef.type = b2_dynamicBody;
-	bodyDef.position = b2Vec2(parent->getPositionX() / Globals::getInstance().getBox2DScale(), parent->getPositionY() / Globals::getInstance().getBox2DScale());
-//	bodyDef.angle = parent->getRotation() * DEGTORAD;
-	bodyDef.angle = 30.0f * DEGTORAD;
-	this->body = world->CreateBody(&bodyDef);
-	log("com.zenprogramming.reflection: create laser with parent: %f %f %f", this->body->GetPosition().x, this->body->GetPosition().y, this->body->GetAngle());
-	log("com.zenprogramming.reflection: create laser with parent: this->getRotation() = %f", this->getRotation());
-	log("com.zenprogramming.reflection: create laser with parent: parent->getRotation() = %f", parent->getRotation());
-
-	// define the shape
-
-	b2ChainShape shape;
-	std::vector<b2Vec2> vertices;
-	vertices.push_back(b2Vec2(-0.0625f, -0.00390625f));
-	vertices.push_back(b2Vec2( 0.0625f, -0.00390625f));
-	vertices.push_back(b2Vec2( 0.0625f,  0.00390625f));
-	vertices.push_back(b2Vec2(-0.0625f,  0.00390625f));
-	shape.CreateLoop(vertices.data(), vertices.size());
-
-	// define the filter
-
-//	b2Filter filter;
-//	filter.categoryBits;
-//	filter.maskBits;
-//	filter.groupIndex;
-
-	// define the fixture definition
-
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &shape;
-	fixtureDef.userData = nullptr;
-	fixtureDef.friction = 0.0f;
-	fixtureDef.restitution = 0.0f;
-	fixtureDef.density = 1.0f;
-//	fixtureDef.isSensor = true;
-//	fixtureDef.filter = filter;
-
-	this->body->CreateFixture(&fixtureDef);
 
 	this->scheduleUpdate();
 
@@ -133,101 +83,9 @@ bool Laser::initWithFile(const std::string& filename, b2World* world, const Node
 /**
  *
  */
-void Laser::initBox2D(b2World* const world, const Node* const parent) {
-	// destroy the fixture, if it exists
-	if (this->body) {
-		if (this->body->GetFixtureList()) {
-			this->body->DestroyFixture(this->body->GetFixtureList());
-		}
-
-		this->body->SetTransform(
-			b2Vec2(
-				parent->getPositionX() / Globals::getInstance().getBox2DScale(),
-				parent->getPositionY() / Globals::getInstance().getBox2DScale()
-			),
-			-parent->getRotation() * DEGTORAD
-		);
-	} else {
-		// define the body definition
-		b2BodyDef bodyDef;
-		bodyDef.type = b2_dynamicBody;
-		bodyDef.position = b2Vec2(parent->getPositionX() / Globals::getInstance().getBox2DScale(), parent->getPositionY() / Globals::getInstance().getBox2DScale());
-//		bodyDef.angle = parent->getRotation() * DEGTORAD;
-		bodyDef.angle = 30.0f * DEGTORAD;
-		this->body = world->CreateBody(&bodyDef);
-		log("com.zenprogramming.reflection: create laser with parent: %f %f %f", this->body->GetPosition().x, this->body->GetPosition().y, this->body->GetAngle());
-		log("com.zenprogramming.reflection: create laser with parent: this->getRotation() = %f", this->getRotation());
-		log("com.zenprogramming.reflection: create laser with parent: parent->getRotation() = %f", parent->getRotation());
-
-/*
-		if (parent) {
-			this->body->SetTransform(
-				b2Vec2(
-					parent->getPositionX() / Globals::getInstance().getBox2DScale(),
-					parent->getPositionY() / Globals::getInstance().getBox2DScale()
-				),
-				-parent->getRotation() * DEGTORAD
-			);
-			log("com.zenprogramming.reflection: create laser with parent: %f %f %f", this->body->GetPosition().x, this->body->GetPosition().y, this->body->GetAngle());
-		} else {
-			this->body->SetTransform(
-				b2Vec2(
-					this->getPositionX() / Globals::getInstance().getBox2DScale(),
-					this->getPositionY() / Globals::getInstance().getBox2DScale()
-				),
-				-this->getRotation() * DEGTORAD
-			);
-			log("com.zenprogramming.reflection: create laser without parent: %f %f %f", this->body->GetPosition().x, this->body->GetPosition().y, this->body->GetAngle());
-		}
-*/
-	}
-
-	// define the shape
-
-	b2ChainShape shape;
-	std::vector<b2Vec2> vertices;
-	vertices.push_back(b2Vec2(-0.0625f, -0.00390625f));
-	vertices.push_back(b2Vec2( 0.0625f, -0.00390625f));
-	vertices.push_back(b2Vec2( 0.0625f,  0.00390625f));
-	vertices.push_back(b2Vec2(-0.0625f,  0.00390625f));
-	shape.CreateLoop(vertices.data(), vertices.size());
-
-//	b2PolygonShape shape;
-//	shape.SetAsBox((this->getBoundingBox().getMaxX() - this->getBoundingBox().getMinX()) / Globals::getInstance().getBox2DScale(), 0.125f, b2Vec2(0.5f, 0.0f), body->GetAngle());
-
-	// define the filter
-
-//	b2Filter filter;
-//	filter.categoryBits;
-//	filter.maskBits;
-//	filter.groupIndex;
-
-	// define the fixture definition
-
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &shape;
-	fixtureDef.userData = nullptr;
-	fixtureDef.friction = 0.0f;
-	fixtureDef.restitution = 0.0f;
-	fixtureDef.density = 1.0f;
-//	fixtureDef.isSensor = true;
-//	fixtureDef.filter = filter;
-
-	this->body->CreateFixture(&fixtureDef);
-}
-
-/**
- *
- */
-void Laser::redoBox2D() {
-}
-
-/**
- *
- */
 void Laser::setPosition(const Vec2& position) {
 	Sprite::setPosition(position);
-	this->getBox2DBody()->SetTransform(b2Vec2(position.x / Globals::getInstance().getBox2DScale(), position.y / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->origin.set(position.x, position.y);
 	this->updateNeeded = true;
 }
 
@@ -236,7 +94,7 @@ void Laser::setPosition(const Vec2& position) {
  */
 void Laser::setPositionNormalized(const Vec2& position) {
 	Sprite::setPositionNormalized(position);
-	this->getBox2DBody()->SetTransform(b2Vec2(this->getParent()->getContentSize().width * position.x / Globals::getInstance().getBox2DScale(), this->getParent()->getContentSize().height * position.y / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->origin.set(position.x, position.y);
 	this->updateNeeded = true;
 }
 
@@ -245,7 +103,7 @@ void Laser::setPositionNormalized(const Vec2& position) {
  */
 void Laser::setPosition(float x, float y) {
 	Sprite::setPosition(x, y);
-	this->getBox2DBody()->SetTransform(b2Vec2(x / Globals::getInstance().getBox2DScale(), y / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->origin.set(x, y);
 	this->updateNeeded = true;
 }
 
@@ -254,7 +112,7 @@ void Laser::setPosition(float x, float y) {
  */
 void Laser::setPositionX(float x) {
 	Sprite::setPositionX(x);
-	this->getBox2DBody()->SetTransform(b2Vec2(x / Globals::getInstance().getBox2DScale(), this->getPositionY() / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->origin.set(x, this->getPositionY());
 	this->updateNeeded = true;
 }
 
@@ -263,7 +121,7 @@ void Laser::setPositionX(float x) {
  */
 void Laser::setPositionY(float y) {
 	Sprite::setPositionY(y);
-	this->getBox2DBody()->SetTransform(b2Vec2(this->getPositionX() / Globals::getInstance().getBox2DScale(), y / Globals::getInstance().getBox2DScale()), -this->getRotation()*DEGTORAD);
+	this->origin.set(this->getPositionX(), y);
 	this->updateNeeded = true;
 }
 
@@ -272,7 +130,7 @@ void Laser::setPositionY(float y) {
  */
 void Laser::setRotation(float rotation) {
 	Sprite::setRotation(rotation);
-	this->getBox2DBody()->SetTransform(b2Vec2(this->getPositionX() / Globals::getInstance().getBox2DScale(), this->getPositionY() / Globals::getInstance().getBox2DScale()), -rotation*DEGTORAD);
+	this->ray->set(Vec3(std::cosf(rotation*DEGTORAD)*RADTODEG, -std::sinf(rotation*DEGTORAD)*RADTODEG, 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
 	this->updateNeeded = true;
 }
 
@@ -312,25 +170,9 @@ void Laser::setScale(float scaleX, float scaleY) {
 /**
  *
  */
-float Laser::dist(const Plane& plane) const {
-	return this->ray->dist(plane);
-}
-
-/**
- *
- */
-Vec3 Laser::intersects(const Plane& plane) const {
-	return this->ray->intersects(plane);
-}
-
-/**
- *
- */
 void Laser::update(float dt) {
 	if (this->needsUpdate()) {
-		this->initBox2D(this->world, this->getParent());
-
-		this->ray->set(Vec3(std::cosf(this->getRotation()*DEGTORAD)*RADTODEG, -std::sinf(this->getRotation()*DEGTORAD)*RADTODEG, 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
+		//this->ray->set(Vec3(std::cosf(this->getRotation()*DEGTORAD)*RADTODEG, -std::sinf(this->getRotation()*DEGTORAD)*RADTODEG, 0.0f), Vec3(this->getPositionX(), this->getPositionY(), 0.0f));
 
 		this->updateNeeded = false;
 	}

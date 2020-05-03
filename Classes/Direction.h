@@ -26,11 +26,14 @@
 #define __DIRECTION_H__
 
 enum class Direction {
+	NORTH,
 	NORTHEAST,
+	EAST,
 	SOUTHEAST,
+	SOUTH,
 	SOUTHWEST,
-	NORTHWEST,
-	NUM_DIRECTIONS
+	WEST,
+	NORTHWEST
 };
 
 #endif // __DIRECTION_H__

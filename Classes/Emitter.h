@@ -27,29 +27,28 @@
 
 #include <functional>
 #include "cocos2d.h"
-#include "external/Box2D/include/Box2D/Box2D.h"
+#include "Direction.h"
 #include "Laser.h"
 
 class Emitter : public cocos2d::Sprite {
 protected:
-	int id;
-	b2World* world;
-	short direction;
+	const int id;
+	Direction direction;
 	bool active;
 	Laser* laser;
 
-	Emitter(int id, b2World* world);
+	Emitter(int id);
 
 public:
-	static Emitter* create(int id, b2World* world);
+	static Emitter* create(int id);
 	virtual ~Emitter();
 
-	bool initWithFile(const std::string& filename, b2World* world);
+	virtual bool initWithFile(const std::string& filename) override;
 
-	int getId() const { return id; }
+	inline int getId() const { return id; }
 
-	inline short getDirection() const { return direction; }
-	inline void setDirection(short direction) { this->direction = direction % 4; }
+	inline Direction getDirection() const { return direction; }
+	inline void setDirection(Direction direction) { this->direction = direction; }
 
 	inline bool isActive() const { return active; }
 	void setActive(bool active);

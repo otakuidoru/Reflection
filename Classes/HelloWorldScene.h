@@ -28,15 +28,12 @@
 #include <memory>
 #include <set>
 #include "cocos2d.h"
-#include "b2WorldNode.h"
 #include "Emitter.h"
-#include "Laser.h"
 #include "Mirror.h"
 #include "Receptor.h"
 
 class HelloWorld : public cocos2d::Scene {
 protected:
-	b2WorldNode* worldNode;
 	std::set<Emitter*> emitters;
 	std::set<Mirror*> mirrors;
 	std::set<Receptor*> receptors;

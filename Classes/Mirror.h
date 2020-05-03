@@ -27,31 +27,29 @@
 
 #include <string>
 #include "cocos2d.h"
-#include "external/Box2D/include/Box2D/Box2D.h"
+#include "Direction.h"
 #include "Laser.h"
 
 class Mirror : public cocos2d::Sprite {
 protected:
+	const int id;
 	bool rotatable;
 	bool rotating;
-	short direction;
-	float reflectionNormal;
+	Direction direction;
 	Laser* laser;
 	cocos2d::Plane* plane;
-	bool updateNeeded;
-	b2Fixture* fixture;
 
-	Mirror();
-
-//	void rotate(bool right);
+	Mirror(int id);
 
 public:
 	constexpr static float ROTATION_TIME = 0.25f;
 
-	static Mirror* create(b2World* world);
+	static Mirror* create(int id);
 	virtual ~Mirror();
 
-	bool initWithFile(const std::string& filename, b2World* world);
+	virtual bool initWithFile(const std::string& filename) override;
+
+	inline int getId() const { return id; }
 
 	inline bool isRotatable() const { return rotatable; }
 	inline void setRotatable(bool rotatable) { this->rotatable = rotatable; }
@@ -59,37 +57,22 @@ public:
 	inline bool isRotating() const { return rotating; }
 	inline void setRotating(bool rotating) { this->rotating = rotating; }
 
-	inline short getDirection() const { return direction; }
-	inline void setDirection(short direction) { this->direction = direction % 4; }
+	inline Direction getDirection() const { return direction; }
+	inline void setDirection(Direction direction) { this->direction = direction; }
 
 	inline Laser* getLaser() const { return laser; }
 
 	inline cocos2d::Plane* getReflectivePlane() const { return plane; }
 
-	bool needsUpdate() const { return updateNeeded; }
-
-//	void rotateCounterclockwise();
-//	void rotateClockwise();
-
 	void startReflect(Laser* originatingLaser);
 	void stopReflect(Laser* originatingLaser);
 
-	b2Body* getBox2DBody() const { return this->fixture->GetBody(); }
-	b2Fixture* getBox2DFixture() const { return this->fixture; }
-
-	virtual float getReflectionNormal() { return reflectionNormal; }
-
-	virtual void setPosition(const cocos2d::Vec2& position) override;
-	virtual void setPositionNormalized(const cocos2d::Vec2& position) override;
-	virtual void setPosition(float x, float y) override;
-	virtual void setPositionX(float x) override;
-	virtual void setPositionY(float y) override;
-	virtual void setRotation(float rotation) override;
-
-	virtual void update(float dt) override;
+//	virtual float getReflectionNormal() { return reflectionNormal; }
 
 	std::function<void(Mirror*)> onLaserEnter;
 	std::function<void(Mirror*)> onLaserExit;
+
+	virtual void update(float dt) override;
 };
 
 #endif // __MIRROR_H__

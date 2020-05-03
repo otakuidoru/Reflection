@@ -27,10 +27,13 @@
 
 USING_NS_CC;
 
+static const float DEGTORAD = 0.0174532925199432957f;
+static const float RADTODEG = 57.295779513082320876f;
+
 /**
  *
  */
-Emitter::Emitter(int id, b2World* world) : Sprite(), id(id), world(world) {
+Emitter::Emitter(int id) : Sprite(), id(id) {
 }
 
 /**
@@ -42,9 +45,9 @@ Emitter::~Emitter() {
 /**
  *
  */
-Emitter* Emitter::create(int id, b2World* world) {
-	Emitter* emitter = new (std::nothrow) Emitter(id, world);
-	if (emitter && emitter->initWithFile("emitter.png", world)) {
+Emitter* Emitter::create(int id) {
+	Emitter* emitter = new (std::nothrow) Emitter(id);
+	if (emitter && emitter->initWithFile("emitter.png")) {
 		emitter->autorelease();
 		return emitter;
 	}
@@ -55,14 +58,14 @@ Emitter* Emitter::create(int id, b2World* world) {
 /**
  * on "init" you need to initialize your instance
  */
-bool Emitter::initWithFile(const std::string& filename, b2World* world) {
+bool Emitter::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Sprite::initWithFile(filename)) {
 		return false;
 	}
 
-	this->direction = 0;
+	this->direction = Direction::EAST;
 	this->active = false;
 	this->laser = nullptr;
 
@@ -109,10 +112,10 @@ void Emitter::setActive(bool active) {
 	this->active = active;
 
 	if (!prevActive && active) {
-		this->laser = Laser::create(this->getId(), this->world, this);
+		this->laser = Laser::create(this->getId(), this);
 		this->addChild(this->laser);
-		this->laser->setAnchorPoint(Vec2(0.0f, 0.5f));
 		this->laser->setPositionNormalized(Vec2(1.0f, 0.5f));
+		this->laser->setAnchorPoint(Vec2(0.0f, 0.5f));
 		this->laser->runAction(Sequence::create(
 			ScaleTo::create(1.0f, 1024.0f, 1.0f),
 			CallFunc::create([&]() {
@@ -129,6 +132,7 @@ void Emitter::setActive(bool active) {
 			ScaleTo::create(1.0f, 0.0f, 1.0f),
 			RemoveSelf::create(),
 			CallFunc::create([&]() {
+				this->laser = nullptr;
 				this->onDeactivate(this);
 			}),
 			nullptr
