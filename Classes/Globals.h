@@ -37,7 +37,7 @@ public:
 	Globals(Globals const&) = delete;
 	void operator=(Globals const&) = delete;
 
-	inline float getBox2DScale() const { return 128.0f; }
+	inline int getBackgroundLayer() const { return -1; }
 };
 
 #endif // __GLOBALS_H__

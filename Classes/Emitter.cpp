@@ -113,11 +113,11 @@ void Emitter::setActive(bool active) {
 
 	if (!prevActive && active) {
 		this->laser = Laser::create(this->getId(), this);
-		this->addChild(this->laser);
+		this->addChild(this->laser, 1);
 		this->laser->setPositionNormalized(Vec2(1.0f, 0.5f));
 		this->laser->setAnchorPoint(Vec2(0.0f, 0.5f));
 		this->laser->runAction(Sequence::create(
-			ScaleTo::create(1.0f, 1024.0f, 1.0f),
+			ScaleTo::create(0.0f, 1024.0f, 1.0f),
 			CallFunc::create([&]() {
 				this->onActivate(this);
 			}),
@@ -129,7 +129,7 @@ void Emitter::setActive(bool active) {
 				this->laser->setPosition(this->laser->getPosition() + Vec2(this->laser->getScaleX(), 0.0f));
 				this->laser->setAnchorPoint(Vec2(1.0f, 0.5f));
 			}),
-			ScaleTo::create(1.0f, 0.0f, 1.0f),
+			ScaleTo::create(0.0f, 0.0f, 1.0f),
 			RemoveSelf::create(),
 			CallFunc::create([&]() {
 				this->laser = nullptr;

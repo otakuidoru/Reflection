@@ -26,6 +26,11 @@
 #include "HelloWorldScene.h"
 #include "Laser.h"
 
+#define BACKGROUND_LAYER -1
+#define LASER_LAYER 1
+#define EMITTER_LAYER 2
+#define MIRROR_LAYER 2
+
 USING_NS_CC;
 
 static const float DEGTORAD = 0.0174532925199432957f;
@@ -78,17 +83,17 @@ bool HelloWorld::init() {
 
 	Mirror* mirror1 = Mirror::create(1);
 	mirror1->setPosition(Vec2(768, 1024));
-	this->addChild(mirror1, 1);
+	this->addChild(mirror1, MIRROR_LAYER);
 	this->mirrors.insert(mirror1);
 
 	Mirror* mirror2 = Mirror::create(2);
 	mirror2->setPosition(Vec2(512, 1024));
-	this->addChild(mirror2, 1);
+	this->addChild(mirror2, MIRROR_LAYER);
 	this->mirrors.insert(mirror2);
 
 	Mirror* mirror3 = Mirror::create(3);
 	mirror3->setPosition(Vec2(768, 1280));
-	this->addChild(mirror3, 1);
+	this->addChild(mirror3, MIRROR_LAYER);
 	this->mirrors.insert(mirror3);
 
 	// Add the emitters
@@ -99,7 +104,7 @@ bool HelloWorld::init() {
 	emitter->setDirection(Direction::NORTH);
 	emitter->onActivate = [&](Emitter* e) {};
 	emitter->onDeactivate = [&](Emitter* e) {};
-	this->addChild(emitter, 1);
+	this->addChild(emitter, EMITTER_LAYER);
 	this->emitters.insert(emitter);
 
 	this->scheduleUpdate();
@@ -116,7 +121,6 @@ void HelloWorld::update(float dt) {
 			Mirror* closestMirror = nullptr;
 			float minDistance = 2560.0f;
 
-			std::map<Mirror*, float> mirrorDistanceMap;
 			for (auto mirror : this->mirrors) {
 				// get the plane
 				const Vec2 mirrorPos = mirror->getParent()->convertToWorldSpace(mirror->getPosition());
@@ -155,7 +159,6 @@ void HelloWorld::update(float dt) {
 
 				Vec3 intersectionPoint = laserRay.intersects(mirrorPlane);
 				float intersectionDist = laserRay.dist(mirrorPlane);
-				mirrorDistanceMap[mirror] = intersectionDist;
 
 				//log("com.zenprogramming.reflection: mirror[%d] intersectionPoint: %f, %f, %f, dist = %f", mirror->getId(), intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, intersectionDist);
 
@@ -169,7 +172,7 @@ void HelloWorld::update(float dt) {
 					minDistance = intersectionDist;
 				}
 			}
-			//log("com.zenprogramming.reflection: closest mirror %d is located at (%f, %f)", closestMirror->getId(), closestMirror->getParent()->convertToWorldSpace(closestMirror->getPosition()).x, closestMirror->getParent()->convertToWorldSpace(closestMirror->getPosition()).y);
+			log("com.zenprogramming.reflection: closest mirror %d is located at (%f, %f)", closestMirror->getId(), closestMirror->getParent()->convertToWorldSpace(closestMirror->getPosition()).x, closestMirror->getParent()->convertToWorldSpace(closestMirror->getPosition()).y);
 		}
 	}
 }
