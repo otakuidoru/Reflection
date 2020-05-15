@@ -25,10 +25,15 @@
 #ifndef __MIRROR_H__
 #define __MIRROR_H__
 
+#ifdef COCOS2D_DEBUG
+#include <ostream>
+#include <sstream>
+#endif
+#include <map>
 #include <string>
+#include <vector>
 #include "cocos2d.h"
 #include "Direction.h"
-#include "Laser.h"
 
 class Mirror : public cocos2d::Sprite {
 protected:
@@ -36,13 +41,12 @@ protected:
 	bool rotatable;
 	bool rotating;
 	Direction direction;
-	Laser* laser;
-	cocos2d::Plane* plane;
+	std::map<int, bool> planeReflective;
 
 	Mirror(int id);
 
 public:
-	constexpr static float ROTATION_TIME = 0.25f;
+	constexpr static float ROTATION_TIME = 2.0f;
 
 	static Mirror* create(int id);
 	virtual ~Mirror();
@@ -60,19 +64,29 @@ public:
 	inline Direction getDirection() const { return direction; }
 	inline void setDirection(Direction direction) { this->direction = direction; }
 
-	inline Laser* getLaser() const { return laser; }
+	cocos2d::Plane getReflectivePlane();
+	std::vector<cocos2d::Plane> getPlanes();
+	cocos2d::Vec3 getReflectionVector(const cocos2d::Ray& ray);
 
-	inline cocos2d::Plane* getReflectivePlane() const { return plane; }
+	bool isPlaneReflective(int index) { return this->planeReflective[index]; }
+	cocos2d::Plane getPlane(int index);
 
-	void startReflect(Laser* originatingLaser);
-	void stopReflect(Laser* originatingLaser);
+	void rotate();
 
-//	virtual float getReflectionNormal() { return reflectionNormal; }
+#ifdef COCOS2D_DEBUG
+	std::string const str() const {
+		std::stringstream ss;
+		ss << "{";
+		ss << "\t\"id\": " << id << ",";
+		ss << "\t\"rotatable\": " << rotatable << ",";
+		ss << "\t\"rotating\": " << rotating << ",";
+		ss << "\t\"direction\":,";
+		ss << "}";
+		return ss.str();
+	}
 
-	std::function<void(Mirror*)> onLaserEnter;
-	std::function<void(Mirror*)> onLaserExit;
-
-	virtual void update(float dt) override;
+	friend std::ostream& operator<<(std::ostream &os, const Mirror& m) { return os << m.str(); }
+#endif
 };
 
 #endif // __MIRROR_H__

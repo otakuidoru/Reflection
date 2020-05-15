@@ -60,7 +60,8 @@ list(APPEND GAME_SOURCE
      Classes/Emitter.cpp
      Classes/Globals.cpp
      Classes/HelloWorldScene.cpp
-     Classes/Laser.cpp
+     Classes/Intersection.cpp
+     Classes/LaserPart.cpp
      Classes/Mirror.cpp
      Classes/Receptor.cpp
      Classes/tinyxml2.cpp
@@ -71,7 +72,8 @@ list(APPEND GAME_HEADER
      Classes/Emitter.h
      Classes/Globals.h
      Classes/HelloWorldScene.h
-     Classes/Laser.h
+     Classes/Intersection.h
+     Classes/LaserPart.h
      Classes/Mirror.h
      Classes/Receptor.h
      Classes/tinyxml2.h

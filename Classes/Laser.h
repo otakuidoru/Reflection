@@ -27,41 +27,31 @@
 
 #include "cocos2d.h"
 
+class EmissionSource;
+
 class Laser : public cocos2d::Sprite {
 protected:
-	const int id = -1;
-	cocos2d::Ray* ray = nullptr;
-	bool updateNeeded = false;
+	EmissionSource* const emissionSource;
 	cocos2d::Vec2 origin;
+	cocos2d::Vec3 direction;
 
-	Laser(int id);
+	Laser(EmissionSource* const emissionSource);
 
 public:
-	static Laser* create(int id, const cocos2d::Node* const parent);
+	static Laser* create(EmissionSource* const emissionSource);
 	virtual ~Laser();
 
-	bool initWithFile(const std::string& filename, const Node* const parent);
+	virtual bool initWithFile(const std::string& filename) override;
 
-	int getId() const { return id; }
+	cocos2d::Ray getRay() const;
 
-	bool needsUpdate() const { return updateNeeded; }
-
-	virtual void setPosition(const cocos2d::Vec2& position) override;
-	virtual void setPositionNormalized(const cocos2d::Vec2& position) override;
-	virtual void setPosition(float x, float y) override;
-	virtual void setPositionX(float x) override;
-	virtual void setPositionY(float y) override;
-	virtual void setRotation(float rotation) override;
-
-	virtual void setScaleX(float scaleX) override;
-	virtual void setScaleY(float scaleY) override;
-	virtual void setScale(float scale) override;
-	virtual void setScale(float scaleX, float scaleY) override;
-
-	cocos2d::Ray* getRay() const { return ray; }
 	float getLength() const { return this->getScaleX(); }
+	void setLength(float length) { this->setScaleX(length); }
 
-	virtual void update(float dt) override;
+	EmissionSource* getEmissionSource() const { return emissionSource; }
+
+//	inline cocos2d::Vec3 getDirection() const { return direction; }
+//	inline void setDirection(cocos2d::Vec3 direction) { this->direction = direction; }
 };
 
 #endif // __LASER_H__

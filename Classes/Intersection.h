@@ -22,41 +22,31 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __HELLOWORLD_SCENE_H__
-#define __HELLOWORLD_SCENE_H__
+#ifndef __INTERSECTION_H__
+#define __INTERSECTION_H__
 
-#include <memory>
-#include <set>
-#include <utility>
 #include "cocos2d.h"
-#include "Emitter.h"
-#include "Intersection.h"
-#include "LaserPart.h"
-#include "Mirror.h"
-#include "Receptor.h"
 
-class HelloWorld : public cocos2d::Scene {
+class Intersection {
 protected:
-	std::set<Emitter*> emitters;
-	std::set<LaserPart*> lasers;
-	std::set<Mirror*> mirrors;
-	std::set<Receptor*> receptors;
-
-	Mirror* getClosestMirror(Emitter* const emitter, const cocos2d::Ray& emitterLaserRay);
-	Mirror* getClosestMirror(Mirror* const origMirror, const cocos2d::Ray& mirrorLaserRay);
-	void activateLaserChain(Mirror* const originMirror, const cocos2d::Ray& originRay, const cocos2d::Vec2& origLaserStartingPoint);
-
-	std::shared_ptr<Intersection> getIntersection(Mirror* const mirror, const cocos2d::Ray& ray);
+	const cocos2d::Plane plane;
+	const int planeIndex;
+	const cocos2d::Vec3 point;
+	const cocos2d::PointSide pointSide;
+	const bool planeReflective;
+	const float distance;
 
 public:
-	static cocos2d::Scene* createScene();
+	Intersection(const cocos2d::Plane& plane, int planeIndex, const cocos2d::Vec3& point, cocos2d::PointSide pointSide, bool planeReflective, float distance);
+	Intersection(const Intersection& intersection);	// copy constructor
+	virtual ~Intersection();
 
-	// implement the "static create()" method manually
-	CREATE_FUNC(HelloWorld);
-	virtual bool init() override;
-
-	virtual void update(float dt) override;
+	cocos2d::Plane getPlane() const { return this->plane; }
+	cocos2d::Vec3 getPoint() const { return this->point; }
+	cocos2d::PointSide getPointSide() const { return this->pointSide; }
+	int isPlaneReflective() const { return this->planeReflective; }
+	float getDistance() const { return this->distance; }
 };
 
-#endif // __HELLOWORLD_SCENE_H__
+#endif // __INTERSECTION_H__
 

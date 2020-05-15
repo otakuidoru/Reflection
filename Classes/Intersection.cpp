@@ -22,33 +22,25 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __BOX2D_DEBUG_DRAW_H__
-#define __BOX2D_DEBUG_DRAW_H__
+#include "Intersection.h"
 
-#include "external/Box2D/include/Box2D/Box2D.h"
-#include "cocos2d.h"
+USING_NS_CC;
 
-class Box2DDebugDraw : public b2Draw {
-protected:
-	float32 _ratio;
-	cocos2d::DrawNode* _drawNode = nullptr;
+/**
+ *
+ */
+Intersection::Intersection(const Intersection& intersection) : plane(intersection.plane), planeIndex(intersection.planeIndex), point(intersection.point), pointSide(intersection.pointSide), planeReflective(intersection.planeReflective), distance(intersection.distance) {
+}
 
-public:
-	Box2DDebugDraw(float32 ratio = 1.0f);
-	virtual ~Box2DDebugDraw();
+/**
+ *
+ */
+Intersection::Intersection(const Plane& plane, int planeIndex, const Vec3& point, PointSide pointSide, bool planeReflective, float distance) : plane(plane), planeIndex(planeIndex), point(point), pointSide(pointSide), planeReflective(planeReflective), distance(distance) {
+}
 
-	void DrawPolygon(const b2Vec2* vertices, int vertexCount, const b2Color& color) override;
-	void DrawSolidPolygon(const b2Vec2* vertices, int vertexCount, const b2Color& color) override;
-	void DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color) override;
-	void DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) override;
-	void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color) override;
-	void DrawTransform(const b2Transform& xf) override;
-	void DrawPoint(const b2Vec2& p, float32 size, const b2Color& color) override;
-
-	void setRatio(float32 ratio) { _ratio = ratio; }
-
-	cocos2d::DrawNode* GetDrawNode() const { return _drawNode; }
-};
-
-#endif // __BOX2D_DEBUG_DRAW_H__
+/**
+ *
+ */
+Intersection::~Intersection() {
+}
 

@@ -32,8 +32,6 @@
 using namespace cocos2d::experimental;
 #endif
 
-#define CC_BOX2D_DEBUG 1
-
 USING_NS_CC;
 
 static cocos2d::Size designResolutionSize = cocos2d::Size(1536, 2048);

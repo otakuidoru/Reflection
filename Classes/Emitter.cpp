@@ -65,9 +65,8 @@ bool Emitter::initWithFile(const std::string& filename) {
 		return false;
 	}
 
-	this->direction = Direction::EAST;
 	this->active = false;
-	this->laser = nullptr;
+	this->direction = Direction::EAST;
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
@@ -108,35 +107,15 @@ bool Emitter::initWithFile(const std::string& filename) {
  *
  */
 void Emitter::setActive(bool active) {
-	const bool prevActive = this->active;
+//	const bool prevActive = this->active;
 	this->active = active;
 
-	if (!prevActive && active) {
-		this->laser = Laser::create(this->getId(), this);
-		this->addChild(this->laser, 1);
-		this->laser->setPositionNormalized(Vec2(1.0f, 0.5f));
-		this->laser->setAnchorPoint(Vec2(0.0f, 0.5f));
-		this->laser->runAction(Sequence::create(
-			ScaleTo::create(0.0f, 1024.0f, 1.0f),
-			CallFunc::create([&]() {
-				this->onActivate(this);
-			}),
-			nullptr
-		));
-	} else if (prevActive && !active) {
-		this->laser->runAction(Sequence::create(
-			CallFunc::create([&]() {
-				this->laser->setPosition(this->laser->getPosition() + Vec2(this->laser->getScaleX(), 0.0f));
-				this->laser->setAnchorPoint(Vec2(1.0f, 0.5f));
-			}),
-			ScaleTo::create(0.0f, 0.0f, 1.0f),
-			RemoveSelf::create(),
-			CallFunc::create([&]() {
-				this->laser = nullptr;
-				this->onDeactivate(this);
-			}),
-			nullptr
-		));
-	}
+//	if (!prevActive && active) {
+		//this->outgoingLaser->setLength(2560.0f);
+		//this->onActivate(this);
+//	} else if (prevActive && !active) {
+		//this->outgoingLaser->setLength(0.0f);
+		//this->onDeactivate(this);
+//	}
 }
 

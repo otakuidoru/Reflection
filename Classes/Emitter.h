@@ -25,17 +25,15 @@
 #ifndef __EMITTER_H__
 #define __EMITTER_H__
 
-#include <functional>
+#include <string>
 #include "cocos2d.h"
 #include "Direction.h"
-#include "Laser.h"
 
 class Emitter : public cocos2d::Sprite {
 protected:
 	const int id;
-	Direction direction;
 	bool active;
-	Laser* laser;
+	Direction direction;
 
 	Emitter(int id);
 
@@ -43,20 +41,15 @@ public:
 	static Emitter* create(int id);
 	virtual ~Emitter();
 
-	virtual bool initWithFile(const std::string& filename) override;
-
 	inline int getId() const { return id; }
+
+	inline bool isActive() const { return active; }
+	virtual void setActive(bool active);
 
 	inline Direction getDirection() const { return direction; }
 	inline void setDirection(Direction direction) { this->direction = direction; }
 
-	inline bool isActive() const { return active; }
-	void setActive(bool active);
-
-	inline Laser* getLaser() const { return laser; }
-
-	std::function<void(Emitter*)> onActivate;
-	std::function<void(Emitter*)> onDeactivate;
+	virtual bool initWithFile(const std::string& filename) override;
 };
 
 #endif // __EMITTER_H__

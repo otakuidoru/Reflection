@@ -37,7 +37,7 @@ public:
 	Globals(Globals const&) = delete;
 	void operator=(Globals const&) = delete;
 
-	inline int getBackgroundLayer() const { return -1; }
+	inline int getBackgroundLayerId() const { return -1; }
 };
 
 #endif // __GLOBALS_H__

@@ -23,8 +23,7 @@
  ****************************************************************************/
 
 #include <cmath>
-#include "Globals.h"
-#include "Laser.h"
+#include "LaserPart.h"
 
 USING_NS_CC;
 
@@ -34,32 +33,32 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Laser::Laser(EmissionSource* const emissionSource) : Sprite(), emissionSource(emissionSource) {
+LaserPart::LaserPart() : Sprite() {
 }
 
 /**
  *
  */
-Laser::~Laser() {
+LaserPart::~LaserPart() {
 }
 
 /**
  *
  */
-Laser* Laser::create(EmissionSource* const emissionSource) {
-	Laser* laser = new (std::nothrow) Laser(emissionSource);
-	if (laser && laser->initWithFile("blue_laser.png")) {
-		laser->autorelease();
-		return laser;
+LaserPart* LaserPart::create() {
+	LaserPart* laserPart = new (std::nothrow) LaserPart();
+	if (laserPart && laserPart->initWithFile("red_laser.png")) {
+		laserPart->autorelease();
+		return laserPart;
 	}
-	CC_SAFE_DELETE(laser);
+	CC_SAFE_DELETE(laserPart);
 	return nullptr;
 }
 
 /**
  * on "init" you need to initialize your instance
  */
-bool Laser::initWithFile(const std::string& filename) {
+bool LaserPart::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Sprite::initWithFile(filename)) {
@@ -72,13 +71,13 @@ bool Laser::initWithFile(const std::string& filename) {
 /**
  *
  */
-Ray Laser::getRay() const {
-//	log("com.zenprogramming.reflection: laser[%d] contentsize (%f, %f)", this->getId(), this->getContentSize().width, this->getContentSize().height);
-	const Vec2 origin = this->convertToWorldSpace(Vec2::ZERO) - Vec2(this->getContentSize().height/2.0f, 0.0f);
-	const Vec3 direction(std::cosf(this->getParent()->getRotation()*DEGTORAD), -std::sinf(this->getParent()->getRotation()*DEGTORAD), 0.0f);
+Ray LaserPart::getRay() const {
+	//log("com.zenprogramming.reflection: laser contentsize (%f, %f)", this->getContentSize().width, this->getContentSize().height);
+	const Vec2 origin = this->getParent()->convertToWorldSpace(this->getPosition());
+	const Vec3 direction(std::cosf(-this->getRotation()*DEGTORAD), std::sinf(-this->getRotation()*DEGTORAD), 0.0f);
 
 	const Ray ray(Vec3(origin.x, origin.y, 0.0f), direction);
-//	log("com.zenprogramming.reflection: laser[%d] origin (%f, %f), direction (%f, %f)", this->getId(), origin.x, origin.y, direction.x, direction.y);
+	//log("com.zenprogramming.reflection: laser origin (%f, %f), direction (%f, %f)", origin.x, origin.y, direction.x, direction.y);
 
 	return ray;
 }

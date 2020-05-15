@@ -22,40 +22,33 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __B2WORLD_NODE_H__
-#define __B2WORLD_NODE_H__
+#ifndef __LASER_PART_H__
+#define __LASER_PART_H__
 
-#include <memory>
 #include "cocos2d.h"
-#include "external/Box2D/include/Box2D/Box2D.h"
-#include "Box2DDebugDraw.h"
-#include "Globals.h"
 
-class b2WorldNode : public cocos2d::Node {
+class LaserPart : public cocos2d::Sprite {
 protected:
-	std::unique_ptr<b2World> world;
+	//cocos2d::Ray ray;
+	cocos2d::Vec2 origin;
+	cocos2d::Vec3 direction;
 
-	b2WorldNode();
-
-//#if (CC_BOX2D_DEBUG)
-	std::unique_ptr<Box2DDebugDraw> _debugDrawInst = nullptr;
-//#endif
+	LaserPart();
 
 public:
-	static b2WorldNode* create();
-	virtual ~b2WorldNode();
+	static LaserPart* create();
+	virtual ~LaserPart();
 
-	virtual bool init() override;
+	virtual bool initWithFile(const std::string& filename) override;
 
-	b2World* getb2World() const { return world.get(); }
-	float getPixelsPerMeter() const { return Globals::getInstance().getBox2DScale(); }
+	cocos2d::Ray getRay() const;
 
-//#if (CC_BOX2D_DEBUG)
-	virtual void draw(cocos2d::Renderer* renderer, const cocos2d::Mat4& parentTransform, uint32_t parentFlags) override;
-//#endif
+	float getLength() const { return this->getScaleX(); }
+	void setLength(float length) { this->setScaleX(length); }
 
-	virtual void update(float dt) override;
+//	inline cocos2d::Vec3 getDirection() const { return direction; }
+//	inline void setDirection(cocos2d::Vec3 direction) { this->direction = direction; }
 };
 
-#endif // __B2WORLD_NODE_H__
+#endif // __LASER_PART_H__
 

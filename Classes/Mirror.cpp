@@ -23,9 +23,6 @@
  ****************************************************************************/
 
 #include <cmath>
-#include <memory>
-#include <utility>
-#include "Globals.h"
 #include "Mirror.h"
 
 USING_NS_CC;
@@ -43,9 +40,6 @@ Mirror::Mirror(int id) : Sprite(), id(id) {
  *
  */
 Mirror::~Mirror() {
-	if (this->plane) {
-		delete this->plane;
-	}
 }
 
 /**
@@ -74,7 +68,9 @@ bool Mirror::initWithFile(const std::string& filename) {
 	this->rotatable = true;
 	this->rotating = false;
 	this->direction = Direction::NORTHEAST;
-	this->plane = new Plane(Vec3(std::cosf(-45.0f)*DEGTORAD, std::cosf(-45.0f)*DEGTORAD, 0.0f), Vec3(this->getPositionX(), this->getPositionY(), -45.0f));
+	this->planeReflective[0] = true;
+	this->planeReflective[1] = false;
+	this->planeReflective[2] = false;
 
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -89,28 +85,9 @@ bool Mirror::initWithFile(const std::string& filename) {
 	touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
 		bool consuming = false;
 
-		if (!this->isRotating()) {
-			if (this->getBoundingBox().containsPoint(touch->getLocation())) {
-				consuming = true;
-				this->runAction(Sequence::create(
-					CallFunc::create([&]() {
-						// set rotating flag
-						this->setRotating(true);
-					}),
-					RotateBy::create(Mirror::ROTATION_TIME, 90.0f),
-					CallFunc::create([&]() {
-						// correct for bounds outside [0.0f, 360.0f]
-						if (this->getRotation() < 0.0f) {
-							this->setRotation(this->getRotation() + 360.0f);
-						} else if (this->getRotation() >= 360.0f) {
-							this->setRotation(this->getRotation() - 360.0f);
-						}
-						// set not rotating anymore
-						this->setRotating(false);
-					}),
-					nullptr
-				));
-			}
+		if (this->getBoundingBox().containsPoint(touch->getLocation())) {
+			consuming = true;
+			this->rotate();
 		}
 
 		return consuming;
@@ -127,29 +104,115 @@ bool Mirror::initWithFile(const std::string& filename) {
 	// add listener
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
 
-	this->scheduleUpdate();
-
 	return true;
 }
 
 /**
  *
  */
-void Mirror::startReflect(Laser* originatingLaser) {
-//	this->laser = ;
+Plane Mirror::getReflectivePlane() {
+	return this->getPlane(0);
 }
 
 /**
  *
  */
-void Mirror::stopReflect(Laser* originatingLaser) {
-//	this->laser = ;
+std::vector<Plane> Mirror::getPlanes() {
+	std::vector<Plane> planes;
+
+	planes.push_back(this->getPlane(0));
+	planes.push_back(this->getPlane(1));
+	planes.push_back(this->getPlane(2));
+
+	return planes;
 }
 
 /**
  *
  */
-void Mirror::update(float dt) {
-//	this->plane->initPlane(const Vec3& p1, const Vec3& p2, const Vec3& p3);//(Vec3(std::cosf(this->getRotation()*DEGTORAD)*RADTODEG, std::sinf(this->getRotation()*DEGTORAD)*RADTODEG, 0.0f), Vec3(this->getPositionX(), this->getPositionY(), this->reflectionNormal));
+Vec3 Mirror::getReflectionVector(const Ray& ray) {
+	// https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+	const Vec3 d = ray._direction;
+	const Vec3 n = this->getReflectivePlane().getNormal();
+	const Vec3 reflectionVector = d - 2 * (d.dot(n)) * n;
+	log("com.zenprogramming.reflection: reflectionVector = (%f, %f, %f)", reflectionVector.x, reflectionVector.y, reflectionVector.z);
+	return reflectionVector;
+}
+
+/**
+ *
+ */
+Plane Mirror::getPlane(int index) {
+	Plane plane;
+
+	const Vec2 worldPos = this->getParent()->convertToWorldSpace(this->getPosition());
+	const Size contentSize = this->getContentSize();
+
+	switch (index) {	
+		case 0: { // first plane - reflective
+			const float angle = -(this->getRotation() - 45.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x, worldPos.y, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+			//log("com.zenprogramming.reflection: mirror[%d] plane[0].pos = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z);
+			//log("com.zenprogramming.reflection: mirror[%d] plane[0].normal = (%f, %f, %f)", this->getId(), plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
+		} break;
+		case 1: { // second plane - non-reflective
+			const float angle = -(this->getRotation() + 90.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+			//log("com.zenprogramming.reflection: mirror[%d] plane[1].pos = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z);
+			//log("com.zenprogramming.reflection: mirror[%d] plane[1].normal = (%f, %f, %f)", this->getId(), plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
+		} break;
+		case 2: { // third plane - non-reflective
+			const float angle = -(this->getRotation() + 180.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+			//log("com.zenprogramming.reflection: mirror[%d] plane[2].pos = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z);
+			//log("com.zenprogramming.reflection: mirror[%d] plane[2].normal = (%f, %f, %f)", this->getId(), plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
+		} break;
+	}
+
+	return plane;
+}
+
+/**
+ *
+ */
+void Mirror::rotate() {
+	if (this->isRotatable()) {
+		if (!this->isRotating()) {
+			this->runAction(Sequence::create(
+				// before rotation
+				CallFunc::create([&]() {
+					log("com.zenprogramming.reflection: BEGIN MIRROR[%d] ROTATION", this->getId());
+					this->setRotating(true);
+				}),
+				// on rotation
+				RotateBy::create(Mirror::ROTATION_TIME, 90.0f),
+				// after rotation
+				CallFunc::create([&]() {
+					log("com.zenprogramming.reflection: END MIRROR[%d] ROTATION", this->getId());
+					// correct for bounds outside [0.0f, 360.0f]
+					if (this->getRotation() < 0.0f) {
+						this->setRotation(this->getRotation() + 360.0f);
+					} else if (this->getRotation() >= 360.0f) {
+						this->setRotation(this->getRotation() - 360.0f);
+					}
+					switch (this->getDirection()) {
+						case Direction::NORTH:     { this->setDirection(Direction::EAST);      } break;
+						case Direction::NORTHEAST: { this->setDirection(Direction::SOUTHEAST); } break;
+						case Direction::EAST:      { this->setDirection(Direction::SOUTH);     } break;
+						case Direction::SOUTHEAST: { this->setDirection(Direction::SOUTHWEST); } break;
+						case Direction::SOUTH:     { this->setDirection(Direction::WEST);      } break;
+						case Direction::SOUTHWEST: { this->setDirection(Direction::NORTHWEST); } break;
+						case Direction::WEST:      { this->setDirection(Direction::NORTH);     } break;
+						case Direction::NORTHWEST: { this->setDirection(Direction::NORTHEAST); } break;
+					}
+					this->setRotating(false);
+				}),
+				nullptr
+			));
+		}
+	}
 }
 
