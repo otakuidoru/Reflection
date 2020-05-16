@@ -194,6 +194,7 @@ Mirror* HelloWorld::getClosestMirror(Emitter* const emitter, const Ray& emitterL
 	float minDistance = 2560.0f;
 
 	for (auto mirror : this->mirrors) {
+		//log("com.zenprogramming.reflection: checking mirror[%d]", mirror->getId());
 		const Rect mirrorBoundingBox = mirror->getBoundingBox();
 		const AABB mirrorAABB(Vec3(mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), 0.0f), Vec3(mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY(), 0.0f));
 		//log("com.zenprogramming.reflection: mirror[%d] AABB = (%f, %f, %f, %f)", mirror->getId(), mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY());
@@ -218,7 +219,6 @@ Mirror* HelloWorld::getClosestMirror(Emitter* const emitter, const Ray& emitterL
  *
  */
 Mirror* HelloWorld::getClosestMirror(Mirror* const origMirror, const Ray& mirrorLaserRay) {
-	//log("com.zenprogramming.reflection: BEGIN getClosestMirror");
 	Mirror* closestMirror = nullptr;
 	float minDistance = 2560.0f;
 
@@ -243,8 +243,6 @@ Mirror* HelloWorld::getClosestMirror(Mirror* const origMirror, const Ray& mirror
 		}
 	}
 
-	//log("com.zenprogramming.reflection: END getClosestMirror");
-
 	return closestMirror;
 }
 
@@ -252,12 +250,13 @@ Mirror* HelloWorld::getClosestMirror(Mirror* const origMirror, const Ray& mirror
  *
  */
 void HelloWorld::update(float dt) {
-	//log("com.zenprogramming.reflection: UPDATE");
+	log("com.zenprogramming.reflection: UPDATE");
 
 	// remove all lasers from the board
 	for (auto laser : this->lasers) {
 		laser->removeFromParent();
 	}
+	this->lasers.clear();
 
 	// regenerate lasers on the board
 	for (auto emitter : this->emitters) {
