@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include "Emitter.h"
-#include "Laser.h"
 
 USING_NS_CC;
 
@@ -101,21 +100,5 @@ bool Emitter::initWithFile(const std::string& filename) {
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
 
 	return true;
-}
-
-/**
- *
- */
-void Emitter::setActive(bool active) {
-//	const bool prevActive = this->active;
-	this->active = active;
-
-//	if (!prevActive && active) {
-		//this->outgoingLaser->setLength(2560.0f);
-		//this->onActivate(this);
-//	} else if (prevActive && !active) {
-		//this->outgoingLaser->setLength(0.0f);
-		//this->onDeactivate(this);
-//	}
 }
 

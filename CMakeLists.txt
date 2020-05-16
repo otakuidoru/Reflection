@@ -58,7 +58,6 @@ endif()
 list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
      Classes/Emitter.cpp
-     Classes/Globals.cpp
      Classes/HelloWorldScene.cpp
      Classes/Intersection.cpp
      Classes/LaserPart.cpp
@@ -70,7 +69,6 @@ list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/Direction.h
      Classes/Emitter.h
-     Classes/Globals.h
      Classes/HelloWorldScene.h
      Classes/Intersection.h
      Classes/LaserPart.h

@@ -61,7 +61,7 @@ bool Receptor::initWithFile(const std::string& filename) {
 		return false;
 	}
 
-	this->direction = 0;
+	this->direction = Direction::EAST;
 
 	return true;
 }

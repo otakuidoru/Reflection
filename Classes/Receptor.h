@@ -25,12 +25,12 @@
 #ifndef __RECEPTOR_H__
 #define __RECEPTOR_H__
 
-#include <functional>
 #include "cocos2d.h"
+#include "Direction.h"
 
 class Receptor : public cocos2d::Sprite {
 protected:
-	short direction;
+	Direction direction;
 
 	Receptor();
 
@@ -40,8 +40,8 @@ public:
 
 	virtual bool initWithFile(const std::string& filename) override;
 
-	inline short getDirection() const { return direction; }
-	inline void setDirection(short direction) { this->direction = direction % 4; }
+	inline Direction getDirection() const { return direction; }
+	inline void setDirection(Direction direction) { this->direction = direction; }
 };
 
 #endif // __RECEPTOR_H__

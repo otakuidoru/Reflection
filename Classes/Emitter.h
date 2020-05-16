@@ -44,7 +44,7 @@ public:
 	inline int getId() const { return id; }
 
 	inline bool isActive() const { return active; }
-	virtual void setActive(bool active);
+	inline void setActive(bool active) { this->active = active; }
 
 	inline Direction getDirection() const { return direction; }
 	inline void setDirection(Direction direction) { this->direction = direction; }
