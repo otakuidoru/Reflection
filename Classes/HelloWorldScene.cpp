@@ -29,6 +29,7 @@
 #define LASER_LAYER 1
 #define EMITTER_LAYER 2
 #define MIRROR_LAYER 2
+#define RECEPTOR_LAYER 2
 
 USING_NS_CC;
 
@@ -77,6 +78,24 @@ bool HelloWorld::init() {
 		this->addChild(label, 1);
 	}
 
+	// Add the emitters
+
+	Emitter* emitter = Emitter::create(1);
+	emitter->setPosition(Vec2(visibleSize.width/2, emitter->getContentSize().height));
+	emitter->setRotation(-90.0f);
+	emitter->setDirection(Direction::NORTH);
+	this->addChild(emitter, EMITTER_LAYER);
+	this->emitters.insert(emitter);
+
+	// Add the receptors
+
+	Receptor* receptor = Receptor::create(1);
+	receptor->setPosition(Vec2(visibleSize.width/2, visibleSize.height - emitter->getContentSize().height));
+	receptor->setRotation(0.0f);
+	receptor->setDirection(Direction::NORTH);
+	this->addChild(receptor, RECEPTOR_LAYER);
+	this->receptors.insert(receptor);
+
 	// Add the mirrors
 
 	Mirror* mirror1 = Mirror::create(1);
@@ -98,16 +117,6 @@ bool HelloWorld::init() {
 	mirror4->setPosition(Vec2(512, 1280));
 	this->addChild(mirror4, MIRROR_LAYER);
 	this->mirrors.insert(mirror4);
-
-	// Add the emitters
-
-	Emitter* emitter = Emitter::create(1);
-	emitter->setPosition(Vec2(visibleSize.width/2, emitter->getContentSize().height));
-	emitter->setRotation(-90.0f);
-	emitter->setDirection(Direction::NORTH);
-	//emitter->setOpacity(64);
-	this->addChild(emitter, EMITTER_LAYER);
-	this->emitters.insert(emitter);
 
 	this->scheduleUpdate();
 
@@ -250,7 +259,7 @@ Mirror* HelloWorld::getClosestMirror(Mirror* const origMirror, const Ray& mirror
  *
  */
 void HelloWorld::update(float dt) {
-	log("com.zenprogramming.reflection: UPDATE");
+	//log("com.zenprogramming.reflection: UPDATE");
 
 	// remove all lasers from the board
 	for (auto laser : this->lasers) {

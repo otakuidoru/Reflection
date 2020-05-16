@@ -22,14 +22,18 @@
  THE SOFTWARE.
  ****************************************************************************/
 
+#include <cmath>
 #include "Receptor.h"
 
 USING_NS_CC;
 
+static const float DEGTORAD = 0.0174532925199432957f;
+static const float RADTODEG = 57.295779513082320876f;
+
 /**
  *
  */
-Receptor::Receptor() : Sprite() {
+Receptor::Receptor(int id) : GameObject(id, 4) {
 }
 
 /**
@@ -41,8 +45,8 @@ Receptor::~Receptor() {
 /**
  *
  */
-Receptor* Receptor::create() {
-	Receptor* receptor = new (std::nothrow) Receptor();
+Receptor* Receptor::create(int id) {
+	Receptor* receptor = new (std::nothrow) Receptor(id);
 	if (receptor && receptor->initWithFile("receptor.png")) {
 		receptor->autorelease();
 		return receptor;
@@ -57,12 +61,45 @@ Receptor* Receptor::create() {
 bool Receptor::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
-	if (!Sprite::initWithFile(filename)) {
+	if (!GameObject::initWithFile(filename)) {
 		return false;
 	}
 
-	this->direction = Direction::EAST;
-
 	return true;
+}
+
+/**
+ *
+ */
+Plane Receptor::getPlane(unsigned int index) {
+	Plane plane;
+
+	const Vec2 worldPos = this->getParent()->convertToWorldSpace(this->getPosition());
+	const Size contentSize = this->getContentSize();
+
+	switch (index) {	
+		case 0: { // first plane - non-reflective
+			const float angle = -(this->getRotation()) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+		} break;
+		case 1: { // second plane - non-reflective
+			const float angle = -(this->getRotation() + 90.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+		} break;
+		case 2: { // third plane - non-reflective
+			const float angle = -(this->getRotation() + 180.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+		} break;
+		case 3: { // fourth plane - non-reflective
+			const float angle = -(this->getRotation() + 270.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+		} break;
+	}
+
+	return plane;
 }
 

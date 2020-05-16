@@ -27,7 +27,6 @@
 
 #include <memory>
 #include <set>
-#include <utility>
 #include "cocos2d.h"
 #include "Emitter.h"
 #include "Intersection.h"

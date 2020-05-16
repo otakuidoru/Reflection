@@ -22,35 +22,41 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __EMITTER_H__
-#define __EMITTER_H__
+#ifndef __GAME_OBJECT_H__
+#define __GAME_OBJECT_H__
 
+#include <map>
 #include <string>
+#include <vector>
 #include "cocos2d.h"
 #include "Direction.h"
 
-class Emitter : public cocos2d::Sprite {
+class GameObject : public cocos2d::Sprite {
 protected:
 	const int id;
-	bool active;
-	Direction direction;
+	const unsigned int numPlanes;
 
-	Emitter(int id);
+	Direction direction;
+	std::map<int, bool> planeReflective;
+
+	GameObject(int id, unsigned int numPlanes);
 
 public:
-	static Emitter* create(int id);
-	virtual ~Emitter();
+	virtual ~GameObject();
 
 	virtual bool initWithFile(const std::string& filename) override;
 
-	inline int getId() const { return id; }
-
-	inline bool isActive() const { return active; }
-	inline void setActive(bool active) { this->active = active; }
+	inline int getId() const { return this->id; }
 
 	inline Direction getDirection() const { return direction; }
 	inline void setDirection(Direction direction) { this->direction = direction; }
+
+	inline unsigned int getNumPlanes() const { return this->numPlanes; }
+	virtual cocos2d::Plane getPlane(unsigned int index) = 0;
+	std::vector<cocos2d::Plane> getPlanes();
+	bool isPlaneReflective(unsigned int index);
+	void setPlaneReflective(unsigned int index, bool reflective);
 };
 
-#endif // __EMITTER_H__
+#endif // __GAME_OBJECT_H__
 

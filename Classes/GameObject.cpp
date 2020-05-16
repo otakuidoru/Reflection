@@ -22,35 +22,67 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __EMITTER_H__
-#define __EMITTER_H__
+#include "GameObject.h"
 
-#include <string>
-#include "cocos2d.h"
-#include "Direction.h"
+USING_NS_CC;
 
-class Emitter : public cocos2d::Sprite {
-protected:
-	const int id;
-	bool active;
-	Direction direction;
+/**
+ *
+ */
+GameObject::GameObject(int id, unsigned int numPlanes) : Sprite(), id(id), numPlanes(numPlanes) {
+}
 
-	Emitter(int id);
+/**
+ *
+ */
+GameObject::~GameObject() {
+}
 
-public:
-	static Emitter* create(int id);
-	virtual ~Emitter();
+/**
+ * on "init" you need to initialize your instance
+ */
+bool GameObject::initWithFile(const std::string& filename) {
+	//////////////////////////////
+	// 1. super init first
+	if (!Sprite::initWithFile(filename)) {
+		return false;
+	}
 
-	virtual bool initWithFile(const std::string& filename) override;
+	this->direction = Direction::EAST;
 
-	inline int getId() const { return id; }
+	return true;
+}
 
-	inline bool isActive() const { return active; }
-	inline void setActive(bool active) { this->active = active; }
+/**
+ *
+ */
+std::vector<Plane> GameObject::getPlanes() {
+	std::vector<Plane> planes;
 
-	inline Direction getDirection() const { return direction; }
-	inline void setDirection(Direction direction) { this->direction = direction; }
-};
+	for (unsigned int i=0; i<this->getNumPlanes(); ++i) {
+		planes.push_back(this->getPlane(i));
+	}
 
-#endif // __EMITTER_H__
+	return planes;
+}
+
+/**
+ *
+ */
+bool GameObject::isPlaneReflective(unsigned int index) {
+	if (index < this->getNumPlanes()) {
+		return this->planeReflective[index];
+	}
+
+	return false;
+}
+
+/**
+ *
+ */
+void GameObject::setPlaneReflective(unsigned int index, bool reflective) {
+	if (index < this->getNumPlanes()) {
+		this->planeReflective[index] = reflective;
+	}
+}
 

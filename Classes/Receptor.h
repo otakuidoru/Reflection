@@ -25,23 +25,21 @@
 #ifndef __RECEPTOR_H__
 #define __RECEPTOR_H__
 
+#include <string>
 #include "cocos2d.h"
-#include "Direction.h"
+#include "GameObject.h"
 
-class Receptor : public cocos2d::Sprite {
+class Receptor : public GameObject {
 protected:
-	Direction direction;
-
-	Receptor();
+	Receptor(int id);
 
 public:
-	static Receptor* create();
+	static Receptor* create(int id);
 	virtual ~Receptor();
 
 	virtual bool initWithFile(const std::string& filename) override;
 
-	inline Direction getDirection() const { return direction; }
-	inline void setDirection(Direction direction) { this->direction = direction; }
+	virtual cocos2d::Plane getPlane(unsigned int index) override;
 };
 
 #endif // __RECEPTOR_H__

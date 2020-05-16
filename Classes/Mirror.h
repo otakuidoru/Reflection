@@ -46,7 +46,7 @@ protected:
 	Mirror(int id);
 
 public:
-	constexpr static float ROTATION_TIME = 2.0f;
+	constexpr static float ROTATION_TIME = 0.25f;
 
 	static Mirror* create(int id);
 	virtual ~Mirror();
@@ -68,7 +68,7 @@ public:
 	std::vector<cocos2d::Plane> getPlanes();
 	cocos2d::Vec3 getReflectionVector(const cocos2d::Ray& ray);
 
-	bool isPlaneReflective(int index) { return this->planeReflective[index]; }
+	inline bool isPlaneReflective(int index) { return this->planeReflective[index]; }
 	cocos2d::Plane getPlane(int index);
 
 	void rotate();
