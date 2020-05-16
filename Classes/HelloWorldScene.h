@@ -42,11 +42,10 @@ protected:
 	std::set<Mirror*> mirrors;
 	std::set<Receptor*> receptors;
 
+	std::shared_ptr<Intersection> getIntersection(Mirror* const mirror, const cocos2d::Ray& ray);
 	Mirror* getClosestMirror(Emitter* const emitter, const cocos2d::Ray& emitterLaserRay);
 	Mirror* getClosestMirror(Mirror* const origMirror, const cocos2d::Ray& mirrorLaserRay);
-	void activateLaserChain(Mirror* const originMirror, const cocos2d::Ray& originRay, const cocos2d::Vec2& origLaserStartingPoint);
-
-	std::shared_ptr<Intersection> getIntersection(Mirror* const mirror, const cocos2d::Ray& ray);
+	void activateLaserChain(Mirror* const originMirror, const cocos2d::Ray& originRay, const cocos2d::Vec3& origLaserStartingPoint);
 
 public:
 	static cocos2d::Scene* createScene();

@@ -94,6 +94,11 @@ bool HelloWorld::init() {
 	this->addChild(mirror3, MIRROR_LAYER);
 	this->mirrors.insert(mirror3);
 
+	Mirror* mirror4 = Mirror::create(4);
+	mirror4->setPosition(Vec2(512, 1280));
+	this->addChild(mirror4, MIRROR_LAYER);
+	this->mirrors.insert(mirror4);
+
 	// Add the emitters
 
 	Emitter* emitter = Emitter::create(1);
@@ -107,93 +112,6 @@ bool HelloWorld::init() {
 	this->scheduleUpdate();
 
 	return true;
-}
-
-/**
- *
- */
-void HelloWorld::activateLaserChain(Mirror* const originMirror, const Ray& originRay, const Vec2& origLaserStartingPoint) {
-	Mirror* closestMirror = this->getClosestMirror(originMirror, originRay);
-
-	if (closestMirror) {
-		std::shared_ptr<Intersection> intersection = this->getIntersection(closestMirror, originRay);
-
-		if (intersection.get()) {
-			// create and add a laser
-			LaserPart* laser = LaserPart::create();
-			laser->setPosition(Vec2(origLaserStartingPoint.x, origLaserStartingPoint.y));
-
-			const Vec3 reflectionVector = originMirror->getReflectionVector(originRay);
-			float angle = -std::atan2(reflectionVector.y, reflectionVector.x) * RADTODEG;
-
-			laser->setRotation(angle);
-			laser->setAnchorPoint(Vec2(0.0f, 0.5f));
-			laser->setScaleX(2560.0f);
-			this->addChild(laser, LASER_LAYER);
-			this->lasers.insert(laser);
-
-			laser->setScaleX(intersection->getDistance());
-			this->activateLaserChain(closestMirror, laser->getRay(), Vec2(intersection->getPoint().x, intersection->getPoint().y));
-		}
-	}
-}
-
-/**
- *
- */
-Mirror* HelloWorld::getClosestMirror(Emitter* const emitter, const Ray& emitterLaserRay) {
-	Mirror* closestMirror = nullptr;
-	float minDistance = 2560.0f;
-
-	for (auto mirror : this->mirrors) {
-		const Rect mirrorBoundingBox = mirror->getBoundingBox();
-		const AABB mirrorAABB(Vec3(mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), 0.0f), Vec3(mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY(), 0.0f));
-		//log("com.zenprogramming.reflection: mirror[%d] AABB = (%f, %f, %f, %f)", mirror->getId(), mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY());
-
-		float intersectionDist;
-		const bool rayIntersectsMirror = emitterLaserRay.intersects(mirrorAABB, &intersectionDist);
-		//log("com.zenprogramming.reflection: emitter[%d] laser intersects mirror[%d]? %d", emitter->getId(), mirror->getId(), rayIntersectsMirror);
-
-		if (rayIntersectsMirror && intersectionDist < minDistance) {
-			closestMirror = mirror;
-			minDistance = intersectionDist;
-			//log("com.zenprogramming.reflection: emitter[%d] laser hits mirror[%d] at distance = %f", emitter->getId(), closestMirror->getId(), intersectionDist);
-		}
-	}
-
-	//log("com.zenprogramming.reflection: closest mirror = %d", closestMirror->getId());
-
-	return closestMirror;
-}
-
-/**
- *
- */
-Mirror* HelloWorld::getClosestMirror(Mirror* const origMirror, const Ray& mirrorLaserRay) {
-	Mirror* closestMirror = nullptr;
-	float minDistance = 2560.0f;
-
-	for (auto mirror : this->mirrors) {
-		if (mirror != origMirror) {
-			const Rect mirrorBoundingBox = mirror->getBoundingBox();
-			const AABB mirrorAABB(Vec3(mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), 0.0f), Vec3(mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY(), 0.0f));
-			//log("com.zenprogramming.reflection: mirror[%d] AABB = (%f, %f, %f, %f)", mirror->getId(), mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY());
-
-			float intersectionDist;
-			const bool rayIntersectsMirror = mirrorLaserRay.intersects(mirrorAABB, &intersectionDist);
-			//log("com.zenprogramming.reflection: origMirror[%d] laser intersects mirror[%d]? %d", origMirror->getId(), mirror->getId(), rayIntersectsMirror);
-
-			if (rayIntersectsMirror && intersectionDist < minDistance) {
-				closestMirror = mirror;
-				minDistance = intersectionDist;
-				//log("com.zenprogramming.reflection: origMirror[%d] laser hits mirror[%d] at distance = %f", origMirror->getId(), closestMirror->getId(), intersectionDist);
-			}
-		}
-	}
-
-	//log("com.zenprogramming.reflection: closest mirror = %d", closestMirror->getId());
-
-	return closestMirror;
 }
 
 /**
@@ -235,6 +153,104 @@ std::shared_ptr<Intersection> HelloWorld::getIntersection(Mirror* const mirror, 
 /**
  *
  */
+void HelloWorld::activateLaserChain(Mirror* const originMirror, const Ray& originRay, const Vec3& origLaserStartingPoint) {
+	const Vec3 reflectionVector = originMirror->getReflectionVector(originRay);
+	float angle = -std::atan2(reflectionVector.y, reflectionVector.x) * RADTODEG;
+	Ray reflectionRay(origLaserStartingPoint, reflectionVector);
+
+	// create and add a laser
+	LaserPart* laser = LaserPart::create();
+	laser->setPosition(Vec2(origLaserStartingPoint.x, origLaserStartingPoint.y));
+	laser->setRotation(angle);
+	//log("com.zenprogramming.reflection: laser angle = %f", laser->getRotation());
+	laser->setAnchorPoint(Vec2(0.0f, 0.5f));
+	laser->setScaleX(2560.0f);
+	this->addChild(laser, LASER_LAYER);
+	this->lasers.insert(laser);
+
+	Mirror* closestMirror = this->getClosestMirror(originMirror, reflectionRay);
+
+	if (closestMirror) {
+		std::shared_ptr<Intersection> intersection = this->getIntersection(closestMirror, laser->getRay());
+
+		if (intersection.get()) {
+			//log("com.zenprogramming.reflection: intersection pos: (%f, %f, %f)", intersection->getPoint().x, intersection->getPoint().y, intersection->getPoint().z);
+			//log("com.zenprogramming.reflection: intersection dist: %f", intersection->getDistance());
+
+			laser->setScaleX(intersection->getDistance());
+
+			if (intersection->isPlaneReflective()) {
+				this->activateLaserChain(closestMirror, laser->getRay(), intersection->getPoint());
+			}
+		}
+	}
+}
+
+/**
+ *
+ */
+Mirror* HelloWorld::getClosestMirror(Emitter* const emitter, const Ray& emitterLaserRay) {
+	Mirror* closestMirror = nullptr;
+	float minDistance = 2560.0f;
+
+	for (auto mirror : this->mirrors) {
+		const Rect mirrorBoundingBox = mirror->getBoundingBox();
+		const AABB mirrorAABB(Vec3(mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), 0.0f), Vec3(mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY(), 0.0f));
+		//log("com.zenprogramming.reflection: mirror[%d] AABB = (%f, %f, %f, %f)", mirror->getId(), mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY());
+
+		float intersectionDist;
+		const bool rayIntersectsMirror = emitterLaserRay.intersects(mirrorAABB, &intersectionDist);
+		//log("com.zenprogramming.reflection: emitter[%d] laser intersects mirror[%d]? %d", emitter->getId(), mirror->getId(), rayIntersectsMirror);
+
+		if (rayIntersectsMirror && intersectionDist < minDistance) {
+			closestMirror = mirror;
+			minDistance = intersectionDist;
+			//log("com.zenprogramming.reflection: emitter[%d] laser hits mirror[%d] at distance = %f", emitter->getId(), closestMirror->getId(), intersectionDist);
+		}
+	}
+
+	//log("com.zenprogramming.reflection: closest mirror = %d", closestMirror->getId());
+
+	return closestMirror;
+}
+
+/**
+ *
+ */
+Mirror* HelloWorld::getClosestMirror(Mirror* const origMirror, const Ray& mirrorLaserRay) {
+	//log("com.zenprogramming.reflection: BEGIN getClosestMirror");
+	Mirror* closestMirror = nullptr;
+	float minDistance = 2560.0f;
+
+	for (auto mirror : this->mirrors) {
+		if (mirror != origMirror) {
+			//log("com.zenprogramming.reflection: checking mirror[%d]", mirror->getId());
+			const Rect mirrorBoundingBox = mirror->getBoundingBox();
+			const AABB mirrorAABB(Vec3(mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), 0.0f), Vec3(mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY(), 0.0f));
+			//log("com.zenprogramming.reflection: mirror[%d] AABB = (%f, %f, %f, %f)", mirror->getId(), mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY());
+
+			float intersectionDist;
+			//log("com.zenprogramming.reflection: laser origin (%f, %f), direction (%f, %f, %f)", mirrorLaserRay._origin.x, mirrorLaserRay._origin.y, mirrorLaserRay._direction.x, mirrorLaserRay._direction.y, mirrorLaserRay._direction.z);
+			const bool rayIntersectsMirror = mirrorLaserRay.intersects(mirrorAABB, &intersectionDist);
+			//log("com.zenprogramming.reflection: origMirror[%d] laser intersects mirror[%d]? %d", origMirror->getId(), mirror->getId(), rayIntersectsMirror);
+
+			if (rayIntersectsMirror && intersectionDist < minDistance) {
+				closestMirror = mirror;
+				minDistance = intersectionDist;
+				//log("com.zenprogramming.reflection: origMirror[%d] laser hits mirror[%d] at distance = %f", origMirror->getId(), closestMirror->getId(), intersectionDist);
+				//log("com.zenprogramming.reflection: closest mirror is now %d", closestMirror->getId());
+			}
+		}
+	}
+
+	//log("com.zenprogramming.reflection: END getClosestMirror");
+
+	return closestMirror;
+}
+
+/**
+ *
+ */
 void HelloWorld::update(float dt) {
 	//log("com.zenprogramming.reflection: UPDATE");
 
@@ -249,35 +265,35 @@ void HelloWorld::update(float dt) {
 			const Vec2 emitterWorldPos = emitter->getParent()->convertToWorldSpace(emitter->getPosition());
 
 			// create and add a laser
-			LaserPart* laserPart = LaserPart::create();
-			laserPart->setPosition(Vec2(
+			LaserPart* laser = LaserPart::create();
+			laser->setPosition(Vec2(
 				emitterWorldPos.x + (std::cosf(emitter->getRotation() * DEGTORAD) * (-emitter->getContentSize().width / 2.0f)),
 				emitterWorldPos.y + (std::sinf(emitter->getRotation() * DEGTORAD) * (-emitter->getContentSize().height / 2.0f))
 			));
-			laserPart->setRotation(emitter->getRotation());
-			laserPart->setAnchorPoint(Vec2(0.0f, 0.5f));
-			laserPart->setScaleX(2560.0f);
-			this->addChild(laserPart, LASER_LAYER);
-			this->lasers.insert(laserPart);
+			laser->setRotation(emitter->getRotation());
+			laser->setAnchorPoint(Vec2(0.0f, 0.5f));
+			laser->setScaleX(2560.0f);
+			this->addChild(laser, LASER_LAYER);
+			this->lasers.insert(laser);
 
 			// find the closest mirror for the emitter laser
-			Mirror* const closestMirror = this->getClosestMirror(emitter, laserPart->getRay());
+			Mirror* const closestMirror = this->getClosestMirror(emitter, laser->getRay());
 			if (closestMirror) {
-				std::shared_ptr<Intersection> intersection = this->getIntersection(closestMirror, laserPart->getRay());
+				std::shared_ptr<Intersection> intersection = this->getIntersection(closestMirror, laser->getRay());
 				//log("com.zenprogramming.reflection: intersection dist: %f", intersection->getDistance());
 
 				if (intersection.get()) {
 					const Vec2 mirrorWorldPos = closestMirror->getParent()->convertToWorldSpace(closestMirror->getPosition());
-					laserPart->setScaleX(intersection->getDistance());
+					laser->setScaleX(intersection->getDistance());
 
-					const Rect mirrorBoundingBox = closestMirror->getBoundingBox();
-					const AABB mirrorAABB(Vec3(mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), 0.0f), Vec3(mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY(), 0.0f));
+					//const Rect mirrorBoundingBox = closestMirror->getBoundingBox();
+					//const AABB mirrorAABB(Vec3(mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), 0.0f), Vec3(mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY(), 0.0f));
 					//log("com.zenprogramming.reflection: mirror[%d] AABB = (%f, %f, %f, %f)", closestMirror->getId(), mirrorBoundingBox.getMinX(), mirrorBoundingBox.getMinY(), mirrorBoundingBox.getMaxX(), mirrorBoundingBox.getMaxY());
 					//log("com.zenprogramming.reflection: laser origin (%f, %f), direction (%f, %f, %f)", laserPart->getRay()._origin.x, laserPart->getRay()._origin.y, laserPart->getRay()._direction.x, laserPart->getRay()._direction.y, laserPart->getRay()._direction.z);
 					//log("com.zenprogramming.reflection: laser->getScaleX() = %f", laserPart->getScaleX());
 
 					if (intersection->isPlaneReflective()) {
-						this->activateLaserChain(closestMirror, laserPart->getRay(), Vec2(intersection->getPoint().x, intersection->getPoint().y));
+						this->activateLaserChain(closestMirror, laser->getRay(), intersection->getPoint());
 					}
 				}
 			}

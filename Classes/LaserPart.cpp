@@ -73,6 +73,7 @@ bool LaserPart::initWithFile(const std::string& filename) {
  */
 Ray LaserPart::getRay() const {
 	//log("com.zenprogramming.reflection: laser contentsize (%f, %f)", this->getContentSize().width, this->getContentSize().height);
+	//log("com.zenprogramming.reflection: laser rotation = %f", this->getRotation());
 	const Vec2 origin = this->getParent()->convertToWorldSpace(this->getPosition());
 	const Vec3 direction(std::cosf(-this->getRotation()*DEGTORAD), std::sinf(-this->getRotation()*DEGTORAD), 0.0f);
 

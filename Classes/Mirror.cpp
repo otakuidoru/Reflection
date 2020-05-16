@@ -135,7 +135,7 @@ Vec3 Mirror::getReflectionVector(const Ray& ray) {
 	const Vec3 d = ray._direction;
 	const Vec3 n = this->getReflectivePlane().getNormal();
 	const Vec3 reflectionVector = d - 2 * (d.dot(n)) * n;
-	log("com.zenprogramming.reflection: reflectionVector = (%f, %f, %f)", reflectionVector.x, reflectionVector.y, reflectionVector.z);
+	//log("com.zenprogramming.reflection: reflectionVector = (%f, %f, %f)", reflectionVector.x, reflectionVector.y, reflectionVector.z);
 	return reflectionVector;
 }
 
@@ -184,14 +184,14 @@ void Mirror::rotate() {
 			this->runAction(Sequence::create(
 				// before rotation
 				CallFunc::create([&]() {
-					log("com.zenprogramming.reflection: BEGIN MIRROR[%d] ROTATION", this->getId());
+					//log("com.zenprogramming.reflection: BEGIN MIRROR[%d] ROTATION", this->getId());
 					this->setRotating(true);
 				}),
 				// on rotation
 				RotateBy::create(Mirror::ROTATION_TIME, 90.0f),
 				// after rotation
 				CallFunc::create([&]() {
-					log("com.zenprogramming.reflection: END MIRROR[%d] ROTATION", this->getId());
+					//log("com.zenprogramming.reflection: END MIRROR[%d] ROTATION", this->getId());
 					// correct for bounds outside [0.0f, 360.0f]
 					if (this->getRotation() < 0.0f) {
 						this->setRotation(this->getRotation() + 360.0f);
