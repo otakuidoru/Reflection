@@ -29,13 +29,13 @@ USING_NS_CC;
 /**
  *
  */
-Intersection::Intersection(const Intersection& intersection) : plane(intersection.plane), planeIndex(intersection.planeIndex), point(intersection.point), pointSide(intersection.pointSide), planeReflective(intersection.planeReflective), distance(intersection.distance) {
+Intersection::Intersection(const Intersection& intersection) : plane(intersection.plane), point(intersection.point), pointSide(intersection.pointSide), planeReflective(intersection.planeReflective), distance(intersection.distance) {
 }
 
 /**
  *
  */
-Intersection::Intersection(const Plane& plane, int planeIndex, const Vec3& point, PointSide pointSide, bool planeReflective, float distance) : plane(plane), planeIndex(planeIndex), point(point), pointSide(pointSide), planeReflective(planeReflective), distance(distance) {
+Intersection::Intersection(const Plane& plane, const Vec3& point, PointSide pointSide, bool planeReflective, float distance) : plane(plane), point(point), pointSide(pointSide), planeReflective(planeReflective), distance(distance) {
 }
 
 /**

@@ -30,21 +30,23 @@
 #include "cocos2d.h"
 #include "Emitter.h"
 #include "Intersection.h"
+#include "GameObject.h"
 #include "LaserPart.h"
 #include "Mirror.h"
 #include "Receptor.h"
 
 class HelloWorld : public cocos2d::Scene {
 protected:
+	std::set<GameObject*> objects;
 	std::set<Emitter*> emitters;
 	std::set<LaserPart*> lasers;
 	std::set<Mirror*> mirrors;
 	std::set<Receptor*> receptors;
 
-	std::shared_ptr<Intersection> getIntersection(Mirror* const mirror, const cocos2d::Ray& ray);
-	Mirror* getClosestMirror(Emitter* const emitter, const cocos2d::Ray& emitterLaserRay);
-	Mirror* getClosestMirror(Mirror* const origMirror, const cocos2d::Ray& mirrorLaserRay);
-	void activateLaserChain(Mirror* const originMirror, const cocos2d::Ray& originRay, const cocos2d::Vec3& origLaserStartingPoint);
+	cocos2d::Vec3 getReflectionVector(const cocos2d::Plane& plane, const cocos2d::Ray& ray);
+	std::shared_ptr<Intersection> getIntersection(GameObject* const object, const cocos2d::Ray& ray);
+	std::shared_ptr<Intersection> getClosestIntersection(const cocos2d::Ray& ray);
+	void activateLaserChain(const cocos2d::Ray& originRay, const cocos2d::Vec3& origLaserStartingPoint, const cocos2d::Plane& originPlane);
 
 public:
 	static cocos2d::Scene* createScene();
@@ -52,6 +54,8 @@ public:
 	// implement the "static create()" method manually
 	CREATE_FUNC(HelloWorld);
 	virtual bool init() override;
+
+	bool checkWinCondition();
 
 	virtual void update(float dt) override;
 };

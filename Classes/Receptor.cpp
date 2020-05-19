@@ -65,6 +65,11 @@ bool Receptor::initWithFile(const std::string& filename) {
 		return false;
 	}
 
+	this->setPlaneReflective(0, false);
+	this->setPlaneReflective(1, false);
+	this->setPlaneReflective(2, false);
+	this->setPlaneReflective(3, false);
+
 	return true;
 }
 
@@ -75,7 +80,7 @@ Plane Receptor::getPlane(unsigned int index) {
 	Plane plane;
 
 	const Vec2 worldPos = this->getParent()->convertToWorldSpace(this->getPosition());
-	const Size contentSize = this->getContentSize();
+	const Size contentSize = this->getContentSize() * this->getScale();
 
 	switch (index) {	
 		case 0: { // first plane - non-reflective

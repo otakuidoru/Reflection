@@ -32,7 +32,7 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Emitter::Emitter(int id) : Sprite(), id(id) {
+Emitter::Emitter(int id) : GameObject(id, 4) {
 }
 
 /**
@@ -60,12 +60,17 @@ Emitter* Emitter::create(int id) {
 bool Emitter::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
-	if (!Sprite::initWithFile(filename)) {
+	if (!GameObject::initWithFile(filename)) {
 		return false;
 	}
 
 	this->active = false;
 	this->direction = Direction::EAST;
+
+	this->setPlaneReflective(0, false);
+	this->setPlaneReflective(1, false);
+	this->setPlaneReflective(2, false);
+	this->setPlaneReflective(3, false);
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
@@ -100,5 +105,50 @@ bool Emitter::initWithFile(const std::string& filename) {
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
 
 	return true;
+}
+
+/**
+ *
+ */
+Plane Emitter::getPlane(unsigned int index) {
+	Plane plane;
+
+	const Vec2 worldPos = this->getParent()->convertToWorldSpace(this->getPosition());
+	const Size contentSize = this->getContentSize() * this->getScale();
+
+	switch (index) {	
+		case 0: { // first plane - non-reflective
+			const float angle = -(this->getRotation() + 45.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+		} break;
+		case 1: { // second plane - non-reflective
+			const float angle = -(this->getRotation() + 135.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+		} break;
+		case 2: { // third plane - non-reflective
+			const float angle = -(this->getRotation() + 225.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+		} break;
+		case 3: { // fourth plane - non-reflective
+			const float angle = -(this->getRotation() + 315.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+		} break;
+	}
+
+	return plane;
+}
+
+/**
+ *
+ */
+void Emitter::setActive(bool active) {
+	this->active = active;
+	if (this->active) {
+		this->onAfterActivate();
+	}
 }
 

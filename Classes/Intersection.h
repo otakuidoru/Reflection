@@ -30,14 +30,13 @@
 class Intersection {
 protected:
 	const cocos2d::Plane plane;
-	const int planeIndex;
 	const cocos2d::Vec3 point;
 	const cocos2d::PointSide pointSide;
 	const bool planeReflective;
 	const float distance;
 
 public:
-	Intersection(const cocos2d::Plane& plane, int planeIndex, const cocos2d::Vec3& point, cocos2d::PointSide pointSide, bool planeReflective, float distance);
+	Intersection(const cocos2d::Plane& plane, const cocos2d::Vec3& point, cocos2d::PointSide pointSide, bool planeReflective, float distance);
 	Intersection(const Intersection& intersection);	// copy constructor
 	virtual ~Intersection();
 

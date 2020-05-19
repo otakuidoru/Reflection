@@ -33,7 +33,7 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Mirror::Mirror(int id) : Sprite(), id(id) {
+Mirror::Mirror(int id) : GameObject(id, 3) {
 }
 
 /**
@@ -61,16 +61,16 @@ Mirror* Mirror::create(int id) {
 bool Mirror::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
-	if (!Sprite::initWithFile(filename)) {
+	if (!GameObject::initWithFile(filename)) {
 		return false;
 	}
 
 	this->rotatable = true;
 	this->rotating = false;
 	this->direction = Direction::NORTHEAST;
-	this->planeReflective[0] = true;
-	this->planeReflective[1] = false;
-	this->planeReflective[2] = false;
+	this->setPlaneReflective(0, true);
+	this->setPlaneReflective(1, false);
+	this->setPlaneReflective(2, false);
 
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -110,65 +110,30 @@ bool Mirror::initWithFile(const std::string& filename) {
 /**
  *
  */
-Plane Mirror::getReflectivePlane() {
-	return this->getPlane(0);
-}
-
-/**
- *
- */
-std::vector<Plane> Mirror::getPlanes() {
-	std::vector<Plane> planes;
-
-	planes.push_back(this->getPlane(0));
-	planes.push_back(this->getPlane(1));
-	planes.push_back(this->getPlane(2));
-
-	return planes;
-}
-
-/**
- *
- */
-Vec3 Mirror::getReflectionVector(const Ray& ray) {
-	// https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
-	const Vec3 d = ray._direction;
-	const Vec3 n = this->getReflectivePlane().getNormal();
-	const Vec3 reflectionVector = d - 2 * (d.dot(n)) * n;
-	//log("com.zenprogramming.reflection: reflectionVector = (%f, %f, %f)", reflectionVector.x, reflectionVector.y, reflectionVector.z);
-	return reflectionVector;
-}
-
-/**
- *
- */
-Plane Mirror::getPlane(int index) {
+Plane Mirror::getPlane(unsigned int index) {
 	Plane plane;
 
 	const Vec2 worldPos = this->getParent()->convertToWorldSpace(this->getPosition());
-	const Size contentSize = this->getContentSize();
+	const Size contentSize = this->getContentSize() * this->getScale();
 
 	switch (index) {	
 		case 0: { // first plane - reflective
 			const float angle = -(this->getRotation() - 45.0f) * DEGTORAD;
 			Vec3 pos(worldPos.x, worldPos.y, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
-			//log("com.zenprogramming.reflection: mirror[%d] plane[0].pos = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z);
-			//log("com.zenprogramming.reflection: mirror[%d] plane[0].normal = (%f, %f, %f)", this->getId(), plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
+			//log("com.zenprogramming.reflection: mirror[%d] plane[0]: pos = (%f, %f, %f) normal = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z, plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
 		} break;
 		case 1: { // second plane - non-reflective
 			const float angle = -(this->getRotation() + 90.0f) * DEGTORAD;
 			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
-			//log("com.zenprogramming.reflection: mirror[%d] plane[1].pos = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z);
-			//log("com.zenprogramming.reflection: mirror[%d] plane[1].normal = (%f, %f, %f)", this->getId(), plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
+			//log("com.zenprogramming.reflection: mirror[%d] plane[1]: pos = (%f, %f, %f) normal = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z, plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
 		} break;
 		case 2: { // third plane - non-reflective
 			const float angle = -(this->getRotation() + 180.0f) * DEGTORAD;
 			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
-			//log("com.zenprogramming.reflection: mirror[%d] plane[2].pos = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z);
-			//log("com.zenprogramming.reflection: mirror[%d] plane[2].normal = (%f, %f, %f)", this->getId(), plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
+			//log("com.zenprogramming.reflection: mirror[%d] plane[2]: pos = (%f, %f, %f) normal = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z, plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
 		} break;
 	}
 
@@ -209,6 +174,7 @@ void Mirror::rotate() {
 						case Direction::NORTHWEST: { this->setDirection(Direction::NORTHEAST); } break;
 					}
 					this->setRotating(false);
+					this->onAfterRotate();
 				}),
 				nullptr
 			));

@@ -25,23 +25,18 @@
 #ifndef __MIRROR_H__
 #define __MIRROR_H__
 
-#ifdef COCOS2D_DEBUG
-#include <ostream>
-#include <sstream>
-#endif
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
 #include "cocos2d.h"
 #include "Direction.h"
+#include "GameObject.h"
 
-class Mirror : public cocos2d::Sprite {
+class Mirror : public GameObject {
 protected:
-	const int id;
 	bool rotatable;
 	bool rotating;
-	Direction direction;
-	std::map<int, bool> planeReflective;
 
 	Mirror(int id);
 
@@ -53,40 +48,17 @@ public:
 
 	virtual bool initWithFile(const std::string& filename) override;
 
-	inline int getId() const { return id; }
-
 	inline bool isRotatable() const { return rotatable; }
 	inline void setRotatable(bool rotatable) { this->rotatable = rotatable; }
 
 	inline bool isRotating() const { return rotating; }
 	inline void setRotating(bool rotating) { this->rotating = rotating; }
 
-	inline Direction getDirection() const { return direction; }
-	inline void setDirection(Direction direction) { this->direction = direction; }
-
-	cocos2d::Plane getReflectivePlane();
-	std::vector<cocos2d::Plane> getPlanes();
-	cocos2d::Vec3 getReflectionVector(const cocos2d::Ray& ray);
-
-	inline bool isPlaneReflective(int index) { return this->planeReflective[index]; }
-	cocos2d::Plane getPlane(int index);
+	virtual cocos2d::Plane getPlane(unsigned int index) override;
 
 	void rotate();
 
-#ifdef COCOS2D_DEBUG
-	std::string const str() const {
-		std::stringstream ss;
-		ss << "{";
-		ss << "\t\"id\": " << id << ",";
-		ss << "\t\"rotatable\": " << rotatable << ",";
-		ss << "\t\"rotating\": " << rotating << ",";
-		ss << "\t\"direction\":,";
-		ss << "}";
-		return ss.str();
-	}
-
-	friend std::ostream& operator<<(std::ostream &os, const Mirror& m) { return os << m.str(); }
-#endif
+	std::function<void()> onAfterRotate;
 };
 
 #endif // __MIRROR_H__
