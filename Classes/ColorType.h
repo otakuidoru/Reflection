@@ -22,33 +22,18 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __LASER_PART_H__
-#define __LASER_PART_H__
+#ifndef __COLOR_TYPE_H__
+#define __COLOR_TYPE_H__
 
-#include "cocos2d.h"
-
-class LaserPart : public cocos2d::Sprite {
-protected:
-	//cocos2d::Ray ray;
-	cocos2d::Vec2 origin;
-	cocos2d::Vec3 direction;
-
-	LaserPart();
-
-public:
-	static LaserPart* create();
-	virtual ~LaserPart();
-
-	virtual bool initWithFile(const std::string& filename) override;
-
-	cocos2d::Ray getRay() const;
-
-	float getLength() const { return this->getScaleX(); }
-	void setLength(float length) { this->setScaleX(length); }
-
-//	inline cocos2d::Vec3 getDirection() const { return direction; }
-//	inline void setDirection(cocos2d::Vec3 direction) { this->direction = direction; }
+enum class ColorType {
+	NONE,
+	RED,
+	GREEN,
+	BLUE,
+	YELLOW,
+	WHITE,
+	BLACK
 };
 
-#endif // __LASER_PART_H__
+#endif // __COLOR_TYPE_H__
 

@@ -29,7 +29,7 @@ USING_NS_CC;
 /**
  *
  */
-GameObject::GameObject(int id, unsigned int numPlanes) : Sprite(), id(id), numPlanes(numPlanes) {
+GameObject::GameObject(int id, ColorType colorType, unsigned int numPlanes) : Sprite(), id(id), colorType(colorType), numPlanes(numPlanes) {
 }
 
 /**

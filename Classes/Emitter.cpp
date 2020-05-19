@@ -32,7 +32,7 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Emitter::Emitter(int id) : GameObject(id, 4) {
+Emitter::Emitter(int id, ColorType colorType) : GameObject(id, colorType, 4) {
 }
 
 /**
@@ -44,8 +44,8 @@ Emitter::~Emitter() {
 /**
  *
  */
-Emitter* Emitter::create(int id) {
-	Emitter* emitter = new (std::nothrow) Emitter(id);
+Emitter* Emitter::create(int id, ColorType colorType) {
+	Emitter* emitter = new (std::nothrow) Emitter(id, colorType);
 	if (emitter && emitter->initWithFile("emitter.png")) {
 		emitter->autorelease();
 		return emitter;

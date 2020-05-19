@@ -28,16 +28,17 @@
 #include <functional>
 #include <string>
 #include "cocos2d.h"
+#include "ColorType.h"
 #include "GameObject.h"
 
 class Emitter : public GameObject {
 protected:
 	bool active;
 
-	Emitter(int id);
+	Emitter(int id, ColorType colorType);
 
 public:
-	static Emitter* create(int id);
+	static Emitter* create(int id, ColorType colorType);
 	virtual ~Emitter();
 
 	virtual bool initWithFile(const std::string& filename) override;

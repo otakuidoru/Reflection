@@ -33,7 +33,7 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Receptor::Receptor(int id) : GameObject(id, 4) {
+Receptor::Receptor(int id, ColorType colorType) : GameObject(id, colorType, 4) {
 }
 
 /**
@@ -45,8 +45,8 @@ Receptor::~Receptor() {
 /**
  *
  */
-Receptor* Receptor::create(int id) {
-	Receptor* receptor = new (std::nothrow) Receptor(id);
+Receptor* Receptor::create(int id, ColorType colorType) {
+	Receptor* receptor = new (std::nothrow) Receptor(id, colorType);
 	if (receptor && receptor->initWithFile("receptor.png")) {
 		receptor->autorelease();
 		return receptor;

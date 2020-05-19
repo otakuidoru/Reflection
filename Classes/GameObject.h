@@ -29,17 +29,19 @@
 #include <string>
 #include <vector>
 #include "cocos2d.h"
+#include "ColorType.h"
 #include "Direction.h"
 
 class GameObject : public cocos2d::Sprite {
 protected:
 	const int id;
 	const unsigned int numPlanes;
+	const ColorType colorType;
 
 	Direction direction;
 	std::map<int, bool> planeReflective;
 
-	GameObject(int id, unsigned int numPlanes);
+	GameObject(int id, ColorType colorType, unsigned int numPlanes);
 
 public:
 	virtual ~GameObject();
@@ -48,7 +50,9 @@ public:
 
 	inline int getId() const { return this->id; }
 
-	inline Direction getDirection() const { return direction; }
+	inline ColorType getColorType() const { return this->colorType; }
+
+	inline Direction getDirection() const { return this->direction; }
 	inline void setDirection(Direction direction) { this->direction = direction; }
 
 	inline unsigned int getNumPlanes() const { return this->numPlanes; }

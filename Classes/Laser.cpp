@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <cmath>
-#include "LaserPart.h"
+#include "Laser.h"
 
 USING_NS_CC;
 
@@ -33,32 +33,32 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-LaserPart::LaserPart() : Sprite() {
+Laser::Laser() : Sprite() {
 }
 
 /**
  *
  */
-LaserPart::~LaserPart() {
+Laser::~Laser() {
 }
 
 /**
  *
  */
-LaserPart* LaserPart::create() {
-	LaserPart* laserPart = new (std::nothrow) LaserPart();
-	if (laserPart && laserPart->initWithFile("red_laser.png")) {
-		laserPart->autorelease();
-		return laserPart;
+Laser* Laser::create() {
+	Laser* laser = new (std::nothrow) Laser();
+	if (laser && laser->initWithFile("red_laser.png")) {
+		laser->autorelease();
+		return laser;
 	}
-	CC_SAFE_DELETE(laserPart);
+	CC_SAFE_DELETE(laser);
 	return nullptr;
 }
 
 /**
  * on "init" you need to initialize your instance
  */
-bool LaserPart::initWithFile(const std::string& filename) {
+bool Laser::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Sprite::initWithFile(filename)) {
@@ -71,7 +71,7 @@ bool LaserPart::initWithFile(const std::string& filename) {
 /**
  *
  */
-Ray LaserPart::getRay() const {
+Ray Laser::getRay() const {
 	//log("com.zenprogramming.reflection: laser contentsize (%f, %f)", this->getContentSize().width, this->getContentSize().height);
 	//log("com.zenprogramming.reflection: laser rotation = %f", this->getRotation());
 	const Vec2 origin = this->getParent()->convertToWorldSpace(this->getPosition());

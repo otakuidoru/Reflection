@@ -24,6 +24,7 @@
 
 #include <cmath>
 #include "Mirror.h"
+#include "ColorType.h"
 
 USING_NS_CC;
 
@@ -33,7 +34,7 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Mirror::Mirror(int id) : GameObject(id, 3) {
+Mirror::Mirror(int id) : GameObject(id, ColorType::NONE, 3) {
 }
 
 /**

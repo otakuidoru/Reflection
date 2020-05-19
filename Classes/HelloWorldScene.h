@@ -31,7 +31,7 @@
 #include "Emitter.h"
 #include "Intersection.h"
 #include "GameObject.h"
-#include "LaserPart.h"
+#include "Laser.h"
 #include "Mirror.h"
 #include "Receptor.h"
 
@@ -39,7 +39,7 @@ class HelloWorld : public cocos2d::Scene {
 protected:
 	std::set<GameObject*> objects;
 	std::set<Emitter*> emitters;
-	std::set<LaserPart*> lasers;
+	std::set<Laser*> lasers;
 	std::set<Mirror*> mirrors;
 	std::set<Receptor*> receptors;
 

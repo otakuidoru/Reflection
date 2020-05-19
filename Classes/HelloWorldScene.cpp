@@ -67,25 +67,26 @@ bool HelloWorld::init() {
 	auto background = LayerGradient::create(Color4B(253, 158, 246, 255), Color4B(255, 255, 255, 255), Vec2(1.0f, 1.0f));
 	this->addChild(background, BACKGROUND_LAYER);
 
-	// add a label that shows "Hello World" and create and initialize a label
-	auto label = Label::createWithTTF("Reflection", "fonts/motioncontrol-bold.ttf", 96);
-	if (label == nullptr) {
-		problemLoading("'fonts/motioncontrol-bold.ttf'");
-	} else {
-		// position the label on the top center of the screen
-		label->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height - label->getContentSize().height));
-
-		// add the label as a child to this layer
-		this->addChild(label, 1);
-	}
+//	// add a label that shows "Hello World" and create and initialize a label
+//	auto label = Label::createWithTTF("Reflection", "fonts/motioncontrol-bold.ttf", 96);
+//	if (label == nullptr) {
+//		problemLoading("'fonts/motioncontrol-bold.ttf'");
+//	} else {
+//		// position the label on the top center of the screen
+//		label->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height - label->getContentSize().height));
+//
+//		// add the label as a child to this layer
+//		this->addChild(label, 1);
+//	}
 
 	// Add the emitters
 
-	Emitter* const emitter = Emitter::create(1);
+	Emitter* const emitter = Emitter::create(1, ColorType::RED);
 	emitter->setScale(scale);
 	emitter->setPosition(Vec2(768, 128));
 	emitter->setRotation(-90.0f);
 	emitter->setDirection(Direction::NORTH);
+	emitter->setColor(Color3B(255, 153, 153));
 	emitter->onAfterActivate = [&]() {
 		this->checkWinCondition();
 	};
@@ -95,10 +96,11 @@ bool HelloWorld::init() {
 
 	// Add the receptors
 
-	Receptor* const receptor = Receptor::create(2);
+	Receptor* const receptor = Receptor::create(2, ColorType::RED);
 	receptor->setScale(scale);
 	receptor->setPosition(Vec2(768, 1792));
 	receptor->setDirection(Direction::NORTH);
+	receptor->setColor(Color3B(255, 153, 153));
 	this->addChild(receptor, RECEPTOR_LAYER);
 	this->receptors.insert(receptor);
 	this->objects.insert(receptor);
@@ -159,8 +161,8 @@ Vec3 HelloWorld::getReflectionVector(const Plane& plane, const Ray& ray) {
 	const Vec3 d = ray._direction;
 	const Vec3 n = plane.getNormal();
 	const Vec3 reflectionVector = d - 2 * (d.dot(n)) * n;
-	log("com.zenprogramming.reflection: reflectionVector = (%f, %f, %f)", reflectionVector.x, reflectionVector.y, reflectionVector.z);
-	log("com.zenprogramming.reflection: END getReflectionVector");
+	//log("com.zenprogramming.reflection: reflectionVector = (%f, %f, %f)", reflectionVector.x, reflectionVector.y, reflectionVector.z);
+	//log("com.zenprogramming.reflection: END getReflectionVector");
 	return reflectionVector;
 }
 
@@ -168,9 +170,9 @@ Vec3 HelloWorld::getReflectionVector(const Plane& plane, const Ray& ray) {
  *
  */
 std::shared_ptr<Intersection> HelloWorld::getIntersection(GameObject* const object, const Ray& ray) {
-	log("com.zenprogramming.reflection: BEGIN getIntersection");
-	log("com.zenprogramming.reflection: object = %d", object->getId());
-	log("com.zenprogramming.reflection: ray = origin (%f, %f), direction (%f, %f)", ray._origin.x, ray._origin.y, ray._direction.x, ray._direction.y);
+	//log("com.zenprogramming.reflection: BEGIN getIntersection");
+	//log("com.zenprogramming.reflection: object = %d", object->getId());
+	//log("com.zenprogramming.reflection: ray = origin (%f, %f), direction (%f, %f)", ray._origin.x, ray._origin.y, ray._direction.x, ray._direction.y);
 	std::shared_ptr<Intersection> intersection;
 
 	const Rect objectBoundingBox = object->getBoundingBox();
@@ -191,7 +193,7 @@ std::shared_ptr<Intersection> HelloWorld::getIntersection(GameObject* const obje
 				const PointSide intersectionPointSide = plane.getSide(ray._origin);
 				const bool planeReflective = object->isPlaneReflective(planeIndex);
 
-				log("com.zenprogramming.reflection: intersectionPoint: %f, %f, %f, dist = %f", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, intersectionDist);
+				//log("com.zenprogramming.reflection: intersectionPoint: %f, %f, %f, dist = %f", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, intersectionDist);
 
 				intersection.reset(new Intersection(plane, intersectionPoint, intersectionPointSide, planeReflective, intersectionDist));
 
@@ -200,7 +202,7 @@ std::shared_ptr<Intersection> HelloWorld::getIntersection(GameObject* const obje
 		}
 	}
 
-	log("com.zenprogramming.reflection: END getIntersection");
+	//log("com.zenprogramming.reflection: END getIntersection");
 	return intersection;
 }
 
@@ -208,13 +210,13 @@ std::shared_ptr<Intersection> HelloWorld::getIntersection(GameObject* const obje
  *
  */
 void HelloWorld::activateLaserChain(const Ray& originRay, const Vec3& origLaserStartingPoint, const Plane& originPlane) {
-	log("com.zenprogramming.reflection: BEGIN activateLaserChain");
+	//log("com.zenprogramming.reflection: BEGIN activateLaserChain");
 	const Vec3 reflectionVector = this->getReflectionVector(originPlane, originRay);
 	float angle = -std::atan2(reflectionVector.y, reflectionVector.x) * RADTODEG;
 	Ray reflectionRay(origLaserStartingPoint, reflectionVector);
 
 	// create and add a laser
-	LaserPart* laser = LaserPart::create();
+	Laser* laser = Laser::create();
 	laser->setPosition(Vec2(origLaserStartingPoint.x, origLaserStartingPoint.y));
 	laser->setRotation(angle);
 	laser->setAnchorPoint(Vec2(0.0f, 0.5f));
@@ -231,46 +233,46 @@ void HelloWorld::activateLaserChain(const Ray& originRay, const Vec3& origLaserS
 		}
 	}
 
-	log("com.zenprogramming.reflection: END activateLaserChain");
+	//log("com.zenprogramming.reflection: END activateLaserChain");
 }
 
 /**
  *
  */
 std::shared_ptr<Intersection> HelloWorld::getClosestIntersection(const Ray& ray) {
-	log("com.zenprogramming.reflection: BEGIN getClosestIntersection");
+	//log("com.zenprogramming.reflection: BEGIN getClosestIntersection");
 	std::shared_ptr<Intersection> intersection;
 	float minDistance = 2560.0f;
 
-	log("com.zenprogramming.reflection: ray = origin (%f, %f, %f), direction (%f, %f, %f)", ray._origin.x, ray._origin.y, ray._origin.z, ray._direction.x, ray._direction.y, ray._direction.z);
+	//log("com.zenprogramming.reflection: ray = origin (%f, %f, %f), direction (%f, %f, %f)", ray._origin.x, ray._origin.y, ray._origin.z, ray._direction.x, ray._direction.y, ray._direction.z);
 
 	// check each object
 	for (auto object : this->objects) {
-		log("com.zenprogramming.reflection: checking object[%d]...", object->getId());
+		//log("com.zenprogramming.reflection: checking object[%d]...", object->getId());
 
 		const Rect objectBoundingBox = object->getBoundingBox();
 		const AABB objectAABB(Vec3(objectBoundingBox.getMinX(), objectBoundingBox.getMinY(), 0.0f), Vec3(objectBoundingBox.getMaxX(), objectBoundingBox.getMaxY(), 0.0f));
-		log("com.zenprogramming.reflection: object[%d] AABB = (%f, %f, %f, %f), width = %f, height = %f", object->getId(), objectBoundingBox.getMinX(), objectBoundingBox.getMinY(), objectBoundingBox.getMaxX(), objectBoundingBox.getMaxY(), objectBoundingBox.getMaxX() - objectBoundingBox.getMinX(), objectBoundingBox.getMaxY() - objectBoundingBox.getMinY());
+		//log("com.zenprogramming.reflection: object[%d] AABB = (%f, %f, %f, %f), width = %f, height = %f", object->getId(), objectBoundingBox.getMinX(), objectBoundingBox.getMinY(), objectBoundingBox.getMaxX(), objectBoundingBox.getMaxY(), objectBoundingBox.getMaxX() - objectBoundingBox.getMinX(), objectBoundingBox.getMaxY() - objectBoundingBox.getMinY());
 
 		for (int planeIndex=0; planeIndex<object->getNumPlanes(); ++planeIndex) {
 			const Plane plane = object->getPlane(planeIndex);
 			const Vec3 intersectionPoint = ray.intersects(plane);
 			const float intersectionDist = intersectionPoint.distance(ray._origin);
 			const bool intersects = ray.intersects(objectAABB);
-			log("com.zenprogramming.reflection: intersects? %d, dist = %f", intersects, intersectionDist);
+			//log("com.zenprogramming.reflection: intersects? %d, dist = %f", intersects, intersectionDist);
 			if (!intersectionPoint.isZero() && ray.intersects(objectAABB) && objectBoundingBox.containsPoint(Vec2(intersectionPoint.x, intersectionPoint.y))) {
 				// ray intersects plane in the object's bounding box
 				if (intersectionDist < minDistance) {
 					minDistance = intersectionDist;
 					intersection.reset(new Intersection(plane, intersectionPoint, plane.getSide(ray._origin), object->isPlaneReflective(planeIndex), intersectionDist));
-					log("com.zenprogramming.reflection: laser hits object[%d] at distance = %f at point (%f, %f, %f)", object->getId(), intersectionDist, intersectionPoint.x, intersectionPoint.y, intersectionPoint.z);
-					log("com.zenprogramming.reflection: closest object is now %d", object->getId());
+					//log("com.zenprogramming.reflection: laser hits object[%d] at distance = %f at point (%f, %f, %f)", object->getId(), intersectionDist, intersectionPoint.x, intersectionPoint.y, intersectionPoint.z);
+					//log("com.zenprogramming.reflection: closest object is now %d", object->getId());
 				}
 			}
 		}
 	}
 
-	log("com.zenprogramming.reflection: END getClosestIntersection");
+	//log("com.zenprogramming.reflection: END getClosestIntersection");
 	return intersection;
 }
 
@@ -333,7 +335,7 @@ bool HelloWorld::checkWinCondition() {
  *
  */
 void HelloWorld::update(float dt) {
-	log("com.zenprogramming.reflection: BEGIN update");
+	//log("com.zenprogramming.reflection: BEGIN update");
 
 	// remove all lasers from the board
 	for (auto laser : this->lasers) {
@@ -347,11 +349,8 @@ void HelloWorld::update(float dt) {
 			const Vec2 emitterWorldPos = emitter->getParent()->convertToWorldSpace(emitter->getPosition());
 
 			// create and add a laser
-			LaserPart* const laser = LaserPart::create();
-			laser->setPosition(Vec2(
-				emitterWorldPos.x + (std::cosf(emitter->getRotation() * DEGTORAD) * (-emitter->getContentSize().width / 2.0f)),
-				emitterWorldPos.y + (std::sinf(emitter->getRotation() * DEGTORAD) * (-emitter->getContentSize().height / 2.0f))
-			));
+			Laser* const laser = Laser::create();
+			laser->setPosition(emitterWorldPos);
 			laser->setRotation(emitter->getRotation());
 			laser->setAnchorPoint(Vec2(0.0f, 0.5f));
 			laser->setScaleX(2560.0f);
@@ -363,8 +362,8 @@ void HelloWorld::update(float dt) {
 			if (intersection.get()) {
 				laser->setScaleX(intersection->getDistance());
 
-				log("com.zenprogramming.reflection: laser origin (%f, %f), direction (%f, %f, %f), length = %f", laser->getRay()._origin.x, laser->getRay()._origin.y, laser->getRay()._direction.x, laser->getRay()._direction.y, laser->getRay()._direction.z, laser->getScaleX());
-				log("com.zenprogramming.reflection: intersection at (%f, %f, %f) side = %d, reflective = %d, distance = %f", intersection->getPoint().x, intersection->getPoint().y, intersection->getPoint().z, intersection->getPointSide(), intersection->isPlaneReflective(), intersection->getDistance());
+				//log("com.zenprogramming.reflection: laser origin (%f, %f), direction (%f, %f, %f), length = %f", laser->getRay()._origin.x, laser->getRay()._origin.y, laser->getRay()._direction.x, laser->getRay()._direction.y, laser->getRay()._direction.z, laser->getScaleX());
+				//log("com.zenprogramming.reflection: intersection at (%f, %f, %f) side = %d, reflective = %d, distance = %f", intersection->getPoint().x, intersection->getPoint().y, intersection->getPoint().z, intersection->getPointSide(), intersection->isPlaneReflective(), intersection->getDistance());
 
 				if (intersection->isPlaneReflective()) {
 					this->activateLaserChain(laser->getRay(), intersection->getPoint(), intersection->getPlane());
@@ -373,6 +372,6 @@ void HelloWorld::update(float dt) {
 		}
 	}
 
-	log("com.zenprogramming.reflection: END update");
+	//log("com.zenprogramming.reflection: END update");
 }
 

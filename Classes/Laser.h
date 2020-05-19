@@ -22,26 +22,33 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __RECEPTOR_H__
-#define __RECEPTOR_H__
+#ifndef __LASER_H__
+#define __LASER_H__
 
-#include <string>
 #include "cocos2d.h"
-#include "ColorType.h"
-#include "GameObject.h"
 
-class Receptor : public GameObject {
+class Laser : public cocos2d::Sprite {
 protected:
-	Receptor(int id, ColorType colorType);
+	//cocos2d::Ray ray;
+	cocos2d::Vec2 origin;
+	cocos2d::Vec3 direction;
+
+	Laser();
 
 public:
-	static Receptor* create(int id, ColorType colorType);
-	virtual ~Receptor();
+	static Laser* create();
+	virtual ~Laser();
 
 	virtual bool initWithFile(const std::string& filename) override;
 
-	virtual cocos2d::Plane getPlane(unsigned int index) override;
+	cocos2d::Ray getRay() const;
+
+	float getLength() const { return this->getScaleX(); }
+	void setLength(float length) { this->setScaleX(length); }
+
+//	inline cocos2d::Vec3 getDirection() const { return direction; }
+//	inline void setDirection(cocos2d::Vec3 direction) { this->direction = direction; }
 };
 
-#endif // __RECEPTOR_H__
+#endif // __LASER_H__
 
