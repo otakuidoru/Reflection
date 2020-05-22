@@ -23,7 +23,10 @@
  ****************************************************************************/
 
 #include <cmath>
+#include <sstream>
+#include "tinyxml2.h"
 #include "HelloWorldScene.h"
+#include "ColorType.h"
 
 #define BACKGROUND_LAYER -1
 #define LASER_LAYER 1
@@ -79,73 +82,11 @@ bool HelloWorld::init() {
 //		this->addChild(label, 1);
 //	}
 
-	// Add the emitters
-
-	Emitter* const emitter = Emitter::create(1, ColorType::RED);
-	emitter->setScale(scale);
-	emitter->setPosition(Vec2(768, 128));
-	emitter->setRotation(-90.0f);
-	emitter->setDirection(Direction::NORTH);
-	emitter->setColor(Color3B(255, 153, 153));
-	emitter->onAfterActivate = [&]() {
-		this->checkWinCondition();
-	};
-	this->addChild(emitter, EMITTER_LAYER);
-	this->emitters.insert(emitter);
-	this->objects.insert(emitter);
-
-	// Add the receptors
-
-	Receptor* const receptor = Receptor::create(2, ColorType::RED);
-	receptor->setScale(scale);
-	receptor->setPosition(Vec2(768, 1792));
-	receptor->setDirection(Direction::NORTH);
-	receptor->setColor(Color3B(255, 153, 153));
-	this->addChild(receptor, RECEPTOR_LAYER);
-	this->receptors.insert(receptor);
-	this->objects.insert(receptor);
-
-	// Add the mirrors
-
-	Mirror* const mirror1 = Mirror::create(3);
-	mirror1->setScale(scale);
-	mirror1->setPosition(Vec2(512, 1280));
-	mirror1->onAfterRotate = [&]() {
-		this->checkWinCondition();
-	};
-	this->addChild(mirror1, MIRROR_LAYER);
-	this->mirrors.insert(mirror1);
-	this->objects.insert(mirror1);
-
-	Mirror* const mirror2 = Mirror::create(4);
-	mirror2->setScale(scale);
-	mirror2->setPosition(Vec2(768, 1280));
-	mirror2->onAfterRotate = [&]() {
-		this->checkWinCondition();
-	};
-	this->addChild(mirror2, MIRROR_LAYER);
-	this->mirrors.insert(mirror2);
-	this->objects.insert(mirror2);
-
-	Mirror* const mirror3 = Mirror::create(5);
-	mirror3->setScale(scale);
-	mirror3->setPosition(Vec2(512, 1024));
-	mirror3->onAfterRotate = [&]() {
-		this->checkWinCondition();
-	};
-	this->addChild(mirror3, MIRROR_LAYER);
-	this->mirrors.insert(mirror3);
-	this->objects.insert(mirror3);
-
-	Mirror* const mirror4 = Mirror::create(6);
-	mirror4->setScale(scale);
-	mirror4->setPosition(Vec2(768, 1024));
-	mirror4->onAfterRotate = [&]() {
-		this->checkWinCondition();
-	};
-	this->addChild(mirror4, MIRROR_LAYER);
-	this->mirrors.insert(mirror4);
-	this->objects.insert(mirror4);
+	std::stringstream ss;
+	ss << FileUtils::getInstance()->getWritablePath() << "1.xml";
+	FileUtils::getInstance()->writeStringToFile(FileUtils::getInstance()->getStringFromFile("1.xml"), ss.str());
+	this->createLevel(ss.str());
+	//log("com.zenprogramming.reflection: CHUCK %s", ss.str().c_str());
 
 	this->scheduleUpdate();
 
@@ -155,8 +96,189 @@ bool HelloWorld::init() {
 /**
  *
  */
+void HelloWorld::createLevel(const std::string& filename) {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	const float scale = std::min(visibleSize.width / 1536.0f, visibleSize.height / 2048.0f);
+
+	tinyxml2::XMLDocument document;
+	tinyxml2::XMLError error = document.LoadFile(filename.c_str());
+	tinyxml2::XMLElement* level = document.RootElement();
+	tinyxml2::XMLElement* levelObjects = level->FirstChildElement("objects");
+	tinyxml2::XMLElement* objectElement = levelObjects->FirstChildElement("object");
+
+	while (objectElement) {
+		// id
+		int objectId;
+		objectElement->QueryIntAttribute("id", &objectId);
+
+		// object type
+		std::string objectType(objectElement->Attribute("type"));
+
+		// color type
+		ColorType colorType = ColorType::NONE;
+		Color3B color(255, 255, 255);
+		std::string colorTypeStr(objectElement->FirstChildElement("colortype")->GetText());
+
+		if (!colorTypeStr.compare("NONE")) {
+			colorType = ColorType::NONE;
+		} else if (!colorTypeStr.compare("RED")) {
+			colorType = ColorType::RED;
+			color = Color3B(255, 153, 153);
+		} else if (!colorTypeStr.compare("GREEN")) {
+			colorType = ColorType::GREEN;
+		} else if (!colorTypeStr.compare("BLUE")) {
+			colorType = ColorType::BLUE;
+		} else if (!colorTypeStr.compare("YELLOW")) {
+			colorType = ColorType::YELLOW;
+		} else if (!colorTypeStr.compare("WHITE")) {
+			colorType = ColorType::WHITE;
+		} else if (!colorTypeStr.compare("BLACK")) {
+			colorType = ColorType::BLACK;
+		}
+
+		// create the object
+		GameObject* object = nullptr;
+		if (!objectType.compare("emitter")) {
+			object = Emitter::create(objectId, colorType);
+			Emitter* emitter = dynamic_cast<Emitter*>(object);
+			emitter->onAfterActivate = [&]() {
+				this->checkWinCondition();
+			};
+			this->emitters.insert(emitter);
+		} else if (!objectType.compare("receptor")) {
+			object = Receptor::create(objectId, colorType);
+			Receptor* receptor = dynamic_cast<Receptor*>(object);
+			this->receptors.insert(receptor);
+		} else if (!objectType.compare("mirror")) {
+			object = Mirror::create(objectId);
+			Mirror* mirror = dynamic_cast<Mirror*>(object);
+			mirror->onAfterRotate = [&]() {
+				this->checkWinCondition();
+			};
+			this->mirrors.insert(mirror);
+		}
+
+		// set object scale
+		object->setScale(scale);
+
+		// set object position
+		float x, y;
+		tinyxml2::XMLElement* positionElement = objectElement->FirstChildElement("position");
+		positionElement->QueryFloatAttribute("x", &x);
+		positionElement->QueryFloatAttribute("y", &y);
+		object->setPosition(Vec2(x, y));
+
+		// set object rotation
+		object->setRotation(std::atof(objectElement->FirstChildElement("rotation")->GetText()));
+
+		// set object direction
+		Direction direction = Direction::EAST;
+		std::string directionStr(objectElement->FirstChildElement("direction")->GetText());
+
+		if (!directionStr.compare("NORTH")) {
+			direction = Direction::NORTH;
+		} else if (!directionStr.compare("NORTHEAST")) {
+			direction = Direction::NORTHEAST;
+		} else if (!directionStr.compare("EAST")) {
+			direction = Direction::EAST;
+		} else if (!directionStr.compare("SOUTHEAST")) {
+			direction = Direction::SOUTHEAST;
+		} else if (!directionStr.compare("SOUTH")) {
+			direction = Direction::SOUTH;
+		} else if (!directionStr.compare("SOUTHWEST")) {
+			direction = Direction::SOUTHWEST;
+		} else if (!directionStr.compare("WEST")) {
+			direction = Direction::WEST;
+		} else if (!directionStr.compare("NORTHWEST")) {
+			direction = Direction::NORTHWEST;
+		}
+		object->setDirection(direction);
+
+		// set object color
+		object->setColor(color);
+
+		this->addChild(object, EMITTER_LAYER);
+		this->objects.insert(object);
+
+		objectElement = objectElement->NextSiblingElement();
+	}
+
+	// parse the win condition - emitters
+	tinyxml2::XMLElement* winConditionElement = level->FirstChildElement("wincondition");
+	tinyxml2::XMLElement* winConditionEmittersElement = winConditionElement->FirstChildElement("emitters");
+	tinyxml2::XMLElement* winConditionEmitterElement = winConditionEmittersElement->FirstChildElement("emitter");
+	while (winConditionEmitterElement) {
+		// get emitter id
+		int emitterId;
+		winConditionEmitterElement->QueryIntAttribute("id", &emitterId);
+
+		// get emitter activity
+		std::string emitterActiveStr(winConditionEmitterElement->Attribute("active"));
+		bool emitterActive = !emitterActiveStr.compare("true");
+
+		for (auto emitter : this->emitters) {
+			if (emitter->getId() == emitterId) {
+				this->emitterActiveWinConditions[emitter] = emitterActive;
+			}
+		}
+
+		winConditionEmitterElement = winConditionEmitterElement->NextSiblingElement();
+	}
+
+	// parse the win condition - mirrors
+	tinyxml2::XMLElement* winConditionMirrorsElement = winConditionElement->FirstChildElement("mirrors");
+	tinyxml2::XMLElement* winConditionMirrorElement = winConditionMirrorsElement->FirstChildElement("mirror");
+	while (winConditionMirrorElement) {
+		// get mirror id
+		int mirrorId;
+		winConditionMirrorElement->QueryIntAttribute("id", &mirrorId);
+
+		// get mirror direction
+		std::string mirrorDirectionStr(winConditionMirrorElement->Attribute("direction"));
+		Direction mirrorDirection = this->stringToDirection(mirrorDirectionStr);
+
+		for (auto mirror : this->mirrors) {
+			if (mirror->getId() == mirrorId) {
+				this->mirrorDirectionWinConditions[mirror] = mirrorDirection;
+			}
+		}
+
+		winConditionMirrorElement = winConditionMirrorElement->NextSiblingElement();
+	}
+}
+
+/**
+ *
+ */
+Direction HelloWorld::stringToDirection(const std::string& str) {
+	Direction direction = Direction::EAST;
+
+	if (!str.compare("NORTH")) {
+		direction = Direction::NORTH;
+	} else if (!str.compare("NORTHEAST")) {
+		direction = Direction::NORTHEAST;
+	} else if (!str.compare("EAST")) {
+		direction = Direction::EAST;
+	} else if (!str.compare("SOUTHEAST")) {
+		direction = Direction::SOUTHEAST;
+	} else if (!str.compare("SOUTH")) {
+		direction = Direction::SOUTH;
+	} else if (!str.compare("SOUTHWEST")) {
+		direction = Direction::SOUTHWEST;
+	} else if (!str.compare("WEST")) {
+		direction = Direction::WEST;
+	} else if (!str.compare("NORTHWEST")) {
+		direction = Direction::NORTHWEST;
+	}
+
+	return direction;
+}
+
+/**
+ *
+ */
 Vec3 HelloWorld::getReflectionVector(const Plane& plane, const Ray& ray) {
-	log("com.zenprogramming.reflection: BEGIN getReflectionVector");
+	//log("com.zenprogramming.reflection: BEGIN getReflectionVector");
 	// https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
 	const Vec3 d = ray._direction;
 	const Vec3 n = plane.getNormal();
@@ -250,6 +372,7 @@ std::shared_ptr<Intersection> HelloWorld::getClosestIntersection(const Ray& ray)
 	for (auto object : this->objects) {
 		//log("com.zenprogramming.reflection: checking object[%d]...", object->getId());
 
+		// get the AABB for the object
 		const Rect objectBoundingBox = object->getBoundingBox();
 		const AABB objectAABB(Vec3(objectBoundingBox.getMinX(), objectBoundingBox.getMinY(), 0.0f), Vec3(objectBoundingBox.getMaxX(), objectBoundingBox.getMaxY(), 0.0f));
 		//log("com.zenprogramming.reflection: object[%d] AABB = (%f, %f, %f, %f), width = %f, height = %f", object->getId(), objectBoundingBox.getMinX(), objectBoundingBox.getMinY(), objectBoundingBox.getMaxX(), objectBoundingBox.getMaxY(), objectBoundingBox.getMaxX() - objectBoundingBox.getMinX(), objectBoundingBox.getMaxY() - objectBoundingBox.getMinY());
@@ -285,10 +408,12 @@ bool HelloWorld::checkWinCondition() {
 
 	Emitter* emitter1;
 
-	Mirror* mirror1;
-	Mirror* mirror2;
+	Receptor* receptor2;
+
 	Mirror* mirror3;
 	Mirror* mirror4;
+	Mirror* mirror5;
+	Mirror* mirror6;
 
 	for (auto emitter : this->emitters) {
 		if (emitter->getId() == 1) {
@@ -296,23 +421,29 @@ bool HelloWorld::checkWinCondition() {
 		}
 	}
 
+	for (auto receptor : this->receptors) {
+		if (receptor->getId() == 2) {
+			receptor2 = receptor;
+		}
+	}
+
 	for (auto mirror : this->mirrors) {
 		if (mirror->getId() == 3) {
-			mirror1 = mirror;
-		} else if (mirror->getId() == 4) {
-			mirror2 = mirror;
-		} else if (mirror->getId() == 5) {
 			mirror3 = mirror;
-		} else if (mirror->getId() == 6) {
+		} else if (mirror->getId() == 4) {
 			mirror4 = mirror;
+		} else if (mirror->getId() == 5) {
+			mirror5 = mirror;
+		} else if (mirror->getId() == 6) {
+			mirror6 = mirror;
 		}
 	}
 
 	if (emitter1->isActive() &&
-			mirror1->getDirection() == Direction::SOUTHEAST &&	// 3
-			mirror2->getDirection() == Direction::NORTHWEST &&	// 7
-			mirror3->getDirection() == Direction::NORTHEAST &&	// 1
-			mirror4->getDirection() == Direction::SOUTHWEST			// 5
+			mirror3->getDirection() == Direction::SOUTHEAST &&	// 3
+			mirror4->getDirection() == Direction::NORTHWEST &&	// 7
+			mirror5->getDirection() == Direction::NORTHEAST &&	// 1
+			mirror6->getDirection() == Direction::SOUTHWEST			// 5
 	) {
 		auto winBanner = Sprite::create("well_done.png");
 		winBanner->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height/2));

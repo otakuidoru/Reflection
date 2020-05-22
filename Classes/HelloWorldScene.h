@@ -25,6 +25,7 @@
 #ifndef __HELLOWORLD_SCENE_H__
 #define __HELLOWORLD_SCENE_H__
 
+#include <map>
 #include <memory>
 #include <set>
 #include "cocos2d.h"
@@ -43,10 +44,16 @@ protected:
 	std::set<Mirror*> mirrors;
 	std::set<Receptor*> receptors;
 
+	std::map<Emitter*, bool> emitterActiveWinConditions;
+	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
+
 	cocos2d::Vec3 getReflectionVector(const cocos2d::Plane& plane, const cocos2d::Ray& ray);
 	std::shared_ptr<Intersection> getIntersection(GameObject* const object, const cocos2d::Ray& ray);
 	std::shared_ptr<Intersection> getClosestIntersection(const cocos2d::Ray& ray);
 	void activateLaserChain(const cocos2d::Ray& originRay, const cocos2d::Vec3& origLaserStartingPoint, const cocos2d::Plane& originPlane);
+
+	void createLevel(const std::string& filename);
+	Direction stringToDirection(const std::string& str);
 
 public:
 	static cocos2d::Scene* createScene();
