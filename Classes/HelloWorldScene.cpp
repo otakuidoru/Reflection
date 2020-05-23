@@ -99,11 +99,14 @@ bool HelloWorld::init() {
 void HelloWorld::createLevel(const std::string& filename) {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	const float scale = std::min(visibleSize.width / 1536.0f, visibleSize.height / 2048.0f);
-
+log("com.zenprogramming.reflection: CHUCK 0a");
 	tinyxml2::XMLDocument document;
 	tinyxml2::XMLError error = document.LoadFile(filename.c_str());
+log("com.zenprogramming.reflection: CHUCK 0b");
 	tinyxml2::XMLElement* level = document.RootElement();
+log("com.zenprogramming.reflection: CHUCK 0c");
 	tinyxml2::XMLElement* levelObjects = level->FirstChildElement("objects");
+log("com.zenprogramming.reflection: CHUCK 0d");
 	tinyxml2::XMLElement* objectElement = levelObjects->FirstChildElement("object");
 
 	while (objectElement) {
@@ -174,25 +177,7 @@ void HelloWorld::createLevel(const std::string& filename) {
 		// set object direction
 		Direction direction = Direction::EAST;
 		std::string directionStr(objectElement->FirstChildElement("direction")->GetText());
-
-		if (!directionStr.compare("NORTH")) {
-			direction = Direction::NORTH;
-		} else if (!directionStr.compare("NORTHEAST")) {
-			direction = Direction::NORTHEAST;
-		} else if (!directionStr.compare("EAST")) {
-			direction = Direction::EAST;
-		} else if (!directionStr.compare("SOUTHEAST")) {
-			direction = Direction::SOUTHEAST;
-		} else if (!directionStr.compare("SOUTH")) {
-			direction = Direction::SOUTH;
-		} else if (!directionStr.compare("SOUTHWEST")) {
-			direction = Direction::SOUTHWEST;
-		} else if (!directionStr.compare("WEST")) {
-			direction = Direction::WEST;
-		} else if (!directionStr.compare("NORTHWEST")) {
-			direction = Direction::NORTHWEST;
-		}
-		object->setDirection(direction);
+		object->setDirection(this->stringToDirection(directionStr));
 
 		// set object color
 		object->setColor(color);
@@ -203,47 +188,63 @@ void HelloWorld::createLevel(const std::string& filename) {
 		objectElement = objectElement->NextSiblingElement();
 	}
 
-	// parse the win condition - emitters
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  Parse the win condition
+	//
+	//////////////////////////////////////////////////////////////////////////////
+log("com.zenprogramming.reflection: CHUCK 1");
+	// get the <wincondition> element
 	tinyxml2::XMLElement* winConditionElement = level->FirstChildElement("wincondition");
-	tinyxml2::XMLElement* winConditionEmittersElement = winConditionElement->FirstChildElement("emitters");
-	tinyxml2::XMLElement* winConditionEmitterElement = winConditionEmittersElement->FirstChildElement("emitter");
-	while (winConditionEmitterElement) {
-		// get emitter id
-		int emitterId;
-		winConditionEmitterElement->QueryIntAttribute("id", &emitterId);
+log("com.zenprogramming.reflection: CHUCK 2");
+	{ // parse the win condition - emitters
+		tinyxml2::XMLElement* winConditionEmittersElement = winConditionElement->FirstChildElement("emitters");
+log("com.zenprogramming.reflection: CHUCK 3");
+		tinyxml2::XMLElement* winConditionEmitterElement = winConditionEmittersElement->FirstChildElement("emitter");
+log("com.zenprogramming.reflection: CHUCK 4");
+		while (winConditionEmitterElement) {
+log("com.zenprogramming.reflection: CHUCK 5");
+			// get emitter id
+			int emitterId;
+			winConditionEmitterElement->QueryIntAttribute("id", &emitterId);
+log("com.zenprogramming.reflection: CHUCK 6");
 
-		// get emitter activity
-		std::string emitterActiveStr(winConditionEmitterElement->Attribute("active"));
-		bool emitterActive = !emitterActiveStr.compare("true");
+			// get emitter activity
+			const std::string emitterActiveStr(winConditionEmitterElement->Attribute("active"));
+log("com.zenprogramming.reflection: CHUCK 7");
+			const bool emitterActive = !emitterActiveStr.compare("true");
+log("com.zenprogramming.reflection: CHUCK 8");
 
-		for (auto emitter : this->emitters) {
-			if (emitter->getId() == emitterId) {
-				this->emitterActiveWinConditions[emitter] = emitterActive;
+			for (auto emitter : this->emitters) {
+				if (emitter->getId() == emitterId) {
+					this->emitterActiveWinConditions[emitter] = emitterActive;
+				}
 			}
-		}
 
-		winConditionEmitterElement = winConditionEmitterElement->NextSiblingElement();
+			winConditionEmitterElement = winConditionEmitterElement->NextSiblingElement();
+		}
 	}
 
-	// parse the win condition - mirrors
-	tinyxml2::XMLElement* winConditionMirrorsElement = winConditionElement->FirstChildElement("mirrors");
-	tinyxml2::XMLElement* winConditionMirrorElement = winConditionMirrorsElement->FirstChildElement("mirror");
-	while (winConditionMirrorElement) {
-		// get mirror id
-		int mirrorId;
-		winConditionMirrorElement->QueryIntAttribute("id", &mirrorId);
+	{ // parse the win condition - mirrors
+		tinyxml2::XMLElement* winConditionMirrorsElement = winConditionElement->FirstChildElement("mirrors");
+		tinyxml2::XMLElement* winConditionMirrorElement = winConditionMirrorsElement->FirstChildElement("mirror");
+		while (winConditionMirrorElement) {
+			// get mirror id
+			int mirrorId;
+			winConditionMirrorElement->QueryIntAttribute("id", &mirrorId);
 
-		// get mirror direction
-		std::string mirrorDirectionStr(winConditionMirrorElement->Attribute("direction"));
-		Direction mirrorDirection = this->stringToDirection(mirrorDirectionStr);
+			// get mirror direction
+			const std::string mirrorDirectionStr(winConditionMirrorElement->Attribute("direction"));
+			const Direction mirrorDirection = this->stringToDirection(mirrorDirectionStr);
 
-		for (auto mirror : this->mirrors) {
-			if (mirror->getId() == mirrorId) {
-				this->mirrorDirectionWinConditions[mirror] = mirrorDirection;
+			for (auto mirror : this->mirrors) {
+				if (mirror->getId() == mirrorId) {
+					this->mirrorDirectionWinConditions[mirror] = mirrorDirection;
+				}
 			}
-		}
 
-		winConditionMirrorElement = winConditionMirrorElement->NextSiblingElement();
+			winConditionMirrorElement = winConditionMirrorElement->NextSiblingElement();
+		}
 	}
 }
 
@@ -403,9 +404,24 @@ std::shared_ptr<Intersection> HelloWorld::getClosestIntersection(const Ray& ray)
  *
  */
 bool HelloWorld::checkWinCondition() {
-	auto visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	// check the emitters for win condition
+	for (std::map<Emitter*, bool>::iterator itr=emitterActiveWinConditions.begin(); itr!=emitterActiveWinConditions.end(); ++itr) {
+		Emitter* const emitter = itr->first;
+		if (emitter->isActive() != itr->second) {
+			return false;
+		}
+	}
 
+	// check the mirrors for win condition
+	for (std::map<Mirror*, Direction>::iterator itr=mirrorDirectionWinConditions.begin(); itr!=mirrorDirectionWinConditions.end(); ++itr) {
+		Mirror* const mirror = itr->first;
+		if (mirror->getDirection() != itr->second) {
+			return false;
+		}
+	}
+
+
+/*
 	Emitter* emitter1;
 
 	Receptor* receptor2;
@@ -438,28 +454,29 @@ bool HelloWorld::checkWinCondition() {
 			mirror6 = mirror;
 		}
 	}
+*/
 
-	if (emitter1->isActive() &&
+/*	if (emitter1->isActive() &&
 			mirror3->getDirection() == Direction::SOUTHEAST &&	// 3
 			mirror4->getDirection() == Direction::NORTHWEST &&	// 7
 			mirror5->getDirection() == Direction::NORTHEAST &&	// 1
 			mirror6->getDirection() == Direction::SOUTHWEST			// 5
-	) {
-		auto winBanner = Sprite::create("well_done.png");
-		winBanner->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height/2));
-		winBanner->setOpacity(0);
-		winBanner->setScale(5.0f);
-		this->addChild(winBanner, 10);
-		winBanner->runAction(Spawn::create(
-			FadeIn::create(0.5f),
-			ScaleTo::create(0.5f, 1.5f),
-			nullptr
-		));
+	) {*/
 
-		return true;
-	}
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	auto winBanner = Sprite::create("well_done.png");
+	winBanner->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height/2));
+	winBanner->setOpacity(0);
+	winBanner->setScale(5.0f);
+	this->addChild(winBanner, 10);
+	winBanner->runAction(Spawn::create(
+		FadeIn::create(0.5f),
+		ScaleTo::create(0.5f, 1.5f),
+		nullptr
+	));
 
-	return false;
+	return true;
 }
 
 /**
