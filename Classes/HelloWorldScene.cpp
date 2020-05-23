@@ -99,14 +99,11 @@ bool HelloWorld::init() {
 void HelloWorld::createLevel(const std::string& filename) {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	const float scale = std::min(visibleSize.width / 1536.0f, visibleSize.height / 2048.0f);
-log("com.zenprogramming.reflection: CHUCK 0a");
+
 	tinyxml2::XMLDocument document;
 	tinyxml2::XMLError error = document.LoadFile(filename.c_str());
-log("com.zenprogramming.reflection: CHUCK 0b");
 	tinyxml2::XMLElement* level = document.RootElement();
-log("com.zenprogramming.reflection: CHUCK 0c");
 	tinyxml2::XMLElement* levelObjects = level->FirstChildElement("objects");
-log("com.zenprogramming.reflection: CHUCK 0d");
 	tinyxml2::XMLElement* objectElement = levelObjects->FirstChildElement("object");
 
 	while (objectElement) {
@@ -193,27 +190,21 @@ log("com.zenprogramming.reflection: CHUCK 0d");
 	//  Parse the win condition
 	//
 	//////////////////////////////////////////////////////////////////////////////
-log("com.zenprogramming.reflection: CHUCK 1");
+
 	// get the <wincondition> element
 	tinyxml2::XMLElement* winConditionElement = level->FirstChildElement("wincondition");
-log("com.zenprogramming.reflection: CHUCK 2");
+
 	{ // parse the win condition - emitters
 		tinyxml2::XMLElement* winConditionEmittersElement = winConditionElement->FirstChildElement("emitters");
-log("com.zenprogramming.reflection: CHUCK 3");
 		tinyxml2::XMLElement* winConditionEmitterElement = winConditionEmittersElement->FirstChildElement("emitter");
-log("com.zenprogramming.reflection: CHUCK 4");
 		while (winConditionEmitterElement) {
-log("com.zenprogramming.reflection: CHUCK 5");
 			// get emitter id
 			int emitterId;
 			winConditionEmitterElement->QueryIntAttribute("id", &emitterId);
-log("com.zenprogramming.reflection: CHUCK 6");
 
 			// get emitter activity
 			const std::string emitterActiveStr(winConditionEmitterElement->Attribute("active"));
-log("com.zenprogramming.reflection: CHUCK 7");
 			const bool emitterActive = !emitterActiveStr.compare("true");
-log("com.zenprogramming.reflection: CHUCK 8");
 
 			for (auto emitter : this->emitters) {
 				if (emitter->getId() == emitterId) {
@@ -419,49 +410,6 @@ bool HelloWorld::checkWinCondition() {
 			return false;
 		}
 	}
-
-
-/*
-	Emitter* emitter1;
-
-	Receptor* receptor2;
-
-	Mirror* mirror3;
-	Mirror* mirror4;
-	Mirror* mirror5;
-	Mirror* mirror6;
-
-	for (auto emitter : this->emitters) {
-		if (emitter->getId() == 1) {
-			emitter1 = emitter;
-		}
-	}
-
-	for (auto receptor : this->receptors) {
-		if (receptor->getId() == 2) {
-			receptor2 = receptor;
-		}
-	}
-
-	for (auto mirror : this->mirrors) {
-		if (mirror->getId() == 3) {
-			mirror3 = mirror;
-		} else if (mirror->getId() == 4) {
-			mirror4 = mirror;
-		} else if (mirror->getId() == 5) {
-			mirror5 = mirror;
-		} else if (mirror->getId() == 6) {
-			mirror6 = mirror;
-		}
-	}
-*/
-
-/*	if (emitter1->isActive() &&
-			mirror3->getDirection() == Direction::SOUTHEAST &&	// 3
-			mirror4->getDirection() == Direction::NORTHWEST &&	// 7
-			mirror5->getDirection() == Direction::NORTHEAST &&	// 1
-			mirror6->getDirection() == Direction::SOUTHWEST			// 5
-	) {*/
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();

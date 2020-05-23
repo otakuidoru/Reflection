@@ -55,6 +55,6 @@
 			<mirror id="4" direction="NORTHWEST"></mirror>
 			<mirror id="5" direction="NORTHEAST"></mirror>
 			<mirror id="6" direction="SOUTHWEST"></mirror>
-		<mirrors>
+		</mirrors>
 	</wincondition>
 </level>
