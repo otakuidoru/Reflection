@@ -30,6 +30,7 @@
 
 #define BACKGROUND_LAYER -1
 #define LASER_LAYER 1
+#define BLOCK_LAYER 2
 #define EMITTER_LAYER 2
 #define MIRROR_LAYER 2
 #define RECEPTOR_LAYER 2
@@ -42,8 +43,8 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Scene* HelloWorld::createScene() {
-	return HelloWorld::create();
+Scene* HelloWorld::createScene(const std::string& levelFilename) {
+	return HelloWorld::create(levelFilename);
 }
 
 // Print useful error message instead of segfaulting when files are not there.
@@ -52,8 +53,22 @@ static void problemLoading(const char* filename) {
 	log("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
+/**
+ *
+ */
+HelloWorld* HelloWorld::create(const std::string& levelFilename) {
+	HelloWorld *ret = new (std::nothrow) HelloWorld();
+	if (ret && ret->init(levelFilename)) {
+		ret->autorelease();
+		return ret;
+	} else {
+		CC_SAFE_DELETE(ret);
+		return nullptr;
+	}
+}
+
 // on "init" you need to initialize your instance
-bool HelloWorld::init() {
+bool HelloWorld::init(const std::string& levelFilename) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Scene::init()) {
@@ -83,10 +98,10 @@ bool HelloWorld::init() {
 //	}
 
 	std::stringstream ss;
-	ss << FileUtils::getInstance()->getWritablePath() << "1.xml";
+	ss << FileUtils::getInstance()->getWritablePath() << levelFilename;
 	FileUtils::getInstance()->writeStringToFile(FileUtils::getInstance()->getStringFromFile("1.xml"), ss.str());
 	this->createLevel(ss.str());
-	//log("com.zenprogramming.reflection: CHUCK %s", ss.str().c_str());
+	//log("com.zenprogramming.reflection: Filename = %s", ss.str().c_str());
 
 	this->scheduleUpdate();
 
@@ -130,6 +145,10 @@ void HelloWorld::createLevel(const std::string& filename) {
 			colorType = ColorType::BLUE;
 		} else if (!colorTypeStr.compare("YELLOW")) {
 			colorType = ColorType::YELLOW;
+		} else if (!colorTypeStr.compare("ORANGE")) {
+			colorType = ColorType::ORANGE;
+		} else if (!colorTypeStr.compare("PURPLE")) {
+			colorType = ColorType::PURPLE;
 		} else if (!colorTypeStr.compare("WHITE")) {
 			colorType = ColorType::WHITE;
 		} else if (!colorTypeStr.compare("BLACK")) {
@@ -138,7 +157,11 @@ void HelloWorld::createLevel(const std::string& filename) {
 
 		// create the object
 		GameObject* object = nullptr;
-		if (!objectType.compare("emitter")) {
+		if (!objectType.compare("block")) {
+			object = Block::create(objectId);
+			Block* block = dynamic_cast<Block*>(object);
+		this->blocks.insert(block);
+		} else if (!objectType.compare("emitter")) {
 			object = Emitter::create(objectId, colorType);
 			Emitter* emitter = dynamic_cast<Emitter*>(object);
 			emitter->onAfterActivate = [&]() {
@@ -325,12 +348,13 @@ std::shared_ptr<Intersection> HelloWorld::getIntersection(GameObject* const obje
  */
 void HelloWorld::activateLaserChain(const Ray& originRay, const Vec3& origLaserStartingPoint, const Plane& originPlane) {
 	//log("com.zenprogramming.reflection: BEGIN activateLaserChain");
+
 	const Vec3 reflectionVector = this->getReflectionVector(originPlane, originRay);
 	float angle = -std::atan2(reflectionVector.y, reflectionVector.x) * RADTODEG;
 	Ray reflectionRay(origLaserStartingPoint, reflectionVector);
 
 	// create and add a laser
-	Laser* laser = Laser::create();
+	Laser* const laser = Laser::create();
 	laser->setPosition(Vec2(origLaserStartingPoint.x, origLaserStartingPoint.y));
 	laser->setRotation(angle);
 	laser->setAnchorPoint(Vec2(0.0f, 0.5f));
@@ -453,7 +477,7 @@ void HelloWorld::update(float dt) {
 			this->addChild(laser, LASER_LAYER);
 			this->lasers.insert(laser);
 
-			// find the closest object for the emitter laser
+			// find the closest intersection for the emitter laser
 			std::shared_ptr<Intersection> intersection = this->getClosestIntersection(laser->getRay());
 			if (intersection.get()) {
 				laser->setScaleX(intersection->getDistance());

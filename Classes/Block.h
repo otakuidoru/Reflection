@@ -22,20 +22,25 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __COLOR_TYPE_H__
-#define __COLOR_TYPE_H__
+#ifndef __BLOCK_H__
+#define __BLOCK_H__
 
-enum class ColorType {
-	NONE,
-	RED,
-	GREEN,
-	BLUE,
-	YELLOW,
-	ORANGE,
-	PURPLE,
-	WHITE,
-	BLACK
+#include <string>
+#include "cocos2d.h"
+#include "GameObject.h"
+
+class Block : public GameObject {
+protected:
+	Block(int id);
+
+public:
+	static Block* create(int id);
+	virtual ~Block();
+
+	virtual bool initWithFile(const std::string& filename) override;
+
+	virtual cocos2d::Plane getPlane(unsigned int index) override;
 };
 
-#endif // __COLOR_TYPE_H__
+#endif // __BLOCK_H__
 
