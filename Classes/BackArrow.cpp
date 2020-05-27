@@ -22,84 +22,77 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#include "GameObject.h"
+#include "BackArrow.h"
 
 USING_NS_CC;
 
 /**
  *
  */
-GameObject::GameObject(int id, ColorType colorType, unsigned int numPlanes) : Sprite(), id(id), colorType(colorType), numPlanes(numPlanes) {
+BackArrow::BackArrow() : Sprite() {
 }
 
 /**
  *
  */
-GameObject::~GameObject() {
+BackArrow::~BackArrow() {
+}
+
+/**
+ *
+ */
+BackArrow* BackArrow::create() {
+	BackArrow* backArrow = new (std::nothrow) BackArrow();
+	if (backArrow && backArrow->initWithFile("back_arrow.png")) {
+		backArrow->autorelease();
+		return backArrow;
+	}
+	CC_SAFE_DELETE(backArrow);
+	return nullptr;
 }
 
 /**
  * on "init" you need to initialize your instance
  */
-bool GameObject::initWithFile(const std::string& filename) {
+bool BackArrow::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Sprite::initWithFile(filename)) {
 		return false;
 	}
 
-	this->direction = Direction::EAST;
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  //  Create a "one by one" touch event listener (processes one touch at a time)
+  //
+  //////////////////////////////////////////////////////////////////////////////
+
+  auto touchListener = EventListenerTouchOneByOne::create();
+  touchListener->setSwallowTouches(true);
+
+	// triggered when pressed
+	touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
+		bool consuming = false;
+
+		if (this->getBoundingBox().containsPoint(touch->getLocation())) {
+			consuming = true;
+			this->onClick();
+		}
+
+		return consuming;
+	};
+
+	// triggered when moving touch
+	touchListener->onTouchMoved = [&](Touch* touch, Event* event) {
+	};
+
+	// triggered when released
+	touchListener->onTouchEnded = [&](Touch* touch, Event* event) {
+	};
+
+	// add listener
+	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
 
 	return true;
-}
-
-/**
- *
- */
-void GameObject::setDirection(Direction direction) {
-	this->direction = direction;
-	switch (direction) {
-		case Direction::NORTH:     { this->setRotation(270.0f); } break;
-		case Direction::NORTHEAST: { this->setRotation(315.0f); } break;
-		case Direction::EAST:      { this->setRotation(  0.0f); } break;
-		case Direction::SOUTHEAST: { this->setRotation( 45.0f); } break;
-		case Direction::SOUTH:     { this->setRotation( 90.0f); } break;
-		case Direction::SOUTHWEST: { this->setRotation(135.0f); } break;
-		case Direction::WEST:      { this->setRotation(180.0f); } break;
-		case Direction::NORTHWEST: { this->setRotation(225.0f); } break;
-	}
-}
-
-/**
- *
- */
-std::vector<Plane> GameObject::getPlanes() {
-	std::vector<Plane> planes;
-
-	for (unsigned int i=0; i<this->getNumPlanes(); ++i) {
-		planes.push_back(this->getPlane(i));
-	}
-
-	return planes;
-}
-
-/**
- *
- */
-bool GameObject::isPlaneReflective(unsigned int index) {
-	if (index < this->getNumPlanes()) {
-		return this->planeReflective[index];
-	}
-
-	return false;
-}
-
-/**
- *
- */
-void GameObject::setPlaneReflective(unsigned int index, bool reflective) {
-	if (index < this->getNumPlanes()) {
-		this->planeReflective[index] = reflective;
-	}
 }
 

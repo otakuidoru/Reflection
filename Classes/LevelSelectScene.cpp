@@ -51,7 +51,7 @@ bool LevelSelect::init() {
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	const float scale = std::min(visibleSize.width / 1536.0f, visibleSize.height / 2048.0f);
+	const float scale = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
 
 	/////////////////////////////
 	// 2. add your codes below...
@@ -59,17 +59,19 @@ bool LevelSelect::init() {
 	auto background = LayerGradient::create(Color4B(253, 158, 246, 255), Color4B(255, 255, 255, 255), Vec2(1.0f, 1.0f));
 	this->addChild(background);
 
-//	// add a label that shows "Hello World" and create and initialize a label
-//	auto label = Label::createWithTTF("Reflection", "fonts/motioncontrol-bold.ttf", 96);
-//	if (label == nullptr) {
-//		problemLoading("'fonts/motioncontrol-bold.ttf'");
-//	} else {
-//		// position the label on the top center of the screen
-//		label->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height - label->getContentSize().height));
-//
-//		// add the label as a child to this layer
-//		this->addChild(label, 1);
-//	}
+  Director::getInstance()->setClearColor(Color4F(1.0f, 1.0f, 1.0f, 1.0f));
+
+	// create the level sprites
+
+	this->addLevelSprite("level_select_1.png", Vec2(origin.x + visibleSize.width / 2.0f - 512.0f * scale, origin.y + visibleSize.height - 512.0f * scale), 1, "1.xml", "Start Simply");
+	this->addLevelSprite("level_select_1.png", Vec2(origin.x + visibleSize.width / 2.0f,                  origin.y + visibleSize.height - 512.0f * scale), 2, "2.xml", "...On The Wall");
+	this->addLevelSprite("level_select_1.png", Vec2(origin.x + visibleSize.width / 2.0f + 512.0f * scale, origin.y + visibleSize.height - 512.0f * scale), 3, "3.xml", "");
+
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  //  Create a "one by one" touch event listener (processes one touch at a time)
+  //
+  //////////////////////////////////////////////////////////////////////////////
 
 	auto touchListener = EventListenerTouchOneByOne::create();
 	touchListener->setSwallowTouches(true);
@@ -82,6 +84,7 @@ bool LevelSelect::init() {
 				consuming = true;
 				auto levelScene = HelloWorld::createScene(itr->second);
 				Director::getInstance()->replaceScene(TransitionFade::create(0.5, levelScene, Color3B(0, 0, 0)));
+				break;
 			}
 		}
 
@@ -99,20 +102,16 @@ bool LevelSelect::init() {
 	// add listener
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
 
-	this->createLevelSprite("level_select_1.png", Vec2(origin.x + visibleSize.width / 2.0f - 512.0f * scale, origin.y + visibleSize.height - 512.0f * scale), 1, "1.xml");
-	this->createLevelSprite("level_select_1.png", Vec2(origin.x + visibleSize.width / 2.0f,                  origin.y + visibleSize.height - 512.0f * scale), 2, "2.xml");
-	this->createLevelSprite("level_select_1.png", Vec2(origin.x + visibleSize.width / 2.0f + 512.0f * scale, origin.y + visibleSize.height - 512.0f * scale), 3, "3.xml");
-
 	return true;
 }
 
 /**
  *
  */
-void LevelSelect::createLevelSprite(const std::string& levelSpriteFilename, const Vec2& position, int num, const std::string& levelFilename) {
+void LevelSelect::addLevelSprite(const std::string& levelSpriteFilename, const Vec2& position, int num, const std::string& levelFilename, const std::string& levelTitle) {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	const float scale = std::min(visibleSize.width / 1536.0f, visibleSize.height / 2048.0f);
+	const float scale = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
 
 	auto levelSelectSprite = Sprite::create(levelSpriteFilename);
 	levelSelectSprite->setPosition(position);

@@ -32,7 +32,7 @@ class LevelSelect : public cocos2d::Scene {
 protected:
 	std::map<cocos2d::Sprite*, std::string> levelSprites;
 
-	void createLevelSprite(const std::string& levelSpriteFilename, const cocos2d::Vec2& position, int num, const std::string& levelFilename);
+	void addLevelSprite(const std::string& levelSpriteFilename, const cocos2d::Vec2& position, int num, const std::string& levelFilename, const std::string& levelTitle);
 
 public:
 	static cocos2d::Scene* createScene();

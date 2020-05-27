@@ -57,6 +57,7 @@ endif()
 # add cross-platforms source files and header files 
 list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
+     Classes/BackArrow.cpp
      Classes/Block.cpp
      Classes/Emitter.cpp
      Classes/GameObject.cpp
@@ -70,6 +71,7 @@ list(APPEND GAME_SOURCE
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
+     Classes/BackArrow.h
      Classes/Block.h
      Classes/Direction.h
      Classes/Emitter.h

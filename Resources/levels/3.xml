@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level>
+	<!-- Initial Setup -->
+	<setup>
+		<!-- Emitters -->
+		<emitters>
+			<emitter id="1">
+				<position x="768.0" y="96.0"></position>
+				<direction>NORTH</direction>
+				<colortype>RED</colortype>
+				<active>false</active>
+			</emitter>
+		</emitters>
+
+		<!-- Receptors -->
+		<receptors>
+			<receptor id="2">
+				<position x="768.0" y="1952.0"></position>
+				<direction>SOUTH</direction>
+				<colortype>RED</colortype>
+			</receptor>
+		</receptors>
+
+		<!-- Mirrors -->
+		<mirrors>
+			<mirror id="3">
+				<position x="512.0" y="1280.0"></position>
+				<direction>EAST</direction>
+			</mirror>
+			<mirror id="4">
+				<position x="768.0" y="1280.0"></position>
+				<direction>EAST</direction>
+			</mirror>
+			<mirror id="5">
+				<position x="512.0" y="1024.0"></position>
+				<direction>EAST</direction>
+			</mirror>
+			<mirror id="6">
+				<position x="768.0" y="1024.0"></position>
+				<direction>EAST</direction>
+			</mirror>
+		</mirrors>
+	</setup>
+
+	<!-- Win Condition -->
+	<wincondition>
+		<!-- Emitters -->
+		<emitters>
+			<emitter id="1" active="true"></emitter>
+		</emitters>
+
+		<!-- Mirrors -->
+		<mirrors>
+			<mirror id="3" direction="SOUTH"></mirror>
+			<mirror id="4" direction="NORTH"></mirror>
+			<mirror id="5" direction="EAST"></mirror>
+			<mirror id="6" direction="WEST"></mirror>
+		</mirrors>
+	</wincondition>
+</level>
+

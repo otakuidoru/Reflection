@@ -22,6 +22,10 @@
  THE SOFTWARE.
  ****************************************************************************/
 
+#ifdef COCOS2D_DEBUG
+#include <sstream>
+#endif
+
 #include <cmath>
 #include "Laser.h"
 
@@ -82,4 +86,29 @@ Ray Laser::getRay() const {
 
 	return ray;
 }
+
+#ifdef COCOS2D_DEBUG
+/**
+ *
+ */
+std::string Laser::str() {
+	Ray ray = this->getRay();
+
+	std::stringstream ss;
+	ss << "{";
+	ss << "\t\"origin\" : {";
+	ss << "\t\t\"x\" : " << ray._origin.x << ",";
+	ss << "\t\t\"y\" : " << ray._origin.y;
+	ss << "\t},";
+	ss << "\t\"direction\" : {";
+	ss << "\t\t\"x\" : " << ray._direction.x << ",";
+	ss << "\t\t\"y\" : " << ray._direction.y << ",";
+	ss << "\t\t\"z\" : " << ray._direction.z;
+	ss << "\t},";
+	ss << "\t\"length\" : " << this->getScaleX();
+	ss << "}";
+
+	return ss.str();
+}
+#endif
 

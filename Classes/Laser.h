@@ -25,11 +25,11 @@
 #ifndef __LASER_H__
 #define __LASER_H__
 
+#include <string>
 #include "cocos2d.h"
 
 class Laser : public cocos2d::Sprite {
 protected:
-	//cocos2d::Ray ray;
 	cocos2d::Vec2 origin;
 	cocos2d::Vec3 direction;
 
@@ -43,11 +43,12 @@ public:
 
 	cocos2d::Ray getRay() const;
 
-	float getLength() const { return this->getScaleX(); }
-	void setLength(float length) { this->setScaleX(length); }
-
 //	inline cocos2d::Vec3 getDirection() const { return direction; }
 //	inline void setDirection(cocos2d::Vec3 direction) { this->direction = direction; }
+
+#ifdef COCOS2D_DEBUG
+	std::string str();
+#endif
 };
 
 #endif // __LASER_H__

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level>
+	<!-- Initial Setup -->
+	<setup>
+		<!-- Emitters -->
+		<emitters>
+			<emitter id="1">
+				<position x="768.0" y="96.0"></position>
+				<direction>NORTH</direction>
+				<colortype>RED</colortype>
+				<active>false</active>
+			</emitter>
+		</emitters>
+
+		<!-- Receptors -->
+		<receptors>
+			<receptor id="2">
+				<position x="768.0" y="1952.0"></position>
+				<direction>SOUTH</direction>
+				<colortype>RED</colortype>
+			</receptor>
+		</receptors>
+	</setup>
+
+	<!-- Win Condition -->
+	<wincondition>
+		<!-- Emitters -->
+		<emitters>
+			<emitter id="1" active="true"></emitter>
+		</emitters>
+	</wincondition>
+</level>
+

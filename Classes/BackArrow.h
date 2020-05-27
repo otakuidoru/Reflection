@@ -22,45 +22,25 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __GAME_OBJECT_H__
-#define __GAME_OBJECT_H__
+#ifndef __BACK_ARROW_H__
+#define __BACK_ARROW_H__
 
-#include <map>
+#include <functional>
 #include <string>
-#include <vector>
 #include "cocos2d.h"
-#include "ColorType.h"
-#include "Direction.h"
 
-class GameObject : public cocos2d::Sprite {
+class BackArrow : public cocos2d::Sprite {
 protected:
-	const int id;
-	const unsigned int numPlanes;
-	const ColorType colorType;
-
-	Direction direction;
-	std::map<int, bool> planeReflective;
-
-	GameObject(int id, ColorType colorType, unsigned int numPlanes);
+	BackArrow();
 
 public:
-	virtual ~GameObject();
+	static BackArrow* create();
+	virtual ~BackArrow();
 
 	virtual bool initWithFile(const std::string& filename) override;
 
-	inline int getId() const { return this->id; }
-
-	inline ColorType getColorType() const { return this->colorType; }
-
-	inline Direction getDirection() const { return this->direction; }
-	void setDirection(Direction direction);
-
-	inline unsigned int getNumPlanes() const { return this->numPlanes; }
-	virtual cocos2d::Plane getPlane(unsigned int index) = 0;
-	std::vector<cocos2d::Plane> getPlanes();
-	bool isPlaneReflective(unsigned int index);
-	void setPlaneReflective(unsigned int index, bool reflective);
+	std::function<void()> onClick;
 };
 
-#endif // __GAME_OBJECT_H__
+#endif // __BACK_ARROW_H__
 

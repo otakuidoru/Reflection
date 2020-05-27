@@ -24,16 +24,14 @@
 
 #include <cmath>
 #include <sstream>
-#include "tinyxml2.h"
+#include "LevelSelectScene.h"
 #include "HelloWorldScene.h"
-#include "ColorType.h"
+#include "BackArrow.h"
 
 #define BACKGROUND_LAYER -1
 #define LASER_LAYER 1
-#define BLOCK_LAYER 2
-#define EMITTER_LAYER 2
-#define MIRROR_LAYER 2
-#define RECEPTOR_LAYER 2
+#define OBJECT_LAYER 2
+#define BACK_ARROW_LAYER 255
 
 USING_NS_CC;
 
@@ -67,7 +65,9 @@ HelloWorld* HelloWorld::create(const std::string& levelFilename) {
 	}
 }
 
-// on "init" you need to initialize your instance
+/**
+ * on "init" you need to initialize your instance
+ */
 bool HelloWorld::init(const std::string& levelFilename) {
 	//////////////////////////////
 	// 1. super init first
@@ -75,15 +75,52 @@ bool HelloWorld::init(const std::string& levelFilename) {
 		return false;
 	}
 
-	auto visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	const float scale = std::min(visibleSize.width / 1536.0f, visibleSize.height / 2048.0f);
+	const Size visibleSize = Director::getInstance()->getVisibleSize();
+	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	const float scale = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
 
 	/////////////////////////////
 	// 2. add your codes below...
 
+	strToColorTypeMap = {
+		{"NONE", ColorType::NONE},
+		{"RED", ColorType::RED},
+		{"GREEN", ColorType::GREEN},
+		{"BLUE", ColorType::BLUE},
+		{"YELLOW", ColorType::YELLOW},
+		{"ORANGE", ColorType::ORANGE},
+		{"PURPLE", ColorType::PURPLE},
+		{"WHITE", ColorType::WHITE},
+		{"BLACK", ColorType::BLACK}
+	};
+
+	colorTypeToColor3BMap = {
+		{ColorType::NONE, Color3B(255, 255, 255)},
+		{ColorType::RED, Color3B(255, 153, 153)},
+		{ColorType::GREEN, Color3B(153, 255, 153)},
+		{ColorType::BLUE, Color3B(153, 153, 255)},
+		{ColorType::YELLOW, Color3B(255, 255, 255)},	// TODO
+		{ColorType::ORANGE, Color3B(255, 255, 255)},	// TODO
+		{ColorType::PURPLE, Color3B(255, 255, 255)},	// TODO
+		{ColorType::WHITE, Color3B(255, 255, 255)},
+		{ColorType::BLACK, Color3B(0, 0, 0)}
+	};
+
+	strToDirectionMap = {
+		{"NORTH",     Direction::NORTH    },
+		{"NORTHEAST", Direction::NORTHEAST},
+		{"EAST",      Direction::EAST     },
+		{"SOUTHEAST", Direction::SOUTHEAST},
+		{"SOUTH",     Direction::SOUTH    },
+		{"SOUTHWEST", Direction::SOUTHWEST},
+		{"WEST",      Direction::WEST     },
+		{"NORTHWEST", Direction::NORTHWEST},
+	};
+
 	auto background = LayerGradient::create(Color4B(253, 158, 246, 255), Color4B(255, 255, 255, 255), Vec2(1.0f, 1.0f));
 	this->addChild(background, BACKGROUND_LAYER);
+
+  Director::getInstance()->setClearColor(Color4F(1.0f, 1.0f, 1.0f, 1.0f));
 
 //	// add a label that shows "Hello World" and create and initialize a label
 //	auto label = Label::createWithTTF("Reflection", "fonts/motioncontrol-bold.ttf", 96);
@@ -97,11 +134,37 @@ bool HelloWorld::init(const std::string& levelFilename) {
 //		this->addChild(label, 1);
 //	}
 
-	std::stringstream ss;
-	ss << FileUtils::getInstance()->getWritablePath() << levelFilename;
-	FileUtils::getInstance()->writeStringToFile(FileUtils::getInstance()->getStringFromFile("1.xml"), ss.str());
-	this->createLevel(ss.str());
-	//log("com.zenprogramming.reflection: Filename = %s", ss.str().c_str());
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+#define PATH_SEPARATOR "\\"
+#endif
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
+#define PATH_SEPARATOR "/"
+#endif
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+#define PATH_SEPARATOR "\/"
+#endif
+
+	std::stringstream source;
+	source << "levels" << PATH_SEPARATOR << levelFilename;
+	//log("com.zenprogramming.reflection: Source Filename = %s", source.str().c_str());
+
+	std::stringstream target;
+	target << FileUtils::getInstance()->getWritablePath() << levelFilename;
+	//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
+
+	// copy the file to the writable area on the device
+	// (have to do this for TinyXML to read the file)
+	FileUtils::getInstance()->writeStringToFile(FileUtils::getInstance()->getStringFromFile(source.str()), target.str());
+	this->createLevel(target.str());
+
+	// create the back arrow
+	auto backArrow = BackArrow::create();
+	backArrow->onClick = []() {
+		auto levelSelectScene = LevelSelect::create();
+		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, levelSelectScene, Color3B(0, 0, 0)));
+	};
+	backArrow->setPosition(Vec2(96.0f, 1968.0f));
+	this->addChild(backArrow, BACK_ARROW_LAYER);
 
 	this->scheduleUpdate();
 
@@ -111,102 +174,209 @@ bool HelloWorld::init(const std::string& levelFilename) {
 /**
  *
  */
-void HelloWorld::createLevel(const std::string& filename) {
-	auto visibleSize = Director::getInstance()->getVisibleSize();
-	const float scale = std::min(visibleSize.width / 1536.0f, visibleSize.height / 2048.0f);
+void HelloWorld::addEmitters(tinyxml2::XMLElement* const emittersElement, float scale) {
+	if (emittersElement) {
+		tinyxml2::XMLElement* emitterElement = emittersElement->FirstChildElement("emitter");
 
-	tinyxml2::XMLDocument document;
-	tinyxml2::XMLError error = document.LoadFile(filename.c_str());
-	tinyxml2::XMLElement* level = document.RootElement();
-	tinyxml2::XMLElement* levelObjects = level->FirstChildElement("objects");
-	tinyxml2::XMLElement* objectElement = levelObjects->FirstChildElement("object");
+		while (emitterElement) {
+			// id
+			int id;
+			emitterElement->QueryIntAttribute("id", &id);
 
-	while (objectElement) {
-		// id
-		int objectId;
-		objectElement->QueryIntAttribute("id", &objectId);
+			// color type
+			std::string colorTypeStr(emitterElement->FirstChildElement("colortype")->GetText());
+			const ColorType colorType = this->strToColorTypeMap[colorTypeStr];
 
-		// object type
-		std::string objectType(objectElement->Attribute("type"));
-
-		// color type
-		ColorType colorType = ColorType::NONE;
-		Color3B color(255, 255, 255);
-		std::string colorTypeStr(objectElement->FirstChildElement("colortype")->GetText());
-
-		if (!colorTypeStr.compare("NONE")) {
-			colorType = ColorType::NONE;
-		} else if (!colorTypeStr.compare("RED")) {
-			colorType = ColorType::RED;
-			color = Color3B(255, 153, 153);
-		} else if (!colorTypeStr.compare("GREEN")) {
-			colorType = ColorType::GREEN;
-		} else if (!colorTypeStr.compare("BLUE")) {
-			colorType = ColorType::BLUE;
-		} else if (!colorTypeStr.compare("YELLOW")) {
-			colorType = ColorType::YELLOW;
-		} else if (!colorTypeStr.compare("ORANGE")) {
-			colorType = ColorType::ORANGE;
-		} else if (!colorTypeStr.compare("PURPLE")) {
-			colorType = ColorType::PURPLE;
-		} else if (!colorTypeStr.compare("WHITE")) {
-			colorType = ColorType::WHITE;
-		} else if (!colorTypeStr.compare("BLACK")) {
-			colorType = ColorType::BLACK;
-		}
-
-		// create the object
-		GameObject* object = nullptr;
-		if (!objectType.compare("block")) {
-			object = Block::create(objectId);
-			Block* block = dynamic_cast<Block*>(object);
-		this->blocks.insert(block);
-		} else if (!objectType.compare("emitter")) {
-			object = Emitter::create(objectId, colorType);
-			Emitter* emitter = dynamic_cast<Emitter*>(object);
+			// create emitter
+			auto emitter = Emitter::create(id, colorType);
 			emitter->onAfterActivate = [&]() {
 				this->checkWinCondition();
 			};
 			this->emitters.insert(emitter);
-		} else if (!objectType.compare("receptor")) {
-			object = Receptor::create(objectId, colorType);
-			Receptor* receptor = dynamic_cast<Receptor*>(object);
-			this->receptors.insert(receptor);
-		} else if (!objectType.compare("mirror")) {
-			object = Mirror::create(objectId);
-			Mirror* mirror = dynamic_cast<Mirror*>(object);
+			this->objects.insert(emitter);
+
+			// set emitter color
+			const Color3B color = colorTypeToColor3BMap[colorType];
+			emitter->setColor(color);
+
+			// set emitter scale
+			emitter->setScale(scale);
+
+			// set emitter position
+			float x, y;
+			tinyxml2::XMLElement* positionElement = emitterElement->FirstChildElement("position");
+			positionElement->QueryFloatAttribute("x", &x);
+			positionElement->QueryFloatAttribute("y", &y);
+			emitter->setPosition(Vec2(x, y));
+
+			// set emitter direction
+			std::string directionStr(emitterElement->FirstChildElement("direction")->GetText());
+			emitter->setDirection(strToDirectionMap[directionStr]);
+
+			// set emitter active
+			std::string activeStr = emitterElement->FirstChildElement("active")->GetText();
+			emitter->setActive(!activeStr.compare("true"));
+
+			// add the emitter to the scene
+			this->addChild(emitter, OBJECT_LAYER);
+
+			emitterElement = emitterElement->NextSiblingElement("emitter");
+		}
+	}
+}
+
+/**
+ *
+ */
+void HelloWorld::addMirrors(tinyxml2::XMLElement* const mirrorsElement, float scale) {
+	if (mirrorsElement) {
+		tinyxml2::XMLElement* mirrorElement = mirrorsElement->FirstChildElement("mirror");
+
+		while (mirrorElement) {
+			// id
+			int id;
+			mirrorElement->QueryIntAttribute("id", &id);
+
+			// create mirror
+			auto mirror = Mirror::create(id);
 			mirror->onAfterRotate = [&]() {
 				this->checkWinCondition();
 			};
 			this->mirrors.insert(mirror);
+			this->objects.insert(mirror);
+
+			// set mirror scale
+			mirror->setScale(scale);
+
+			// set mirror position
+			float x, y;
+			tinyxml2::XMLElement* positionElement = mirrorElement->FirstChildElement("position");
+			positionElement->QueryFloatAttribute("x", &x);
+			positionElement->QueryFloatAttribute("y", &y);
+			mirror->setPosition(Vec2(x, y));
+
+			// set mirror direction
+			std::string directionStr(mirrorElement->FirstChildElement("direction")->GetText());
+			mirror->setDirection(strToDirectionMap[directionStr]);
+
+			// add the mirror to the scene
+			this->addChild(mirror, OBJECT_LAYER);
+
+			mirrorElement = mirrorElement->NextSiblingElement("mirror");
 		}
-
-		// set object scale
-		object->setScale(scale);
-
-		// set object position
-		float x, y;
-		tinyxml2::XMLElement* positionElement = objectElement->FirstChildElement("position");
-		positionElement->QueryFloatAttribute("x", &x);
-		positionElement->QueryFloatAttribute("y", &y);
-		object->setPosition(Vec2(x, y));
-
-		// set object rotation
-		object->setRotation(std::atof(objectElement->FirstChildElement("rotation")->GetText()));
-
-		// set object direction
-		Direction direction = Direction::EAST;
-		std::string directionStr(objectElement->FirstChildElement("direction")->GetText());
-		object->setDirection(this->stringToDirection(directionStr));
-
-		// set object color
-		object->setColor(color);
-
-		this->addChild(object, EMITTER_LAYER);
-		this->objects.insert(object);
-
-		objectElement = objectElement->NextSiblingElement();
 	}
+}
+
+/**
+ *
+ */
+void HelloWorld::addReceptors(tinyxml2::XMLElement* const receptorsElement, float scale) {
+	if (receptorsElement) {
+		tinyxml2::XMLElement* receptorElement = receptorsElement->FirstChildElement("receptor");
+
+		while (receptorElement) {
+			// id
+			int id;
+			receptorElement->QueryIntAttribute("id", &id);
+
+			// color type
+			std::string colorTypeStr(receptorElement->FirstChildElement("colortype")->GetText());
+			const ColorType colorType = this->strToColorTypeMap[colorTypeStr];
+
+			// create receptor
+			auto receptor = Receptor::create(id, colorType);
+			this->receptors.insert(receptor);
+			this->objects.insert(receptor);
+
+			// set receptor color
+			const Color3B color = colorTypeToColor3BMap[colorType];
+			receptor->setColor(color);
+
+			// set receptor scale
+			receptor->setScale(scale);
+
+			// set receptor position
+			float x, y;
+			tinyxml2::XMLElement* positionElement = receptorElement->FirstChildElement("position");
+			positionElement->QueryFloatAttribute("x", &x);
+			positionElement->QueryFloatAttribute("y", &y);
+			receptor->setPosition(Vec2(x, y));
+
+			// set receptor direction
+			std::string directionStr(receptorElement->FirstChildElement("direction")->GetText());
+			receptor->setDirection(strToDirectionMap[directionStr]);
+
+			// add the receptor to the scene
+			this->addChild(receptor, OBJECT_LAYER);
+
+			receptorElement = receptorElement->NextSiblingElement("receptor");
+		}
+	}
+}
+
+/**
+ *
+ */
+void HelloWorld::addBlocks(tinyxml2::XMLElement* const blocksElement, float scale) {
+	if (blocksElement) {
+		tinyxml2::XMLElement* blockElement = blocksElement->FirstChildElement("block");
+
+		while (blockElement) {
+			// id
+			int id;
+			blockElement->QueryIntAttribute("id", &id);
+
+			// create block
+			auto block = Block::create(id);
+			this->blocks.insert(block);
+			this->objects.insert(block);
+
+			// set block scale
+			block->setScale(scale);
+
+			// set block position
+			float x, y;
+			tinyxml2::XMLElement* positionElement = blockElement->FirstChildElement("position");
+			positionElement->QueryFloatAttribute("x", &x);
+			positionElement->QueryFloatAttribute("y", &y);
+			block->setPosition(Vec2(x, y));
+
+			// set block direction
+			std::string directionStr(blockElement->FirstChildElement("direction")->GetText());
+			block->setDirection(strToDirectionMap[directionStr]);
+
+			// add the block to the scene
+			this->addChild(block, OBJECT_LAYER);
+
+			blockElement = blockElement->NextSiblingElement("block");
+		}
+	}
+}
+
+/**
+ *
+ */
+void HelloWorld::createLevel(const std::string& filename) {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	const float scale = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
+
+	tinyxml2::XMLDocument document;
+	tinyxml2::XMLError error = document.LoadFile(filename.c_str());
+	//log("com.zenprogramming.reflection: error = %d", error);
+
+	tinyxml2::XMLElement* levelElement = document.RootElement();
+
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  Parse the initial setup objects
+	//
+	//////////////////////////////////////////////////////////////////////////////
+
+	// add initial objects
+	this->addEmitters(levelElement->FirstChildElement("setup")->FirstChildElement("emitters"), scale);
+	this->addMirrors(levelElement->FirstChildElement("setup")->FirstChildElement("mirrors"), scale);
+	this->addReceptors(levelElement->FirstChildElement("setup")->FirstChildElement("receptors"), scale);
+	this->addBlocks(levelElement->FirstChildElement("setup")->FirstChildElement("blocks"), scale);
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
@@ -215,86 +385,62 @@ void HelloWorld::createLevel(const std::string& filename) {
 	//////////////////////////////////////////////////////////////////////////////
 
 	// get the <wincondition> element
-	tinyxml2::XMLElement* winConditionElement = level->FirstChildElement("wincondition");
+	tinyxml2::XMLElement* winConditionElement = levelElement->FirstChildElement("wincondition");
+	if (winConditionElement) {
+		{ // parse the win condition - emitters
+			tinyxml2::XMLElement* winConditionEmittersElement = winConditionElement->FirstChildElement("emitters");
+			if (winConditionEmittersElement) {
+				tinyxml2::XMLElement* winConditionEmitterElement = winConditionEmittersElement->FirstChildElement("emitter");
+				while (winConditionEmitterElement) {
+					// get emitter id
+					int emitterId;
+					winConditionEmitterElement->QueryIntAttribute("id", &emitterId);
 
-	{ // parse the win condition - emitters
-		tinyxml2::XMLElement* winConditionEmittersElement = winConditionElement->FirstChildElement("emitters");
-		tinyxml2::XMLElement* winConditionEmitterElement = winConditionEmittersElement->FirstChildElement("emitter");
-		while (winConditionEmitterElement) {
-			// get emitter id
-			int emitterId;
-			winConditionEmitterElement->QueryIntAttribute("id", &emitterId);
+					// get emitter activity
+					const std::string emitterActiveStr(winConditionEmitterElement->Attribute("active"));
+					const bool emitterActive = !emitterActiveStr.compare("true");
 
-			// get emitter activity
-			const std::string emitterActiveStr(winConditionEmitterElement->Attribute("active"));
-			const bool emitterActive = !emitterActiveStr.compare("true");
+					for (auto emitter : this->emitters) {
+						if (emitter->getId() == emitterId) {
+							this->emitterActiveWinConditions[emitter] = emitterActive;
+						}
+					}
 
-			for (auto emitter : this->emitters) {
-				if (emitter->getId() == emitterId) {
-					this->emitterActiveWinConditions[emitter] = emitterActive;
+					winConditionEmitterElement = winConditionEmitterElement->NextSiblingElement("emitter");
 				}
 			}
-
-			winConditionEmitterElement = winConditionEmitterElement->NextSiblingElement();
 		}
-	}
+		{ // parse the win condition - mirrors
+			tinyxml2::XMLElement* winConditionMirrorsElement = winConditionElement->FirstChildElement("mirrors");
+			if (winConditionMirrorsElement) {
+				tinyxml2::XMLElement* winConditionMirrorElement = winConditionMirrorsElement->FirstChildElement("mirror");
+				while (winConditionMirrorElement) {
+					// get mirror id
+					int mirrorId;
+					winConditionMirrorElement->QueryIntAttribute("id", &mirrorId);
 
-	{ // parse the win condition - mirrors
-		tinyxml2::XMLElement* winConditionMirrorsElement = winConditionElement->FirstChildElement("mirrors");
-		tinyxml2::XMLElement* winConditionMirrorElement = winConditionMirrorsElement->FirstChildElement("mirror");
-		while (winConditionMirrorElement) {
-			// get mirror id
-			int mirrorId;
-			winConditionMirrorElement->QueryIntAttribute("id", &mirrorId);
+					// get mirror direction
+					const std::string mirrorDirectionStr(winConditionMirrorElement->Attribute("direction"));
+					const Direction mirrorDirection = strToDirectionMap[mirrorDirectionStr];
 
-			// get mirror direction
-			const std::string mirrorDirectionStr(winConditionMirrorElement->Attribute("direction"));
-			const Direction mirrorDirection = this->stringToDirection(mirrorDirectionStr);
+					for (auto mirror : this->mirrors) {
+						if (mirror->getId() == mirrorId) {
+							this->mirrorDirectionWinConditions[mirror] = mirrorDirection;
+						}
+					}
 
-			for (auto mirror : this->mirrors) {
-				if (mirror->getId() == mirrorId) {
-					this->mirrorDirectionWinConditions[mirror] = mirrorDirection;
+					winConditionMirrorElement = winConditionMirrorElement->NextSiblingElement("mirror");
 				}
 			}
-
-			winConditionMirrorElement = winConditionMirrorElement->NextSiblingElement();
 		}
 	}
 }
 
 /**
- *
- */
-Direction HelloWorld::stringToDirection(const std::string& str) {
-	Direction direction = Direction::EAST;
-
-	if (!str.compare("NORTH")) {
-		direction = Direction::NORTH;
-	} else if (!str.compare("NORTHEAST")) {
-		direction = Direction::NORTHEAST;
-	} else if (!str.compare("EAST")) {
-		direction = Direction::EAST;
-	} else if (!str.compare("SOUTHEAST")) {
-		direction = Direction::SOUTHEAST;
-	} else if (!str.compare("SOUTH")) {
-		direction = Direction::SOUTH;
-	} else if (!str.compare("SOUTHWEST")) {
-		direction = Direction::SOUTHWEST;
-	} else if (!str.compare("WEST")) {
-		direction = Direction::WEST;
-	} else if (!str.compare("NORTHWEST")) {
-		direction = Direction::NORTHWEST;
-	}
-
-	return direction;
-}
-
-/**
- *
+ * https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
  */
 Vec3 HelloWorld::getReflectionVector(const Plane& plane, const Ray& ray) {
 	//log("com.zenprogramming.reflection: BEGIN getReflectionVector");
-	// https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
 	const Vec3 d = ray._direction;
 	const Vec3 n = plane.getNormal();
 	const Vec3 reflectionVector = d - 2 * (d.dot(n)) * n;
@@ -435,9 +581,9 @@ bool HelloWorld::checkWinCondition() {
 		}
 	}
 
-	auto visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	auto winBanner = Sprite::create("well_done.png");
+	const Size visibleSize = Director::getInstance()->getVisibleSize();
+	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	Sprite* winBanner = Sprite::create("well_done.png");
 	winBanner->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height/2));
 	winBanner->setOpacity(0);
 	winBanner->setScale(5.0f);
