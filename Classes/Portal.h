@@ -22,42 +22,26 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __MIRROR_H__
-#define __MIRROR_H__
+#ifndef __PORTAL_H__
+#define __PORTAL_H__
 
-#include <functional>
 #include <string>
 #include "cocos2d.h"
 #include "Direction.h"
 #include "GameObject.h"
 
-class Mirror : public GameObject {
+class Portal : public GameObject {
 protected:
-	bool rotatable;
-	bool rotating;
-
-	Mirror(int id);
+	Portal(int id);
 
 public:
-	constexpr static float ROTATION_TIME = 0.25f;
-
-	static Mirror* create(int id);
-	virtual ~Mirror();
+	static Portal* create(int id);
+	virtual ~Portal();
 
 	virtual bool initWithFile(const std::string& filename) override;
 
-	inline bool isRotatable() const { return rotatable; }
-	inline void setRotatable(bool rotatable) { this->rotatable = rotatable; }
-
-	inline bool isRotating() const { return rotating; }
-	inline void setRotating(bool rotating) { this->rotating = rotating; }
-
 	virtual cocos2d::Plane getPlane(unsigned int index) override;
-
-	void rotate();
-
-	std::function<void()> onAfterRotate;
 };
 
-#endif // __MIRROR_H__
+#endif // __PORTAL_H__
 

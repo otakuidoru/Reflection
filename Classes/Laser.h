@@ -36,10 +36,10 @@ protected:
 	Laser();
 
 public:
-	static Laser* create();
+	static Laser* create(const cocos2d::Color3B& color);
 	virtual ~Laser();
 
-	virtual bool initWithFile(const std::string& filename) override;
+	virtual bool initWithFileAndColor(const std::string& filename, const cocos2d::Color3B& color);
 
 	cocos2d::Ray getRay() const;
 

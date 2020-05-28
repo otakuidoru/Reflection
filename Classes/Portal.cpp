@@ -23,7 +23,8 @@
  ****************************************************************************/
 
 #include <cmath>
-#include "Receptor.h"
+#include "Portal.h"
+#include "ColorType.h"
 
 USING_NS_CC;
 
@@ -33,43 +34,43 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Receptor::Receptor(int id, ColorType colorType) : GameObject(id, colorType, 4) {
+Portal::Portal(int id) : GameObject(id, ColorType::NONE, 4) {
 }
 
 /**
  *
  */
-Receptor::~Receptor() {
+Portal::~Portal() {
 }
 
 /**
  *
  */
-Receptor* Receptor::create(int id, ColorType colorType) {
-	Receptor* receptor = new (std::nothrow) Receptor(id, colorType);
-	if (receptor && receptor->initWithFile("receptor.png")) {
-		receptor->autorelease();
-		return receptor;
+Portal* Portal::create(int id) {
+	Portal* portal = new (std::nothrow) Portal(id);
+	if (portal && portal->initWithFile("portal.png")) {
+		portal->autorelease();
+		return portal;
 	}
-	CC_SAFE_DELETE(receptor);
+	CC_SAFE_DELETE(portal);
 	return nullptr;
 }
 
 /**
  * on "init" you need to initialize your instance
  */
-bool Receptor::initWithFile(const std::string& filename) {
+bool Portal::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
 	if (!GameObject::initWithFile(filename)) {
 		return false;
 	}
 
+	this->direction = Direction::NORTHEAST;
 	this->setPlaneReflective(0, false);
 	this->setPlaneReflective(1, false);
 	this->setPlaneReflective(2, false);
 	this->setPlaneReflective(3, false);
-	this->setPlaneReflective(4, false);
 
 	return true;
 }
@@ -77,7 +78,7 @@ bool Receptor::initWithFile(const std::string& filename) {
 /**
  *
  */
-Plane Receptor::getPlane(unsigned int index) {
+Plane Portal::getPlane(unsigned int index) {
 	Plane plane;
 
 	const Vec2 worldPos = this->getParent()->convertToWorldSpace(this->getPosition());
@@ -85,26 +86,24 @@ Plane Receptor::getPlane(unsigned int index) {
 
 	switch (index) {	
 		case 0: { // first plane - non-reflective
-			const float angle = -(this->getRotation()) * DEGTORAD;
-			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			const float angle = -(this->getRotation() - 45.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x, worldPos.y, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+			//log("com.zenprogramming.reflection: mirror[%d] plane[0]: pos = (%f, %f, %f) normal = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z, plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
 		} break;
 		case 1: { // second plane - non-reflective
 			const float angle = -(this->getRotation() + 90.0f) * DEGTORAD;
 			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+			//log("com.zenprogramming.reflection: mirror[%d] plane[1]: pos = (%f, %f, %f) normal = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z, plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
 		} break;
 		case 2: { // third plane - non-reflective
 			const float angle = -(this->getRotation() + 180.0f) * DEGTORAD;
 			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+			//log("com.zenprogramming.reflection: mirror[%d] plane[2]: pos = (%f, %f, %f) normal = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z, plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
 		} break;
-		case 3: { // fourth plane - non-reflective
-			const float angle = -(this->getRotation() + 270.0f) * DEGTORAD;
-			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
-			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
-		} break;
-		case 4: { // fourth plane - non-reflective
+		case 2: { // third plane - non-reflective
 			// TODO
 		} break;
 	}

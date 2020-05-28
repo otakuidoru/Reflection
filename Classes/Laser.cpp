@@ -49,9 +49,9 @@ Laser::~Laser() {
 /**
  *
  */
-Laser* Laser::create() {
+Laser* Laser::create(const Color3B& color) {
 	Laser* laser = new (std::nothrow) Laser();
-	if (laser && laser->initWithFile("red_laser.png")) {
+	if (laser && laser->initWithFileAndColor("laser.png", color)) {
 		laser->autorelease();
 		return laser;
 	}
@@ -62,12 +62,14 @@ Laser* Laser::create() {
 /**
  * on "init" you need to initialize your instance
  */
-bool Laser::initWithFile(const std::string& filename) {
+bool Laser::initWithFileAndColor(const std::string& filename, const Color3B& color) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Sprite::initWithFile(filename)) {
 		return false;
 	}
+
+	this->setColor(color);
 
 	return true;
 }

@@ -44,7 +44,8 @@
 class HelloWorld : public cocos2d::Scene {
 protected:
 	std::map<std::string, ColorType> strToColorTypeMap;
-	std::map<ColorType, cocos2d::Color3B> colorTypeToColor3BMap;
+	std::map<ColorType, cocos2d::Color3B> colorTypeToObjectColor3BMap;
+	std::map<ColorType, cocos2d::Color3B> colorTypeToLaserColor3BMap;
 	std::map<std::string, Direction> strToDirectionMap;
 
 	std::set<GameObject*> objects;
@@ -61,7 +62,7 @@ protected:
 	cocos2d::Vec3 getReflectionVector(const cocos2d::Plane& plane, const cocos2d::Ray& ray);
 	std::shared_ptr<Intersection> getIntersection(GameObject* const object, const cocos2d::Ray& ray);
 	std::shared_ptr<Intersection> getClosestIntersection(const cocos2d::Ray& ray);
-	void activateLaserChain(const cocos2d::Ray& originRay, const cocos2d::Vec3& origLaserStartingPoint, const cocos2d::Plane& originPlane);
+	void activateLaserChain(const cocos2d::Ray& originRay, const cocos2d::Vec3& origLaserStartingPoint, const cocos2d::Plane& originPlane, ColorType colorType);
 
 	// level creation methods
 	void addEmitters(tinyxml2::XMLElement* const emittersElement, float scale);

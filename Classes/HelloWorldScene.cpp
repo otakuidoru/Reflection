@@ -94,11 +94,23 @@ bool HelloWorld::init(const std::string& levelFilename) {
 		{"BLACK", ColorType::BLACK}
 	};
 
-	colorTypeToColor3BMap = {
+	colorTypeToObjectColor3BMap = {
 		{ColorType::NONE, Color3B(255, 255, 255)},
 		{ColorType::RED, Color3B(255, 153, 153)},
 		{ColorType::GREEN, Color3B(153, 255, 153)},
 		{ColorType::BLUE, Color3B(153, 153, 255)},
+		{ColorType::YELLOW, Color3B(255, 255, 255)},	// TODO
+		{ColorType::ORANGE, Color3B(255, 255, 255)},	// TODO
+		{ColorType::PURPLE, Color3B(255, 255, 255)},	// TODO
+		{ColorType::WHITE, Color3B(255, 255, 255)},
+		{ColorType::BLACK, Color3B(0, 0, 0)}
+	};
+
+	colorTypeToLaserColor3BMap = {
+		{ColorType::NONE, Color3B(255, 255, 255)},
+		{ColorType::RED, Color3B(255, 0, 0)},
+		{ColorType::GREEN, Color3B(0, 255, 0)},
+		{ColorType::BLUE, Color3B(0, 0, 255)},
 		{ColorType::YELLOW, Color3B(255, 255, 255)},	// TODO
 		{ColorType::ORANGE, Color3B(255, 255, 255)},	// TODO
 		{ColorType::PURPLE, Color3B(255, 255, 255)},	// TODO
@@ -196,7 +208,7 @@ void HelloWorld::addEmitters(tinyxml2::XMLElement* const emittersElement, float 
 			this->objects.insert(emitter);
 
 			// set emitter color
-			const Color3B color = colorTypeToColor3BMap[colorType];
+			const Color3B color = colorTypeToObjectColor3BMap[colorType];
 			emitter->setColor(color);
 
 			// set emitter scale
@@ -289,7 +301,7 @@ void HelloWorld::addReceptors(tinyxml2::XMLElement* const receptorsElement, floa
 			this->objects.insert(receptor);
 
 			// set receptor color
-			const Color3B color = colorTypeToColor3BMap[colorType];
+			const Color3B color = colorTypeToObjectColor3BMap[colorType];
 			receptor->setColor(color);
 
 			// set receptor scale
@@ -368,7 +380,7 @@ void HelloWorld::createLevel(const std::string& filename) {
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
-	//  Parse the initial setup objects
+	//  Add the initial setup objects
 	//
 	//////////////////////////////////////////////////////////////////////////////
 
@@ -380,7 +392,7 @@ void HelloWorld::createLevel(const std::string& filename) {
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
-	//  Parse the win condition
+	//  Add the win condition
 	//
 	//////////////////////////////////////////////////////////////////////////////
 
@@ -492,7 +504,7 @@ std::shared_ptr<Intersection> HelloWorld::getIntersection(GameObject* const obje
 /**
  *
  */
-void HelloWorld::activateLaserChain(const Ray& originRay, const Vec3& origLaserStartingPoint, const Plane& originPlane) {
+void HelloWorld::activateLaserChain(const Ray& originRay, const Vec3& origLaserStartingPoint, const Plane& originPlane, ColorType colorType) {
 	//log("com.zenprogramming.reflection: BEGIN activateLaserChain");
 
 	const Vec3 reflectionVector = this->getReflectionVector(originPlane, originRay);
@@ -500,7 +512,7 @@ void HelloWorld::activateLaserChain(const Ray& originRay, const Vec3& origLaserS
 	Ray reflectionRay(origLaserStartingPoint, reflectionVector);
 
 	// create and add a laser
-	Laser* const laser = Laser::create();
+	Laser* const laser = Laser::create(colorTypeToLaserColor3BMap[colorType]);
 	laser->setPosition(Vec2(origLaserStartingPoint.x, origLaserStartingPoint.y));
 	laser->setRotation(angle);
 	laser->setAnchorPoint(Vec2(0.0f, 0.5f));
@@ -513,7 +525,7 @@ void HelloWorld::activateLaserChain(const Ray& originRay, const Vec3& origLaserS
 		laser->setScaleX(intersection->getDistance());
 
 		if (intersection->isPlaneReflective()) {
-			this->activateLaserChain(laser->getRay(), intersection->getPoint(), intersection->getPlane());
+			this->activateLaserChain(laser->getRay(), intersection->getPoint(), intersection->getPlane(), colorType);
 		}
 	}
 
@@ -615,7 +627,7 @@ void HelloWorld::update(float dt) {
 			const Vec2 emitterWorldPos = emitter->getParent()->convertToWorldSpace(emitter->getPosition());
 
 			// create and add a laser
-			Laser* const laser = Laser::create();
+			Laser* const laser = Laser::create(colorTypeToLaserColor3BMap[emitter->getColorType()]);
 			laser->setPosition(emitterWorldPos);
 			laser->setRotation(emitter->getRotation());
 			laser->setAnchorPoint(Vec2(0.0f, 0.5f));
@@ -632,7 +644,7 @@ void HelloWorld::update(float dt) {
 				//log("com.zenprogramming.reflection: intersection at (%f, %f, %f) side = %d, reflective = %d, distance = %f", intersection->getPoint().x, intersection->getPoint().y, intersection->getPoint().z, intersection->getPointSide(), intersection->isPlaneReflective(), intersection->getDistance());
 
 				if (intersection->isPlaneReflective()) {
-					this->activateLaserChain(laser->getRay(), intersection->getPoint(), intersection->getPlane());
+					this->activateLaserChain(laser->getRay(), intersection->getPoint(), intersection->getPlane(), emitter->getColorType());
 				}
 			}
 		}
