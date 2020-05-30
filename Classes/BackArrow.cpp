@@ -61,14 +61,16 @@ bool BackArrow::initWithFile(const std::string& filename) {
 		return false;
 	}
 
-  //////////////////////////////////////////////////////////////////////////////
-  //
-  //  Create a "one by one" touch event listener (processes one touch at a time)
-  //
-  //////////////////////////////////////////////////////////////////////////////
+	this->setColor(Color3B(0, 0, 0));
 
-  auto touchListener = EventListenerTouchOneByOne::create();
-  touchListener->setSwallowTouches(true);
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  Create a "one by one" touch event listener (processes one touch at a time)
+	//
+	//////////////////////////////////////////////////////////////////////////////
+
+	auto touchListener = EventListenerTouchOneByOne::create();
+	touchListener->setSwallowTouches(true);
 
 	// triggered when pressed
 	touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {

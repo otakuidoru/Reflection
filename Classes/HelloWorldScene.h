@@ -35,8 +35,8 @@
 #include "ColorType.h"
 #include "Direction.h"
 #include "Emitter.h"
-#include "Intersection.h"
 #include "GameObject.h"
+#include "Intersection.h"
 #include "Laser.h"
 #include "Mirror.h"
 #include "Receptor.h"
@@ -71,14 +71,14 @@ protected:
 	void addBlocks(tinyxml2::XMLElement* const blocksElement, float scale);
 	void createLevel(const std::string& filename);
 
+	bool checkWinCondition();
+
 public:
 	static cocos2d::Scene* createScene(const std::string& levelFilename);
 
 	// implement the "static create()" method manually
 	static HelloWorld* create(const std::string& levelFilename);
 	virtual bool init(const std::string& levelFilename);
-
-	bool checkWinCondition();
 
 	virtual void update(float dt) override;
 };

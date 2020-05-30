@@ -55,7 +55,7 @@ static void problemLoading(const char* filename) {
  *
  */
 HelloWorld* HelloWorld::create(const std::string& levelFilename) {
-	HelloWorld *ret = new (std::nothrow) HelloWorld();
+	HelloWorld* ret = new (std::nothrow) HelloWorld();
 	if (ret && ret->init(levelFilename)) {
 		ret->autorelease();
 		return ret;
@@ -83,39 +83,39 @@ bool HelloWorld::init(const std::string& levelFilename) {
 	// 2. add your codes below...
 
 	strToColorTypeMap = {
-		{"NONE", ColorType::NONE},
-		{"RED", ColorType::RED},
-		{"GREEN", ColorType::GREEN},
-		{"BLUE", ColorType::BLUE},
+		{"NONE",   ColorType::NONE},
+		{"RED",    ColorType::RED},
+		{"GREEN",  ColorType::GREEN},
+		{"BLUE",   ColorType::BLUE},
 		{"YELLOW", ColorType::YELLOW},
 		{"ORANGE", ColorType::ORANGE},
 		{"PURPLE", ColorType::PURPLE},
-		{"WHITE", ColorType::WHITE},
-		{"BLACK", ColorType::BLACK}
+		{"WHITE",  ColorType::WHITE},
+		{"BLACK",  ColorType::BLACK}
 	};
 
 	colorTypeToObjectColor3BMap = {
-		{ColorType::NONE, Color3B(255, 255, 255)},
-		{ColorType::RED, Color3B(255, 153, 153)},
-		{ColorType::GREEN, Color3B(153, 255, 153)},
-		{ColorType::BLUE, Color3B(153, 153, 255)},
+		{ColorType::NONE,   Color3B(255, 255, 255)},
+		{ColorType::RED,    Color3B(255, 153, 153)},
+		{ColorType::GREEN,  Color3B(153, 255, 153)},
+		{ColorType::BLUE,   Color3B(153, 153, 255)},
 		{ColorType::YELLOW, Color3B(255, 255, 255)},	// TODO
 		{ColorType::ORANGE, Color3B(255, 255, 255)},	// TODO
 		{ColorType::PURPLE, Color3B(255, 255, 255)},	// TODO
-		{ColorType::WHITE, Color3B(255, 255, 255)},
-		{ColorType::BLACK, Color3B(0, 0, 0)}
+		{ColorType::WHITE,  Color3B(255, 255, 255)},
+		{ColorType::BLACK,  Color3B(  0,   0,   0)}
 	};
 
 	colorTypeToLaserColor3BMap = {
-		{ColorType::NONE, Color3B(255, 255, 255)},
-		{ColorType::RED, Color3B(255, 0, 0)},
-		{ColorType::GREEN, Color3B(0, 255, 0)},
-		{ColorType::BLUE, Color3B(0, 0, 255)},
+		{ColorType::NONE,   Color3B(255, 255, 255)},
+		{ColorType::RED,    Color3B(255,   0,   0)},
+		{ColorType::GREEN,  Color3B(0,   255,   0)},
+		{ColorType::BLUE,   Color3B(0,     0, 255)},
 		{ColorType::YELLOW, Color3B(255, 255, 255)},	// TODO
 		{ColorType::ORANGE, Color3B(255, 255, 255)},	// TODO
 		{ColorType::PURPLE, Color3B(255, 255, 255)},	// TODO
-		{ColorType::WHITE, Color3B(255, 255, 255)},
-		{ColorType::BLACK, Color3B(0, 0, 0)}
+		{ColorType::WHITE,  Color3B(255, 255, 255)},
+		{ColorType::BLACK,  Color3B(  0,   0,   0)}
 	};
 
 	strToDirectionMap = {
@@ -132,7 +132,7 @@ bool HelloWorld::init(const std::string& levelFilename) {
 	auto background = LayerGradient::create(Color4B(253, 158, 246, 255), Color4B(255, 255, 255, 255), Vec2(1.0f, 1.0f));
 	this->addChild(background, BACKGROUND_LAYER);
 
-  Director::getInstance()->setClearColor(Color4F(1.0f, 1.0f, 1.0f, 1.0f));
+	Director::getInstance()->setClearColor(Color4F(1.0f, 1.0f, 1.0f, 1.0f));
 
 //	// add a label that shows "Hello World" and create and initialize a label
 //	auto label = Label::createWithTTF("Reflection", "fonts/motioncontrol-bold.ttf", 96);
@@ -376,8 +376,6 @@ void HelloWorld::createLevel(const std::string& filename) {
 	tinyxml2::XMLError error = document.LoadFile(filename.c_str());
 	//log("com.zenprogramming.reflection: error = %d", error);
 
-	tinyxml2::XMLElement* levelElement = document.RootElement();
-
 	//////////////////////////////////////////////////////////////////////////////
 	//
 	//  Add the initial setup objects
@@ -385,10 +383,10 @@ void HelloWorld::createLevel(const std::string& filename) {
 	//////////////////////////////////////////////////////////////////////////////
 
 	// add initial objects
-	this->addEmitters(levelElement->FirstChildElement("setup")->FirstChildElement("emitters"), scale);
-	this->addMirrors(levelElement->FirstChildElement("setup")->FirstChildElement("mirrors"), scale);
-	this->addReceptors(levelElement->FirstChildElement("setup")->FirstChildElement("receptors"), scale);
-	this->addBlocks(levelElement->FirstChildElement("setup")->FirstChildElement("blocks"), scale);
+	this->addEmitters(document.RootElement()->FirstChildElement("setup")->FirstChildElement("emitters"), scale);
+	this->addMirrors(document.RootElement()->FirstChildElement("setup")->FirstChildElement("mirrors"), scale);
+	this->addReceptors(document.RootElement()->FirstChildElement("setup")->FirstChildElement("receptors"), scale);
+	this->addBlocks(document.RootElement()->FirstChildElement("setup")->FirstChildElement("blocks"), scale);
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
@@ -397,7 +395,7 @@ void HelloWorld::createLevel(const std::string& filename) {
 	//////////////////////////////////////////////////////////////////////////////
 
 	// get the <wincondition> element
-	tinyxml2::XMLElement* winConditionElement = levelElement->FirstChildElement("wincondition");
+	tinyxml2::XMLElement* winConditionElement = document.RootElement()->FirstChildElement("wincondition");
 	if (winConditionElement) {
 		{ // parse the win condition - emitters
 			tinyxml2::XMLElement* winConditionEmittersElement = winConditionElement->FirstChildElement("emitters");
@@ -595,14 +593,14 @@ bool HelloWorld::checkWinCondition() {
 
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
 	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	Sprite* winBanner = Sprite::create("well_done.png");
+	Sprite* const winBanner = Sprite::create("well_done.png");
 	winBanner->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height/2));
 	winBanner->setOpacity(0);
 	winBanner->setScale(5.0f);
 	this->addChild(winBanner, 10);
 	winBanner->runAction(Spawn::create(
 		FadeIn::create(0.5f),
-		ScaleTo::create(0.5f, 1.5f),
+		ScaleTo::create(0.5f, 1.75f),
 		nullptr
 	));
 

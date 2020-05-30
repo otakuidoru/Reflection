@@ -63,9 +63,9 @@ bool LevelSelect::init() {
 
 	// create the level sprites
 
-	this->addLevelSprite("level_select_1.png", Vec2(origin.x + visibleSize.width / 2.0f - 512.0f * scale, origin.y + visibleSize.height - 512.0f * scale), 1, "1.xml", "Start Simply");
-	this->addLevelSprite("level_select_1.png", Vec2(origin.x + visibleSize.width / 2.0f,                  origin.y + visibleSize.height - 512.0f * scale), 2, "2.xml", "...On The Wall");
-	this->addLevelSprite("level_select_1.png", Vec2(origin.x + visibleSize.width / 2.0f + 512.0f * scale, origin.y + visibleSize.height - 512.0f * scale), 3, "3.xml", "");
+	this->addLevelSprite("level_select.png", Vec2(origin.x + visibleSize.width / 2.0f - 512.0f * scale, origin.y + visibleSize.height - 512.0f * scale), 1, "1.xml", "Start Simply");
+	this->addLevelSprite("level_select.png", Vec2(origin.x + visibleSize.width / 2.0f,                  origin.y + visibleSize.height - 512.0f * scale), 2, "2.xml", "...On The Wall");
+	this->addLevelSprite("level_select.png", Vec2(origin.x + visibleSize.width / 2.0f + 512.0f * scale, origin.y + visibleSize.height - 512.0f * scale), 3, "3.xml", "");
 
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -92,11 +92,11 @@ bool LevelSelect::init() {
 	};
 
 	// triggered when moving touch
-	touchListener->onTouchMoved = [&](Touch* touch, Event* event) {
+	touchListener->onTouchMoved = [](Touch* touch, Event* event) {
 	};
 
 	// triggered when released
-	touchListener->onTouchEnded = [&](Touch* touch, Event* event) {
+	touchListener->onTouchEnded = [](Touch* touch, Event* event) {
 	};
 
 	// add listener
@@ -116,6 +116,14 @@ void LevelSelect::addLevelSprite(const std::string& levelSpriteFilename, const V
 	auto levelSelectSprite = Sprite::create(levelSpriteFilename);
 	levelSelectSprite->setPosition(position);
 	levelSelectSprite->setScale(scale);
+	const float minSkewX = -10.0f;
+	const float maxSkewX =  10.0f;
+	const float minSkewY = -10.0f;
+	const float maxSkewY =  10.0f;
+	float skewX = ((float(rand()) / float(RAND_MAX)) * (maxSkewX - minSkewX)) + minSkewX;	// generate a skew between -10.0 and 10.0
+	float skewY = ((float(rand()) / float(RAND_MAX)) * (maxSkewY - minSkewY)) + minSkewY;	// generate a skew between -10.0 and 10.0
+	levelSelectSprite->setSkewX(skewX);
+	levelSelectSprite->setSkewX(skewY);
 	this->addChild(levelSelectSprite);
 
 	std::stringstream ss;
