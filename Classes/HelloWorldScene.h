@@ -29,6 +29,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <vector>
 #include "tinyxml2.h"
 #include "cocos2d.h"
 #include "Block.h"
@@ -55,6 +56,8 @@ protected:
 	std::set<Mirror*> mirrors;
 	std::set<Receptor*> receptors;
 
+	std::vector<cocos2d::Layer*> introLayers;
+
 	std::map<Emitter*, bool> emitterActiveWinConditions;
 	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
 
@@ -72,6 +75,7 @@ protected:
 	void createLevel(const std::string& filename);
 
 	bool checkWinCondition();
+	Laser* addLaser(float angle, const cocos2d::Vec2& position, const cocos2d::Color3B& color);
 
 public:
 	static cocos2d::Scene* createScene(const std::string& levelFilename);

@@ -49,29 +49,56 @@ bool LevelSelect::init() {
 		return false;
 	}
 
-	auto visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	const float scale = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
+	const Size visibleSize = Director::getInstance()->getVisibleSize();
+	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	const float SCALE = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
 
 	/////////////////////////////
 	// 2. add your codes below...
 
-	auto background = LayerGradient::create(Color4B(253, 158, 246, 255), Color4B(255, 255, 255, 255), Vec2(1.0f, 1.0f));
-	this->addChild(background);
+	auto background = Sprite::create("mountain_steps_background.png");
+	background->setPositionNormalized(Vec2(0.5f, 0.5f));
+	this->addChild(background, -1);
 
-  Director::getInstance()->setClearColor(Color4F(1.0f, 1.0f, 1.0f, 1.0f));
+	Director::getInstance()->setClearColor(Color4F(0.0f, 0.0f, 0.0f, 1.0f));
 
 	// create the level sprites
 
-	this->addLevelSprite("level_select.png", Vec2(origin.x + visibleSize.width / 2.0f - 512.0f * scale, origin.y + visibleSize.height - 512.0f * scale), 1, "1.xml", "Start Simply");
-	this->addLevelSprite("level_select.png", Vec2(origin.x + visibleSize.width / 2.0f,                  origin.y + visibleSize.height - 512.0f * scale), 2, "2.xml", "...On The Wall");
-	this->addLevelSprite("level_select.png", Vec2(origin.x + visibleSize.width / 2.0f + 512.0f * scale, origin.y + visibleSize.height - 512.0f * scale), 3, "3.xml", "");
+	const float START_X = 168.0f;
+	const float START_Y = origin.y + visibleSize.height - 512.0f;
+	const float SPACER = 300.0f;
 
-  //////////////////////////////////////////////////////////////////////////////
-  //
-  //  Create a "one by one" touch event listener (processes one touch at a time)
-  //
-  //////////////////////////////////////////////////////////////////////////////
+	this->addLevelSprite("level_sprite_0_stars.png", Vec2((START_X + (0 * SPACER)) * SCALE, (START_Y - (0 * SPACER)) * SCALE), SCALE, "1",  "1.xml", "Start Simply");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (1 * SPACER)) * SCALE, (START_Y - (0 * SPACER)) * SCALE), SCALE, "",  "2.xml", "...On The Wall");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (2 * SPACER)) * SCALE, (START_Y - (0 * SPACER)) * SCALE), SCALE, "",  "3.xml", "Three");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (3 * SPACER)) * SCALE, (START_Y - (0 * SPACER)) * SCALE), SCALE, "",  "4.xml", "Obstacle");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (4 * SPACER)) * SCALE, (START_Y - (0 * SPACER)) * SCALE), SCALE, "",  "5.xml", "Five");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (0 * SPACER)) * SCALE, (START_Y - (1 * SPACER)) * SCALE), SCALE, "",  "6.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (1 * SPACER)) * SCALE, (START_Y - (1 * SPACER)) * SCALE), SCALE, "",  "7.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (2 * SPACER)) * SCALE, (START_Y - (1 * SPACER)) * SCALE), SCALE, "",  "8.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (3 * SPACER)) * SCALE, (START_Y - (1 * SPACER)) * SCALE), SCALE, "",  "9.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (4 * SPACER)) * SCALE, (START_Y - (1 * SPACER)) * SCALE), SCALE, "", "10.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (0 * SPACER)) * SCALE, (START_Y - (2 * SPACER)) * SCALE), SCALE, "", "11.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (1 * SPACER)) * SCALE, (START_Y - (2 * SPACER)) * SCALE), SCALE, "", "12.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (2 * SPACER)) * SCALE, (START_Y - (2 * SPACER)) * SCALE), SCALE, "", "13.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (3 * SPACER)) * SCALE, (START_Y - (2 * SPACER)) * SCALE), SCALE, "", "14.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (4 * SPACER)) * SCALE, (START_Y - (2 * SPACER)) * SCALE), SCALE, "", "15.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (0 * SPACER)) * SCALE, (START_Y - (3 * SPACER)) * SCALE), SCALE, "", "16.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (1 * SPACER)) * SCALE, (START_Y - (3 * SPACER)) * SCALE), SCALE, "", "17.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (2 * SPACER)) * SCALE, (START_Y - (3 * SPACER)) * SCALE), SCALE, "", "18.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (3 * SPACER)) * SCALE, (START_Y - (3 * SPACER)) * SCALE), SCALE, "", "19.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (4 * SPACER)) * SCALE, (START_Y - (3 * SPACER)) * SCALE), SCALE, "", "20.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (0 * SPACER)) * SCALE, (START_Y - (4 * SPACER)) * SCALE), SCALE, "", "21.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (1 * SPACER)) * SCALE, (START_Y - (4 * SPACER)) * SCALE), SCALE, "", "22.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (2 * SPACER)) * SCALE, (START_Y - (4 * SPACER)) * SCALE), SCALE, "", "23.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (3 * SPACER)) * SCALE, (START_Y - (4 * SPACER)) * SCALE), SCALE, "", "24.xml", "");
+	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (4 * SPACER)) * SCALE, (START_Y - (4 * SPACER)) * SCALE), SCALE, "", "25.xml", "");
+
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  Create a "one by one" touch event listener (processes one touch at a time)
+	//
+	//////////////////////////////////////////////////////////////////////////////
 
 	auto touchListener = EventListenerTouchOneByOne::create();
 	touchListener->setSwallowTouches(true);
@@ -92,12 +119,10 @@ bool LevelSelect::init() {
 	};
 
 	// triggered when moving touch
-	touchListener->onTouchMoved = [](Touch* touch, Event* event) {
-	};
+	touchListener->onTouchMoved = [](Touch* touch, Event* event) {};
 
 	// triggered when released
-	touchListener->onTouchEnded = [](Touch* touch, Event* event) {
-	};
+	touchListener->onTouchEnded = [](Touch* touch, Event* event) {};
 
 	// add listener
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
@@ -108,31 +133,16 @@ bool LevelSelect::init() {
 /**
  *
  */
-void LevelSelect::addLevelSprite(const std::string& levelSpriteFilename, const Vec2& position, int num, const std::string& levelFilename, const std::string& levelTitle) {
-	auto visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	const float scale = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
-
+void LevelSelect::addLevelSprite(const std::string& levelSpriteFilename, const Vec2& position, float scale, const std::string& num, const std::string& levelFilename, const std::string& levelTitle) {
 	auto levelSelectSprite = Sprite::create(levelSpriteFilename);
 	levelSelectSprite->setPosition(position);
 	levelSelectSprite->setScale(scale);
-	const float minSkewX = -10.0f;
-	const float maxSkewX =  10.0f;
-	const float minSkewY = -10.0f;
-	const float maxSkewY =  10.0f;
-	float skewX = ((float(rand()) / float(RAND_MAX)) * (maxSkewX - minSkewX)) + minSkewX;	// generate a skew between -10.0 and 10.0
-	float skewY = ((float(rand()) / float(RAND_MAX)) * (maxSkewY - minSkewY)) + minSkewY;	// generate a skew between -10.0 and 10.0
-	levelSelectSprite->setSkewX(skewX);
-	levelSelectSprite->setSkewX(skewY);
 	this->addChild(levelSelectSprite);
 
-	std::stringstream ss;
-	ss << num;
-	auto label = Label::createWithTTF(ss.str(), "fonts/agentorange.ttf", 160);
+	auto label = Label::createWithTTF(num, "fonts/agentorange.ttf", 96);
 	label->setPositionNormalized(Vec2(0.5f, 0.5f));
 	label->setColor(Color3B(0, 0, 0));
-	levelSelectSprite->addChild(label);
-
+	levelSelectSprite->addChild(label, 10);
 	this->levelSprites[levelSelectSprite] = levelFilename;
 }
 

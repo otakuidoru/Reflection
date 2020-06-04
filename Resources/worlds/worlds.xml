@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<worlds>
+	<world order="1">
+		<title>Forest</title>
+		<folder>forest</folder>
+	</world>
+	<world order="2">
+		<title>Forest</title>
+		<folder>forest</folder>
+	</world>
+	<world order="3">
+		<title>Forest</title>
+		<folder>forest</folder>
+	</world>
+	<world order="4">
+		<title>Forest</title>
+		<folder>forest</folder>
+	</world>
+</worlds>
+

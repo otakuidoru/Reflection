@@ -31,7 +31,8 @@
 #define BACKGROUND_LAYER -1
 #define LASER_LAYER 1
 #define OBJECT_LAYER 2
-#define BACK_ARROW_LAYER 255
+#define BACK_ARROW_LAYER 254
+#define INTRO_LAYER 255
 
 USING_NS_CC;
 
@@ -45,7 +46,9 @@ Scene* HelloWorld::createScene(const std::string& levelFilename) {
 	return HelloWorld::create(levelFilename);
 }
 
-// Print useful error message instead of segfaulting when files are not there.
+/**
+ * Print useful error message instead of segfaulting when files are not there.
+ */
 static void problemLoading(const char* filename) {
 	log("Error while loading: %s\n", filename);
 	log("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
@@ -111,9 +114,9 @@ bool HelloWorld::init(const std::string& levelFilename) {
 		{ColorType::RED,    Color3B(255,   0,   0)},
 		{ColorType::GREEN,  Color3B(0,   255,   0)},
 		{ColorType::BLUE,   Color3B(0,     0, 255)},
-		{ColorType::YELLOW, Color3B(255, 255, 255)},	// TODO
-		{ColorType::ORANGE, Color3B(255, 255, 255)},	// TODO
-		{ColorType::PURPLE, Color3B(255, 255, 255)},	// TODO
+		{ColorType::YELLOW, Color3B(255, 255,   0)},
+		{ColorType::ORANGE, Color3B(251, 139,  35)},
+		{ColorType::PURPLE, Color3B(148,   0, 211)},
 		{ColorType::WHITE,  Color3B(255, 255, 255)},
 		{ColorType::BLACK,  Color3B(  0,   0,   0)}
 	};
@@ -133,18 +136,6 @@ bool HelloWorld::init(const std::string& levelFilename) {
 	this->addChild(background, BACKGROUND_LAYER);
 
 	Director::getInstance()->setClearColor(Color4F(1.0f, 1.0f, 1.0f, 1.0f));
-
-//	// add a label that shows "Hello World" and create and initialize a label
-//	auto label = Label::createWithTTF("Reflection", "fonts/motioncontrol-bold.ttf", 96);
-//	if (label == nullptr) {
-//		problemLoading("'fonts/motioncontrol-bold.ttf'");
-//	} else {
-//		// position the label on the top center of the screen
-//		label->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height - label->getContentSize().height));
-//
-//		// add the label as a child to this layer
-//		this->addChild(label, 1);
-//	}
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 #define PATH_SEPARATOR "\\"
@@ -353,10 +344,6 @@ void HelloWorld::addBlocks(tinyxml2::XMLElement* const blocksElement, float scal
 			positionElement->QueryFloatAttribute("y", &y);
 			block->setPosition(Vec2(x, y));
 
-			// set block direction
-			std::string directionStr(blockElement->FirstChildElement("direction")->GetText());
-			block->setDirection(strToDirectionMap[directionStr]);
-
 			// add the block to the scene
 			this->addChild(block, OBJECT_LAYER);
 
@@ -387,6 +374,71 @@ void HelloWorld::createLevel(const std::string& filename) {
 	this->addMirrors(document.RootElement()->FirstChildElement("setup")->FirstChildElement("mirrors"), scale);
 	this->addReceptors(document.RootElement()->FirstChildElement("setup")->FirstChildElement("receptors"), scale);
 	this->addBlocks(document.RootElement()->FirstChildElement("setup")->FirstChildElement("blocks"), scale);
+
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  Create the intro layers
+	//
+	//////////////////////////////////////////////////////////////////////////////
+
+	// get the <intro> element
+	tinyxml2::XMLElement* introElement = document.RootElement()->FirstChildElement("intro");
+	if (introElement) {
+		tinyxml2::XMLElement* layerElement = introElement->FirstChildElement("layer");
+		while (layerElement) {
+			auto layer = Layer::create();
+			this->addChild(layer, 255);
+			this->introLayers.push_back(layer);
+
+			const std::string text = layerElement->FirstChildElement("text")->GetText();
+
+			auto label = Label::createWithTTF(text, "fonts/motioncontrol-bold.ttf", 160);
+			if (label == nullptr) {
+				problemLoading("'fonts/motioncontrol-bold.ttf'");
+			} else {
+				// position the label on the top center of the screen
+				label->setPosition(Vec2(768.0f, 1024.0f));
+
+				// add the label as a child to this layer
+				layer->addChild(label, INTRO_LAYER);
+
+				//////////////////////////////////////////////////////////////////////////////
+				//
+				//  Create a "one by one" touch event listener (processes one touch at a time)
+				//
+				//////////////////////////////////////////////////////////////////////////////
+
+				auto touchListener = EventListenerTouchOneByOne::create();
+				touchListener->setSwallowTouches(true);
+
+				// triggered when pressed
+				touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
+					bool consuming = false;
+
+					if (!this->introLayers.empty()) {
+						if (this->introLayers[0]->getBoundingBox().containsPoint(touch->getLocation())) {
+							this->introLayers[0]->removeFromParent();
+						}
+					}
+
+					return consuming;
+				};
+
+				// triggered when moving touch
+				touchListener->onTouchMoved = [&](Touch* touch, Event* event) {
+				};
+
+				// triggered when released
+				touchListener->onTouchEnded = [&](Touch* touch, Event* event) {
+				};
+
+				// add listener
+				layer->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, layer);
+			}
+
+			layerElement = layerElement->NextSiblingElement("layer");
+		}
+	}
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
@@ -480,7 +532,7 @@ std::shared_ptr<Intersection> HelloWorld::getIntersection(GameObject* const obje
 
 		const float intersectionDist = ray.dist(plane);
 		if (intersectionDist > 0.0f && intersectionDist < closestIntersectionDistance) {
-			Vec3 intersectionPoint = ray.intersects(plane);
+			const Vec3 intersectionPoint = ray.intersects(plane);
 
 			if (objectBoundingBox.containsPoint(Vec2(intersectionPoint.x, intersectionPoint.y))) {
 				const PointSide intersectionPointSide = plane.getSide(ray._origin);
@@ -506,17 +558,11 @@ void HelloWorld::activateLaserChain(const Ray& originRay, const Vec3& origLaserS
 	//log("com.zenprogramming.reflection: BEGIN activateLaserChain");
 
 	const Vec3 reflectionVector = this->getReflectionVector(originPlane, originRay);
-	float angle = -std::atan2(reflectionVector.y, reflectionVector.x) * RADTODEG;
-	Ray reflectionRay(origLaserStartingPoint, reflectionVector);
+	const float angle = -std::atan2(reflectionVector.y, reflectionVector.x) * RADTODEG;
+	const Ray reflectionRay(origLaserStartingPoint, reflectionVector);
 
 	// create and add a laser
-	Laser* const laser = Laser::create(colorTypeToLaserColor3BMap[colorType]);
-	laser->setPosition(Vec2(origLaserStartingPoint.x, origLaserStartingPoint.y));
-	laser->setRotation(angle);
-	laser->setAnchorPoint(Vec2(0.0f, 0.5f));
-	laser->setScaleX(2560.0f);
-	this->addChild(laser, LASER_LAYER);
-	this->lasers.insert(laser);
+	Laser* const laser = this->addLaser(angle, Vec2(origLaserStartingPoint.x, origLaserStartingPoint.y), colorTypeToLaserColor3BMap[colorType]);
 
 	std::shared_ptr<Intersection> intersection = this->getClosestIntersection(reflectionRay);
 	if (intersection.get()) {
@@ -610,6 +656,22 @@ bool HelloWorld::checkWinCondition() {
 /**
  *
  */
+Laser* HelloWorld::addLaser(float angle, const Vec2& position, const Color3B& color) {
+	// create and add a laser
+	Laser* const laser = Laser::create(color);
+	laser->setPosition(position);
+	laser->setRotation(angle);
+	laser->setAnchorPoint(Vec2(0.0f, 0.5f));
+	laser->setScaleX(2560.0f);
+	this->addChild(laser, LASER_LAYER);
+	this->lasers.insert(laser);
+
+	return laser;
+}
+
+/**
+ *
+ */
 void HelloWorld::update(float dt) {
 	//log("com.zenprogramming.reflection: BEGIN update");
 
@@ -625,13 +687,7 @@ void HelloWorld::update(float dt) {
 			const Vec2 emitterWorldPos = emitter->getParent()->convertToWorldSpace(emitter->getPosition());
 
 			// create and add a laser
-			Laser* const laser = Laser::create(colorTypeToLaserColor3BMap[emitter->getColorType()]);
-			laser->setPosition(emitterWorldPos);
-			laser->setRotation(emitter->getRotation());
-			laser->setAnchorPoint(Vec2(0.0f, 0.5f));
-			laser->setScaleX(2560.0f);
-			this->addChild(laser, LASER_LAYER);
-			this->lasers.insert(laser);
+			Laser* const laser = this->addLaser(emitter->getRotation(), emitterWorldPos, colorTypeToLaserColor3BMap[emitter->getColorType()]);
 
 			// find the closest intersection for the emitter laser
 			std::shared_ptr<Intersection> intersection = this->getClosestIntersection(laser->getRay());
