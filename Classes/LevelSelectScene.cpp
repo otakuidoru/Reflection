@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <sstream>
+#include <sqlite3.h>
 #include "LevelSelectScene.h"
 #include "HelloWorldScene.h"
 
@@ -41,6 +42,59 @@ static void problemLoading(const char* filename) {
 	log("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
+/**
+ *
+ */
+static int callback(void* object, int argc, char** data, char** azColName) {
+	if (LevelSelect* const scene = static_cast<LevelSelect*>(object)) {
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+		const float SCALE = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
+
+		std::string levelNumFilename(scene->levelNumFilePathMap[std::atoi(data[3])]);
+		log("com.zenprogramming.reflection: here level filename num %s", levelNumFilename.c_str());
+		std::string levelFilename(data[4]);
+		log("com.zenprogramming.reflection: here level filename %s", levelFilename.c_str());
+		const float x = std::atof(data[5]);
+		log("com.zenprogramming.reflection: here x %f", x);
+		const float y = std::atof(data[6]);
+		log("com.zenprogramming.reflection: here y %f", y);
+		const bool locked = std::atoi(data[7]) == 1;
+		const int numStars = std::atoi(data[8]);
+
+		std::string levelSpriteFilename;
+		if (locked) {
+			levelSpriteFilename = "level_sprite_locked.png";
+		} else if (numStars == 0) {
+			levelSpriteFilename = "level_sprite_0_stars.png";
+		} else if (numStars == 1) {
+			levelSpriteFilename = "level_sprite_1_stars.png";
+		} else if (numStars == 2) {
+			levelSpriteFilename = "level_sprite_2_stars.png";
+		} else if (numStars == 3) {
+			levelSpriteFilename = "level_sprite_3_stars.png";
+		}
+
+		//log("com.zenprogramming.reflection: levelSpriteFilename = %s", levelSpriteFilename.c_str());
+
+		auto levelSelectSprite = Sprite::create(levelSpriteFilename);
+		levelSelectSprite->setPosition(Vec2(x, y));
+		levelSelectSprite->setScale(SCALE);
+		scene->addChild(levelSelectSprite);
+
+		if (!locked) {
+			auto levelNumSprite = Sprite::create(levelNumFilename);
+			levelNumSprite->setPositionNormalized(Vec2(0.5f, 0.5f));
+			levelSelectSprite->setScale(SCALE);
+			levelSelectSprite->addChild(levelNumSprite, 10);
+		}
+
+		scene->levelSprites[levelSelectSprite] = levelFilename;
+	}
+
+	return 0;
+}
+
 // on "init" you need to initialize your instance
 bool LevelSelect::init() {
 	//////////////////////////////
@@ -48,6 +102,34 @@ bool LevelSelect::init() {
 	if (!Scene::init()) {
 		return false;
 	}
+
+	this->levelNumFilePathMap = {
+		{  1,  "numbers/1.png" },
+		{  2,  "numbers/2.png" },
+		{  3,  "numbers/3.png" },
+		{  4,  "numbers/4.png" },
+		{  5,  "numbers/5.png" },
+		{  6,  "numbers/6.png" },
+		{  7,  "numbers/7.png" },
+		{  8,  "numbers/8.png" },
+		{  9,  "numbers/9.png" },
+		{ 10, "numbers/10.png" },
+		{ 11, "numbers/11.png" },
+		{ 12, "numbers/12.png" },
+		{ 13, "numbers/13.png" },
+		{ 14, "numbers/14.png" },
+		{ 15, "numbers/15.png" },
+		{ 16, "numbers/16.png" },
+		{ 17, "numbers/17.png" },
+		{ 18, "numbers/18.png" },
+		{ 19, "numbers/19.png" },
+		{ 20, "numbers/20.png" },
+		{ 21, "numbers/21.png" },
+		{ 22, "numbers/22.png" },
+		{ 23, "numbers/23.png" },
+		{ 24, "numbers/24.png" },
+		{ 25, "numbers/25.png" },
+	};
 
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
 	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -62,37 +144,59 @@ bool LevelSelect::init() {
 
 	Director::getInstance()->setClearColor(Color4F(0.0f, 0.0f, 0.0f, 1.0f));
 
+	/////////////////////////////////////////////////////////////////////////////
+
+	// TODO: check for existance of levels.db file first
+
+	std::string DB_FILENAME = "levels.db";
+
+	std::stringstream source;
+	source << DB_FILENAME;
+	//log("com.zenprogramming.reflection: Source Filename = %s", source.str().c_str());
+
+	std::stringstream target;
+	target << FileUtils::getInstance()->getWritablePath() << DB_FILENAME;
+	//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
+
+	// copy the file to the writable area on the device
+	FileUtils::getInstance()->writeDataToFile(FileUtils::getInstance()->getDataFromFile(source.str()), target.str());
+	//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
+
+	/////////////////////////////////////////////////////////////////////////////
+
 	// create the level sprites
 
-	const float START_X = 168.0f;
-	const float START_Y = origin.y + visibleSize.height - 512.0f;
-	const float SPACER = 300.0f;
+	sqlite3* db;
+	char* zErrMsg = 0;
+	int rc;
 
-	this->addLevelSprite("level_sprite_0_stars.png", Vec2((START_X + (0 * SPACER)) * SCALE, (START_Y - (0 * SPACER)) * SCALE), SCALE, "1",  "1.xml", "Start Simply");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (1 * SPACER)) * SCALE, (START_Y - (0 * SPACER)) * SCALE), SCALE, "",  "2.xml", "...On The Wall");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (2 * SPACER)) * SCALE, (START_Y - (0 * SPACER)) * SCALE), SCALE, "",  "3.xml", "Three");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (3 * SPACER)) * SCALE, (START_Y - (0 * SPACER)) * SCALE), SCALE, "",  "4.xml", "Obstacle");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (4 * SPACER)) * SCALE, (START_Y - (0 * SPACER)) * SCALE), SCALE, "",  "5.xml", "Five");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (0 * SPACER)) * SCALE, (START_Y - (1 * SPACER)) * SCALE), SCALE, "",  "6.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (1 * SPACER)) * SCALE, (START_Y - (1 * SPACER)) * SCALE), SCALE, "",  "7.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (2 * SPACER)) * SCALE, (START_Y - (1 * SPACER)) * SCALE), SCALE, "",  "8.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (3 * SPACER)) * SCALE, (START_Y - (1 * SPACER)) * SCALE), SCALE, "",  "9.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (4 * SPACER)) * SCALE, (START_Y - (1 * SPACER)) * SCALE), SCALE, "", "10.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (0 * SPACER)) * SCALE, (START_Y - (2 * SPACER)) * SCALE), SCALE, "", "11.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (1 * SPACER)) * SCALE, (START_Y - (2 * SPACER)) * SCALE), SCALE, "", "12.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (2 * SPACER)) * SCALE, (START_Y - (2 * SPACER)) * SCALE), SCALE, "", "13.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (3 * SPACER)) * SCALE, (START_Y - (2 * SPACER)) * SCALE), SCALE, "", "14.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (4 * SPACER)) * SCALE, (START_Y - (2 * SPACER)) * SCALE), SCALE, "", "15.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (0 * SPACER)) * SCALE, (START_Y - (3 * SPACER)) * SCALE), SCALE, "", "16.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (1 * SPACER)) * SCALE, (START_Y - (3 * SPACER)) * SCALE), SCALE, "", "17.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (2 * SPACER)) * SCALE, (START_Y - (3 * SPACER)) * SCALE), SCALE, "", "18.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (3 * SPACER)) * SCALE, (START_Y - (3 * SPACER)) * SCALE), SCALE, "", "19.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (4 * SPACER)) * SCALE, (START_Y - (3 * SPACER)) * SCALE), SCALE, "", "20.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (0 * SPACER)) * SCALE, (START_Y - (4 * SPACER)) * SCALE), SCALE, "", "21.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (1 * SPACER)) * SCALE, (START_Y - (4 * SPACER)) * SCALE), SCALE, "", "22.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (2 * SPACER)) * SCALE, (START_Y - (4 * SPACER)) * SCALE), SCALE, "", "23.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (3 * SPACER)) * SCALE, (START_Y - (4 * SPACER)) * SCALE), SCALE, "", "24.xml", "");
-	this->addLevelSprite("level_sprite_locked.png",  Vec2((START_X + (4 * SPACER)) * SCALE, (START_Y - (4 * SPACER)) * SCALE), SCALE, "", "25.xml", "");
+	// open the database
+	rc = sqlite3_open(target.str().c_str(), &db);
+	if (rc) {
+		log("com.zenprogramming.reflection: Can't open database: %s", sqlite3_errmsg(db));
+		sqlite3_close(db);
+		return false;
+	}
+
+	std::string sql = "SELECT id, title, world_id, level_num, file_path, x, y, locked, num_stars, fastest_time FROM levels WHERE world_id = 1";
+	rc = sqlite3_exec(db, sql.c_str(), callback, static_cast<void*>(this), &zErrMsg);
+	if (rc != SQLITE_OK) {
+		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+
+	//levelNumLockedMap
+/*
+	std::string sql = "SELECT id, title, world_id, level_num, file_path, x, y, locked, num_stars, fastest_time FROM levels WHERE world_id = 1";
+	rc = sqlite3_exec(db, sql.c_str(), callback, static_cast<void*>(this), &zErrMsg);
+	if (rc != SQLITE_OK) {
+		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+*/
+
+	// close the database
+	rc = sqlite3_close(db);
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
@@ -128,21 +232,5 @@ bool LevelSelect::init() {
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
 
 	return true;
-}
-
-/**
- *
- */
-void LevelSelect::addLevelSprite(const std::string& levelSpriteFilename, const Vec2& position, float scale, const std::string& num, const std::string& levelFilename, const std::string& levelTitle) {
-	auto levelSelectSprite = Sprite::create(levelSpriteFilename);
-	levelSelectSprite->setPosition(position);
-	levelSelectSprite->setScale(scale);
-	this->addChild(levelSelectSprite);
-
-	auto label = Label::createWithTTF(num, "fonts/agentorange.ttf", 96);
-	label->setPositionNormalized(Vec2(0.5f, 0.5f));
-	label->setColor(Color3B(0, 0, 0));
-	levelSelectSprite->addChild(label, 10);
-	this->levelSprites[levelSelectSprite] = levelFilename;
 }
 

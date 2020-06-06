@@ -26,15 +26,15 @@
 #define __LEVEL_SELECT_SCENE_H__
 
 #include <map>
+#include <string>
 #include "cocos2d.h"
 
 class LevelSelect : public cocos2d::Scene {
-protected:
-	std::map<cocos2d::Sprite*, std::string> levelSprites;
-
-	void addLevelSprite(const std::string& levelSpriteFilename, const cocos2d::Vec2& position, float scale, const std::string& num, const std::string& levelFilename, const std::string& levelTitle);
-
 public:
+	std::map<cocos2d::Sprite*, std::string> levelSprites;
+	std::map<int, std::string> levelNumFilePathMap;
+	std::map<int, bool> levelNumLockedMap;
+
 	static cocos2d::Scene* createScene();
 
 	// implement the "static create()" method manually

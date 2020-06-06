@@ -73,14 +73,14 @@ bool Mirror::initWithFile(const std::string& filename) {
 	this->setPlaneReflective(1, false);
 	this->setPlaneReflective(2, false);
 
-  //////////////////////////////////////////////////////////////////////////////
-  //
-  //  Create a "one by one" touch event listener (processes one touch at a time)
-  //
-  //////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  Create a "one by one" touch event listener (processes one touch at a time)
+	//
+	//////////////////////////////////////////////////////////////////////////////
 
-  auto touchListener = EventListenerTouchOneByOne::create();
-  touchListener->setSwallowTouches(true);
+	auto touchListener = EventListenerTouchOneByOne::create();
+	touchListener->setSwallowTouches(true);
 
 	// triggered when pressed
 	touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {

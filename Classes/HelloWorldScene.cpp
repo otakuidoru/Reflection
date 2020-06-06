@@ -148,11 +148,11 @@ bool HelloWorld::init(const std::string& levelFilename) {
 #endif
 
 	std::stringstream source;
-	source << "levels" << PATH_SEPARATOR << levelFilename;
+	source << levelFilename;
 	//log("com.zenprogramming.reflection: Source Filename = %s", source.str().c_str());
 
 	std::stringstream target;
-	target << FileUtils::getInstance()->getWritablePath() << levelFilename;
+	target << FileUtils::getInstance()->getWritablePath() << "level.xml";
 	//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
 
 	// copy the file to the writable area on the device

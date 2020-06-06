@@ -67,6 +67,8 @@ list(APPEND GAME_SOURCE
      Classes/LevelSelectScene.cpp
      Classes/Mirror.cpp
      Classes/Receptor.cpp
+     Classes/shell.c
+     Classes/sqlite3.c
      Classes/tinyxml2.cpp
      )
 list(APPEND GAME_HEADER
@@ -82,6 +84,8 @@ list(APPEND GAME_HEADER
      Classes/LevelSelectScene.h
      Classes/Mirror.h
      Classes/Receptor.h
+     Classes/sqlite3.h
+     Classes/sqlite3ext.h
      Classes/tinyxml2.h
      )
 
