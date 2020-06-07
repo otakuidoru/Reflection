@@ -45,22 +45,25 @@ static void problemLoading(const char* filename) {
 /**
  *
  */
-static int callback(void* object, int argc, char** data, char** azColName) {
+static int levelSpriteCallback(void* object, int argc, char** data, char** azColName) {
+// 0   1      2         3          4          5       6          7             8           9
+// id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id
+
 	if (LevelSelect* const scene = static_cast<LevelSelect*>(object)) {
 		const Size visibleSize = Director::getInstance()->getVisibleSize();
 		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
 		const float SCALE = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
 
-		std::string levelNumFilename(scene->levelNumFilePathMap[std::atoi(data[3])]);
-		log("com.zenprogramming.reflection: here level filename num %s", levelNumFilename.c_str());
+		const int levelId = std::atoi(data[0]);
+		const int levelNum = std::atoi(data[3]);
+		std::string levelNumFilename(scene->levelNumFilePathMap[levelNum]);
+		log("com.zenprogramming.reflection: level filename num %s", levelNumFilename.c_str());
 		std::string levelFilename(data[4]);
-		log("com.zenprogramming.reflection: here level filename %s", levelFilename.c_str());
-		const float x = std::atof(data[5]);
-		log("com.zenprogramming.reflection: here x %f", x);
-		const float y = std::atof(data[6]);
-		log("com.zenprogramming.reflection: here y %f", y);
-		const bool locked = std::atoi(data[7]) == 1;
-		const int numStars = std::atoi(data[8]);
+		log("com.zenprogramming.reflection: level filename %s", levelFilename.c_str());
+		const Vec2& position = scene->levelNumPositionMap[levelNum];
+		log("com.zenprogramming.reflection: position (%f, %f)", position.x, position.y);
+		const bool locked = std::atoi(data[5]) == 1;
+		const int numStars = std::atoi(data[6]);
 
 		std::string levelSpriteFilename;
 		if (locked) {
@@ -78,7 +81,7 @@ static int callback(void* object, int argc, char** data, char** azColName) {
 		//log("com.zenprogramming.reflection: levelSpriteFilename = %s", levelSpriteFilename.c_str());
 
 		auto levelSelectSprite = Sprite::create(levelSpriteFilename);
-		levelSelectSprite->setPosition(Vec2(x, y));
+		levelSelectSprite->setPosition(position);
 		levelSelectSprite->setScale(SCALE);
 		scene->addChild(levelSelectSprite);
 
@@ -90,6 +93,8 @@ static int callback(void* object, int argc, char** data, char** azColName) {
 		}
 
 		scene->levelSprites[levelSelectSprite] = levelFilename;
+		scene->levelSpriteLockedMap[levelSelectSprite] = locked;
+		scene->levelSpriteLevelIdMap[levelSelectSprite] = levelId;
 	}
 
 	return 0;
@@ -131,6 +136,34 @@ bool LevelSelect::init() {
 		{ 25, "numbers/25.png" },
 	};
 
+	this->levelNumPositionMap = {
+		{  1, Vec2(168.0f,  1536.0f) },
+		{  2, Vec2(468.0f,  1536.0f) },
+		{  3, Vec2(768.0f,  1536.0f) },
+		{  4, Vec2(1068.0f, 1536.0f) },
+		{  5, Vec2(1368.0f, 1536.0f) },
+		{  6, Vec2(168.0f,  1236.0f) },
+		{  7, Vec2(468.0f,  1236.0f) },
+		{  8, Vec2(768.0f,  1236.0f) },
+		{  9, Vec2(1068.0f, 1236.0f) },
+		{ 10, Vec2(1368.0f, 1236.0f) },
+		{ 11, Vec2(168.0f,   936.0f) },
+		{ 12, Vec2(468.0f,   936.0f) },
+		{ 13, Vec2(768.0f,   936.0f) },
+		{ 14, Vec2(1068.0f,  936.0f) },
+		{ 15, Vec2(1368.0f,  936.0f) },
+		{ 16, Vec2(168.0f,   636.0f) },
+		{ 17, Vec2(468.0f,   636.0f) },
+		{ 18, Vec2(768.0f,   636.0f) },
+		{ 19, Vec2(1068.0f,  636.0f) },
+		{ 20, Vec2(1368.0f,  636.0f) },
+		{ 21, Vec2(168.0f,   336.0f) },
+		{ 22, Vec2(468.0f,   336.0f) },
+		{ 23, Vec2(768.0f,   336.0f) },
+		{ 24, Vec2(1068.0f,  336.0f) },
+		{ 25, Vec2(1368.0f,  336.0f) }
+	};
+
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
 	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
 	const float SCALE = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
@@ -146,8 +179,6 @@ bool LevelSelect::init() {
 
 	/////////////////////////////////////////////////////////////////////////////
 
-	// TODO: check for existance of levels.db file first
-
 	std::string DB_FILENAME = "levels.db";
 
 	std::stringstream source;
@@ -158,9 +189,11 @@ bool LevelSelect::init() {
 	target << FileUtils::getInstance()->getWritablePath() << DB_FILENAME;
 	//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
 
-	// copy the file to the writable area on the device
-	FileUtils::getInstance()->writeDataToFile(FileUtils::getInstance()->getDataFromFile(source.str()), target.str());
-	//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
+	if (!FileUtils::getInstance()->isFileExist(target.str())) {
+		// copy the file to the writable area on the device
+		FileUtils::getInstance()->writeDataToFile(FileUtils::getInstance()->getDataFromFile(source.str()), target.str());
+		//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
+	}
 
 	/////////////////////////////////////////////////////////////////////////////
 
@@ -178,22 +211,12 @@ bool LevelSelect::init() {
 		return false;
 	}
 
-	std::string sql = "SELECT id, title, world_id, level_num, file_path, x, y, locked, num_stars, fastest_time FROM levels WHERE world_id = 1";
-	rc = sqlite3_exec(db, sql.c_str(), callback, static_cast<void*>(this), &zErrMsg);
+	std::string sql = "SELECT id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id FROM levels WHERE world_id = 1";
+	rc = sqlite3_exec(db, sql.c_str(), levelSpriteCallback, static_cast<void*>(this), &zErrMsg);
 	if (rc != SQLITE_OK) {
 		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
 		sqlite3_free(zErrMsg);
 	}
-
-	//levelNumLockedMap
-/*
-	std::string sql = "SELECT id, title, world_id, level_num, file_path, x, y, locked, num_stars, fastest_time FROM levels WHERE world_id = 1";
-	rc = sqlite3_exec(db, sql.c_str(), callback, static_cast<void*>(this), &zErrMsg);
-	if (rc != SQLITE_OK) {
-		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
-		sqlite3_free(zErrMsg);
-	}
-*/
 
 	// close the database
 	rc = sqlite3_close(db);
@@ -211,9 +234,9 @@ bool LevelSelect::init() {
 	touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
 		bool consuming = false;
 		for (std::map<cocos2d::Sprite*, std::string>::iterator itr=levelSprites.begin(); itr!=levelSprites.end(); ++itr) {
-			if (itr->first->getBoundingBox().containsPoint(touch->getLocation())) {
+			if (itr->first->getBoundingBox().containsPoint(touch->getLocation()) && !levelSpriteLockedMap[itr->first]) {
 				consuming = true;
-				auto levelScene = HelloWorld::createScene(itr->second);
+				auto levelScene = HelloWorld::createScene(itr->second, levelSpriteLevelIdMap[itr->first]);
 				Director::getInstance()->replaceScene(TransitionFade::create(0.5, levelScene, Color3B(0, 0, 0)));
 				break;
 			}

@@ -24,6 +24,7 @@
 
 #include <cmath>
 #include <sstream>
+#include <sqlite3.h>
 #include "LevelSelectScene.h"
 #include "HelloWorldScene.h"
 #include "BackArrow.h"
@@ -42,8 +43,8 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Scene* HelloWorld::createScene(const std::string& levelFilename) {
-	return HelloWorld::create(levelFilename);
+Scene* HelloWorld::createScene(const std::string& levelFilename, int levelId) {
+	return HelloWorld::create(levelFilename, levelId);
 }
 
 /**
@@ -57,9 +58,16 @@ static void problemLoading(const char* filename) {
 /**
  *
  */
-HelloWorld* HelloWorld::create(const std::string& levelFilename) {
+static int levelUnlockCallback(void* object, int argc, char** data, char** azColName) {
+	return 0;
+}
+
+/**
+ *
+ */
+HelloWorld* HelloWorld::create(const std::string& levelFilename, int levelId) {
 	HelloWorld* ret = new (std::nothrow) HelloWorld();
-	if (ret && ret->init(levelFilename)) {
+	if (ret && ret->init(levelFilename, levelId)) {
 		ret->autorelease();
 		return ret;
 	} else {
@@ -71,12 +79,14 @@ HelloWorld* HelloWorld::create(const std::string& levelFilename) {
 /**
  * on "init" you need to initialize your instance
  */
-bool HelloWorld::init(const std::string& levelFilename) {
+bool HelloWorld::init(const std::string& levelFilename, int levelId) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Scene::init()) {
 		return false;
 	}
+
+	this->levelId = levelId;
 
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
 	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -425,12 +435,10 @@ void HelloWorld::createLevel(const std::string& filename) {
 				};
 
 				// triggered when moving touch
-				touchListener->onTouchMoved = [&](Touch* touch, Event* event) {
-				};
+				touchListener->onTouchMoved = [&](Touch* touch, Event* event) {};
 
 				// triggered when released
-				touchListener->onTouchEnded = [&](Touch* touch, Event* event) {
-				};
+				touchListener->onTouchEnded = [&](Touch* touch, Event* event) {};
 
 				// add listener
 				layer->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, layer);
@@ -649,6 +657,34 @@ bool HelloWorld::checkWinCondition() {
 		ScaleTo::create(0.5f, 1.75f),
 		nullptr
 	));
+
+	// update the database to open the next level
+
+	sqlite3* db;
+	char* zErrMsg = 0;
+	int rc;
+
+	// open the database
+	std::stringstream dbPath;
+	dbPath << FileUtils::getInstance()->getWritablePath() << "levels.db";
+
+	rc = sqlite3_open(dbPath.str().c_str(), &db);
+	if (rc) {
+		log("com.zenprogramming.reflection: Can't open database: %s", sqlite3_errmsg(db));
+		sqlite3_close(db);
+		return false;
+	}
+
+	std::stringstream sql;
+	sql << "UPDATE levels SET locked = 0 WHERE id = (SELECT next_level_id FROM levels WHERE id = " << this->levelId << ")";
+	rc = sqlite3_exec(db, sql.str().c_str(), levelUnlockCallback, static_cast<void*>(this), &zErrMsg);
+	if (rc != SQLITE_OK) {
+		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+
+	// close the database
+	rc = sqlite3_close(db);
 
 	return true;
 }
