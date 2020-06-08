@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <cmath>
-#include "Portal.h"
+#include "Splitter.h"
 #include "ColorType.h"
 
 USING_NS_CC;
@@ -34,32 +34,32 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Portal::Portal(int id) : GameObject(id, ColorType::NONE, 4) {
+Splitter::Splitter(int id) : GameObject(id, ColorType::NONE, 4) {
 }
 
 /**
  *
  */
-Portal::~Portal() {
+Splitter::~Splitter() {
 }
 
 /**
  *
  */
-Portal* Portal::create(int id) {
-	Portal* portal = new (std::nothrow) Portal(id);
-	if (portal && portal->initWithFile("portal.png")) {
-		portal->autorelease();
-		return portal;
+Splitter* Splitter::create(int id) {
+	Splitter* splitter = new (std::nothrow) Splitter(id);
+	if (splitter && splitter->initWithFile("splitter.png")) {
+		splitter->autorelease();
+		return splitter;
 	}
-	CC_SAFE_DELETE(portal);
+	CC_SAFE_DELETE(splitter);
 	return nullptr;
 }
 
 /**
  * on "init" you need to initialize your instance
  */
-bool Portal::initWithFile(const std::string& filename) {
+bool Splitter::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
 	if (!GameObject::initWithFile(filename)) {
@@ -78,7 +78,7 @@ bool Portal::initWithFile(const std::string& filename) {
 /**
  *
  */
-Plane Portal::getPlane(unsigned int index) {
+Plane Splitter::getPlane(unsigned int index) {
 	Plane plane;
 
 	const Vec2 worldPos = this->getParent()->convertToWorldSpace(this->getPosition());

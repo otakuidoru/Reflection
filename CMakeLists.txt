@@ -59,6 +59,7 @@ list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
      Classes/BackArrow.cpp
      Classes/Block.cpp
+     Classes/Combiner.cpp
      Classes/Emitter.cpp
      Classes/GameObject.cpp
      Classes/HelloWorldScene.cpp
@@ -66,7 +67,9 @@ list(APPEND GAME_SOURCE
      Classes/Laser.cpp
      Classes/LevelSelectScene.cpp
      Classes/Mirror.cpp
+     Classes/Portal.cpp
      Classes/Receptor.cpp
+     Classes/Splitter.cpp
      Classes/shell.c
      Classes/sqlite3.c
      Classes/tinyxml2.cpp
@@ -75,6 +78,7 @@ list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/BackArrow.h
      Classes/Block.h
+     Classes/Combiner.h
      Classes/Direction.h
      Classes/Emitter.h
      Classes/GameObject.h
@@ -83,7 +87,9 @@ list(APPEND GAME_HEADER
      Classes/Laser.h
      Classes/LevelSelectScene.h
      Classes/Mirror.h
+     Classes/Portal.h
      Classes/Receptor.h
+     Classes/Splitter.h
      Classes/sqlite3.h
      Classes/sqlite3ext.h
      Classes/tinyxml2.h

@@ -23,8 +23,7 @@
  ****************************************************************************/
 
 #include <cmath>
-#include "Portal.h"
-#include "ColorType.h"
+#include "Combiner.h"
 
 USING_NS_CC;
 
@@ -34,32 +33,32 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Portal::Portal(int id) : GameObject(id, ColorType::NONE, 4) {
+Combiner::Combiner(int id) : GameObject(id, ColorType::NONE, 4) {
 }
 
 /**
  *
  */
-Portal::~Portal() {
+Combiner::~Combiner() {
 }
 
 /**
  *
  */
-Portal* Portal::create(int id) {
-	Portal* portal = new (std::nothrow) Portal(id);
-	if (portal && portal->initWithFile("portal.png")) {
-		portal->autorelease();
-		return portal;
+Combiner* Combiner::create(int id) {
+	Combiner* combiner = new (std::nothrow) Combiner(id);
+	if (combiner && combiner->initWithFile("combiner.png")) {
+		combiner->autorelease();
+		return combiner;
 	}
-	CC_SAFE_DELETE(portal);
+	CC_SAFE_DELETE(combiner);
 	return nullptr;
 }
 
 /**
  * on "init" you need to initialize your instance
  */
-bool Portal::initWithFile(const std::string& filename) {
+bool Combiner::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
 	if (!GameObject::initWithFile(filename)) {
@@ -78,7 +77,7 @@ bool Portal::initWithFile(const std::string& filename) {
 /**
  *
  */
-Plane Portal::getPlane(unsigned int index) {
+Plane Combiner::getPlane(unsigned int index) {
 	Plane plane;
 
 	const Vec2 worldPos = this->getParent()->convertToWorldSpace(this->getPosition());
