@@ -522,6 +522,7 @@ Vec3 HelloWorld::getReflectionVector(const Plane& plane, const Ray& ray) {
 /**
  *
  */
+/*
 std::shared_ptr<Intersection> HelloWorld::getIntersection(GameObject* const object, const Ray& ray) {
 	//log("com.zenprogramming.reflection: BEGIN getIntersection");
 	//log("com.zenprogramming.reflection: object = %d", object->getId());
@@ -558,6 +559,7 @@ std::shared_ptr<Intersection> HelloWorld::getIntersection(GameObject* const obje
 	//log("com.zenprogramming.reflection: END getIntersection");
 	return intersection;
 }
+*/
 
 /**
  *
@@ -629,7 +631,15 @@ std::shared_ptr<Intersection> HelloWorld::getClosestIntersection(const Ray& ray)
  *
  */
 bool HelloWorld::checkWinCondition() {
-	// check the emitters for win condition
+	//log("com.zenprogramming.reflection: BEGIN checkWinCondition");
+
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  Check all objects for their win condition
+	//
+	//////////////////////////////////////////////////////////////////////////////
+
+	// check the emitters active state for win condition
 	for (std::map<Emitter*, bool>::iterator itr=emitterActiveWinConditions.begin(); itr!=emitterActiveWinConditions.end(); ++itr) {
 		Emitter* const emitter = itr->first;
 		if (emitter->isActive() != itr->second) {
@@ -637,13 +647,19 @@ bool HelloWorld::checkWinCondition() {
 		}
 	}
 
-	// check the mirrors for win condition
+	// check the mirrors direction state for win condition
 	for (std::map<Mirror*, Direction>::iterator itr=mirrorDirectionWinConditions.begin(); itr!=mirrorDirectionWinConditions.end(); ++itr) {
 		Mirror* const mirror = itr->first;
 		if (mirror->getDirection() != itr->second) {
 			return false;
 		}
 	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  Play the win animation
+	//
+	//////////////////////////////////////////////////////////////////////////////
 
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
 	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -658,7 +674,31 @@ bool HelloWorld::checkWinCondition() {
 		nullptr
 	));
 
-	// update the database to open the next level
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  Copy the scene to a RenderTexture
+	//
+	//////////////////////////////////////////////////////////////////////////////
+
+	// create and copy the scene to a RenderTexture
+	RenderTexture* renderTexture = RenderTexture::create(this->getBoundingBox().size.width, this->getBoundingBox().size.height, PixelFormat::RGBA8888);
+	renderTexture->begin();
+	this->visit();
+	renderTexture->end();
+
+	// remove all objects from the scene
+	//for (auto object : this->objects) {
+	//	object->removeFromParent();
+	//}
+	//this->objects.clear();
+
+	// TODO: do sand blowing away animation
+
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  Update the database to open the next level
+	//
+	//////////////////////////////////////////////////////////////////////////////
 
 	sqlite3* db;
 	char* zErrMsg = 0;
@@ -685,6 +725,8 @@ bool HelloWorld::checkWinCondition() {
 
 	// close the database
 	rc = sqlite3_close(db);
+
+	//log("com.zenprogramming.reflection: END checkWinCondition");
 
 	return true;
 }

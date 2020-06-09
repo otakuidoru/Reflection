@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <worlds>
-	<world order="1">
-		<title>Forest</title>
+	<world order="0">
+		<title>Tranquil Forest</title>
 		<folder>forest</folder>
+	</world>
+	<world order="1">
+		<title>Meadow</title>
+		<folder>meadow</folder>
 	</world>
 	<world order="2">
-		<title>Forest</title>
-		<folder>forest</folder>
+		<title>Mountain</title>
+		<folder>Mountain</folder>
 	</world>
 	<world order="3">
-		<title>Forest</title>
-		<folder>forest</folder>
+		<title>Calming River</title>
+		<folder>river</folder>
 	</world>
 	<world order="4">
-		<title>Forest</title>
-		<folder>forest</folder>
+		<title>Ocean</title>
+		<folder>ocean</folder>
+	</world>
+	<world order="5">
+		<title>Space</title>
+		<folder>space</folder>
+	</world>
+	<world order="6">
+		<title>Astral Plane</title>
+		<folder>astralplane</folder>
 	</world>
 </worlds>
 

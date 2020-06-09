@@ -34,6 +34,7 @@
 #include "cocos2d.h"
 #include "Block.h"
 #include "ColorType.h"
+#include "Combiner.h"
 #include "Direction.h"
 #include "Emitter.h"
 #include "GameObject.h"
@@ -41,6 +42,8 @@
 #include "Laser.h"
 #include "Mirror.h"
 #include "Receptor.h"
+#include "Portal.h"
+#include "Splitter.h"
 
 class HelloWorld : public cocos2d::Scene {
 protected:
@@ -55,6 +58,9 @@ protected:
 	std::set<Laser*> lasers;
 	std::set<Mirror*> mirrors;
 	std::set<Receptor*> receptors;
+	std::set<Portal*> portals;
+	std::set<Combiner*> combiners;
+	std::set<Splitter*> splitters;
 
 	std::vector<cocos2d::Layer*> introLayers;
 
@@ -65,7 +71,7 @@ protected:
 
 	// level methods
 	cocos2d::Vec3 getReflectionVector(const cocos2d::Plane& plane, const cocos2d::Ray& ray);
-	std::shared_ptr<Intersection> getIntersection(GameObject* const object, const cocos2d::Ray& ray);
+	//std::shared_ptr<Intersection> getIntersection(GameObject* const object, const cocos2d::Ray& ray);
 	std::shared_ptr<Intersection> getClosestIntersection(const cocos2d::Ray& ray);
 	void activateLaserChain(const cocos2d::Ray& originRay, const cocos2d::Vec3& origLaserStartingPoint, const cocos2d::Plane& originPlane, ColorType colorType);
 
@@ -74,6 +80,9 @@ protected:
 	void addMirrors(tinyxml2::XMLElement* const mirrorsElement, float scale);
 	void addReceptors(tinyxml2::XMLElement* const receptorsElement, float scale);
 	void addBlocks(tinyxml2::XMLElement* const blocksElement, float scale);
+	void addPortals(tinyxml2::XMLElement* const portalsElement, float scale);
+	void addCombiners(tinyxml2::XMLElement* const combinersElement, float scale);
+	void addSplitters(tinyxml2::XMLElement* const splittersElement, float scale);
 	void createLevel(const std::string& filename);
 
 	bool checkWinCondition();
