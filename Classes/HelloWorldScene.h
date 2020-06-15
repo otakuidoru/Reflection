@@ -68,10 +68,10 @@ protected:
 	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
 
 	int levelId;
+	bool ready;
 
 	// level methods
 	cocos2d::Vec3 getReflectionVector(const cocos2d::Plane& plane, const cocos2d::Ray& ray);
-	//std::shared_ptr<Intersection> getIntersection(GameObject* const object, const cocos2d::Ray& ray);
 	std::shared_ptr<Intersection> getClosestIntersection(const cocos2d::Ray& ray);
 	void activateLaserChain(const cocos2d::Ray& originRay, const cocos2d::Vec3& origLaserStartingPoint, const cocos2d::Plane& originPlane, ColorType colorType);
 

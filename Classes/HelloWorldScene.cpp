@@ -179,6 +179,8 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId) {
 	backArrow->setPosition(Vec2(96.0f, 1968.0f));
 	this->addChild(backArrow, BACK_ARROW_LAYER);
 
+	this->ready = true;
+
 	this->scheduleUpdate();
 
 	return true;
@@ -203,7 +205,7 @@ void HelloWorld::addEmitters(tinyxml2::XMLElement* const emittersElement, float 
 			// create emitter
 			auto emitter = Emitter::create(id, colorType);
 			emitter->onAfterActivate = [&]() {
-				this->checkWinCondition();
+				//this->checkWinCondition();
 			};
 			this->emitters.insert(emitter);
 			this->objects.insert(emitter);
@@ -253,7 +255,7 @@ void HelloWorld::addMirrors(tinyxml2::XMLElement* const mirrorsElement, float sc
 			// create mirror
 			auto mirror = Mirror::create(id);
 			mirror->onAfterRotate = [&]() {
-				this->checkWinCondition();
+					//this->checkWinCondition();
 			};
 			this->mirrors.insert(mirror);
 			this->objects.insert(mirror);
@@ -522,48 +524,6 @@ Vec3 HelloWorld::getReflectionVector(const Plane& plane, const Ray& ray) {
 /**
  *
  */
-/*
-std::shared_ptr<Intersection> HelloWorld::getIntersection(GameObject* const object, const Ray& ray) {
-	//log("com.zenprogramming.reflection: BEGIN getIntersection");
-	//log("com.zenprogramming.reflection: object = %d", object->getId());
-	//log("com.zenprogramming.reflection: ray = origin (%f, %f), direction (%f, %f)", ray._origin.x, ray._origin.y, ray._direction.x, ray._direction.y);
-	std::shared_ptr<Intersection> intersection;
-
-	const Rect objectBoundingBox = object->getBoundingBox();
-
-	// determine the closest intersected plane in the bounding box
-	float closestIntersectionDistance = 2560.0f;
-
-	std::vector<cocos2d::Plane> objectPlanes = object->getPlanes();
-	for (int planeIndex=0; planeIndex<3; ++planeIndex) {
-		// ray intersects the mirror AABB; find the closest intersected plane
-		Plane plane = object->getPlane(planeIndex);
-
-		const float intersectionDist = ray.dist(plane);
-		if (intersectionDist > 0.0f && intersectionDist < closestIntersectionDistance) {
-			const Vec3 intersectionPoint = ray.intersects(plane);
-
-			if (objectBoundingBox.containsPoint(Vec2(intersectionPoint.x, intersectionPoint.y))) {
-				const PointSide intersectionPointSide = plane.getSide(ray._origin);
-				const bool planeReflective = object->isPlaneReflective(planeIndex);
-
-				//log("com.zenprogramming.reflection: intersectionPoint: %f, %f, %f, dist = %f", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, intersectionDist);
-
-				intersection.reset(new Intersection(plane, intersectionPoint, intersectionPointSide, planeReflective, intersectionDist));
-
-				closestIntersectionDistance = intersectionDist;
-			}
-		}
-	}
-
-	//log("com.zenprogramming.reflection: END getIntersection");
-	return intersection;
-}
-*/
-
-/**
- *
- */
 void HelloWorld::activateLaserChain(const Ray& originRay, const Vec3& origLaserStartingPoint, const Plane& originPlane, ColorType colorType) {
 	//log("com.zenprogramming.reflection: BEGIN activateLaserChain");
 
@@ -633,98 +593,104 @@ std::shared_ptr<Intersection> HelloWorld::getClosestIntersection(const Ray& ray)
 bool HelloWorld::checkWinCondition() {
 	//log("com.zenprogramming.reflection: BEGIN checkWinCondition");
 
-	//////////////////////////////////////////////////////////////////////////////
-	//
-	//  Check all objects for their win condition
-	//
-	//////////////////////////////////////////////////////////////////////////////
+	if (this->ready) {
+		////////////////////////////////////////////////////////////////////////////
+		//
+		//  Check all objects for their win condition
+		//
+		////////////////////////////////////////////////////////////////////////////
 
-	// check the emitters active state for win condition
-	for (std::map<Emitter*, bool>::iterator itr=emitterActiveWinConditions.begin(); itr!=emitterActiveWinConditions.end(); ++itr) {
-		Emitter* const emitter = itr->first;
-		if (emitter->isActive() != itr->second) {
+		// check the emitters active state for win condition
+		for (std::map<Emitter*, bool>::iterator itr=emitterActiveWinConditions.begin(); itr!=emitterActiveWinConditions.end(); ++itr) {
+			Emitter* const emitter = itr->first;
+			if (emitter->isActive() != itr->second) {
+				return false;
+			}
+		}
+
+		// check the mirrors direction state for win condition
+		for (std::map<Mirror*, Direction>::iterator itr=mirrorDirectionWinConditions.begin(); itr!=mirrorDirectionWinConditions.end(); ++itr) {
+			Mirror* const mirror = itr->first;
+			if (mirror->getDirection() != itr->second) {
+				return false;
+			}
+		}
+
+		// set the ready to false
+		this->ready = false;
+
+		////////////////////////////////////////////////////////////////////////////
+		//
+		//  Copy the scene to a RenderTexture
+		//
+		////////////////////////////////////////////////////////////////////////////
+
+		// create and copy the scene to a RenderTexture
+		RenderTexture* renderTexture = RenderTexture::create(this->getBoundingBox().size.width, this->getBoundingBox().size.height, PixelFormat::RGBA8888);
+		renderTexture->begin();
+		this->visit();
+		renderTexture->end();
+
+		renderTexture->setPositionNormalized(Vec2(0.5f, 0.5f));
+		this->addChild(renderTexture, 250);
+
+		////////////////////////////////////////////////////////////////////////////
+		//
+		//  Play the win animation
+		//
+		////////////////////////////////////////////////////////////////////////////
+
+		Sprite* const winBanner = Sprite::create("well_done.png");
+		winBanner->setPositionNormalized(Vec2(0.5f, 0.5f));
+		winBanner->setOpacity(0);
+		winBanner->setScale(5.0f);
+		this->addChild(winBanner, 255);
+		winBanner->runAction(Spawn::create(
+			FadeIn::create(0.5f),
+			ScaleTo::create(0.5f, 1.75f),
+			nullptr
+		));
+
+		// remove all objects from the scene
+		//for (auto object : this->objects) {
+		//	object->removeFromParent();
+		//}
+		//this->objects.clear();
+
+		// TODO: do sand blowing away animation
+
+		//////////////////////////////////////////////////////////////////////////////
+		//
+		//  Update the database to open the next level
+		//
+		//////////////////////////////////////////////////////////////////////////////
+
+		sqlite3* db;
+		char* errMsg = 0;
+		int rc;
+
+		// open the database
+		std::stringstream dbPath;
+		dbPath << FileUtils::getInstance()->getWritablePath() << "levels.db";
+
+		rc = sqlite3_open(dbPath.str().c_str(), &db);
+		if (rc) {
+			log("com.zenprogramming.reflection: Can't open database: %s", sqlite3_errmsg(db));
+			sqlite3_close(db);
 			return false;
 		}
-	}
 
-	// check the mirrors direction state for win condition
-	for (std::map<Mirror*, Direction>::iterator itr=mirrorDirectionWinConditions.begin(); itr!=mirrorDirectionWinConditions.end(); ++itr) {
-		Mirror* const mirror = itr->first;
-		if (mirror->getDirection() != itr->second) {
-			return false;
+		std::stringstream sql;
+		sql << "UPDATE levels SET locked = 0 WHERE id = (SELECT next_level_id FROM levels WHERE id = " << this->levelId << ")";
+		rc = sqlite3_exec(db, sql.str().c_str(), levelUnlockCallback, static_cast<void*>(this), &errMsg);
+		if (rc != SQLITE_OK) {
+			log("com.zenprogramming.reflection: SQL error: %s", errMsg);
+			sqlite3_free(errMsg);
 		}
+
+		// close the database
+		rc = sqlite3_close(db);
 	}
-
-	//////////////////////////////////////////////////////////////////////////////
-	//
-	//  Play the win animation
-	//
-	//////////////////////////////////////////////////////////////////////////////
-
-	const Size visibleSize = Director::getInstance()->getVisibleSize();
-	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	Sprite* const winBanner = Sprite::create("well_done.png");
-	winBanner->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height/2));
-	winBanner->setOpacity(0);
-	winBanner->setScale(5.0f);
-	this->addChild(winBanner, 10);
-	winBanner->runAction(Spawn::create(
-		FadeIn::create(0.5f),
-		ScaleTo::create(0.5f, 1.75f),
-		nullptr
-	));
-
-	//////////////////////////////////////////////////////////////////////////////
-	//
-	//  Copy the scene to a RenderTexture
-	//
-	//////////////////////////////////////////////////////////////////////////////
-
-	// create and copy the scene to a RenderTexture
-	RenderTexture* renderTexture = RenderTexture::create(this->getBoundingBox().size.width, this->getBoundingBox().size.height, PixelFormat::RGBA8888);
-	renderTexture->begin();
-	this->visit();
-	renderTexture->end();
-
-	// remove all objects from the scene
-	//for (auto object : this->objects) {
-	//	object->removeFromParent();
-	//}
-	//this->objects.clear();
-
-	// TODO: do sand blowing away animation
-
-	//////////////////////////////////////////////////////////////////////////////
-	//
-	//  Update the database to open the next level
-	//
-	//////////////////////////////////////////////////////////////////////////////
-
-	sqlite3* db;
-	char* zErrMsg = 0;
-	int rc;
-
-	// open the database
-	std::stringstream dbPath;
-	dbPath << FileUtils::getInstance()->getWritablePath() << "levels.db";
-
-	rc = sqlite3_open(dbPath.str().c_str(), &db);
-	if (rc) {
-		log("com.zenprogramming.reflection: Can't open database: %s", sqlite3_errmsg(db));
-		sqlite3_close(db);
-		return false;
-	}
-
-	std::stringstream sql;
-	sql << "UPDATE levels SET locked = 0 WHERE id = (SELECT next_level_id FROM levels WHERE id = " << this->levelId << ")";
-	rc = sqlite3_exec(db, sql.str().c_str(), levelUnlockCallback, static_cast<void*>(this), &zErrMsg);
-	if (rc != SQLITE_OK) {
-		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
-		sqlite3_free(zErrMsg);
-	}
-
-	// close the database
-	rc = sqlite3_close(db);
 
 	//log("com.zenprogramming.reflection: END checkWinCondition");
 
@@ -753,33 +719,37 @@ Laser* HelloWorld::addLaser(float angle, const Vec2& position, const Color3B& co
 void HelloWorld::update(float dt) {
 	//log("com.zenprogramming.reflection: BEGIN update");
 
-	// remove all lasers from the board
-	for (auto laser : this->lasers) {
-		laser->removeFromParent();
-	}
-	this->lasers.clear();
+	if (ready) {
+		// remove all lasers from the board
+		for (auto laser : this->lasers) {
+			laser->removeFromParent();
+		}
+		this->lasers.clear();
 
-	// regenerate lasers on the board
-	for (auto emitter : this->emitters) {
-		if (emitter->isActive()) {
-			const Vec2 emitterWorldPos = emitter->getParent()->convertToWorldSpace(emitter->getPosition());
+		// regenerate lasers on the board
+		for (auto emitter : this->emitters) {
+			if (emitter->isActive()) {
+				const Vec2 emitterWorldPos = emitter->getParent()->convertToWorldSpace(emitter->getPosition());
 
-			// create and add a laser
-			Laser* const laser = this->addLaser(emitter->getRotation(), emitterWorldPos, colorTypeToLaserColor3BMap[emitter->getColorType()]);
+				// create and add a laser
+				Laser* const laser = this->addLaser(emitter->getRotation(), emitterWorldPos, colorTypeToLaserColor3BMap[emitter->getColorType()]);
 
-			// find the closest intersection for the emitter laser
-			std::shared_ptr<Intersection> intersection = this->getClosestIntersection(laser->getRay());
-			if (intersection.get()) {
-				laser->setScaleX(intersection->getDistance());
+				// find the closest intersection for the emitter laser
+				std::shared_ptr<Intersection> intersection = this->getClosestIntersection(laser->getRay());
+				if (intersection.get()) {
+					laser->setScaleX(intersection->getDistance());
 
-				//log("com.zenprogramming.reflection: laser origin (%f, %f), direction (%f, %f, %f), length = %f", laser->getRay()._origin.x, laser->getRay()._origin.y, laser->getRay()._direction.x, laser->getRay()._direction.y, laser->getRay()._direction.z, laser->getScaleX());
-				//log("com.zenprogramming.reflection: intersection at (%f, %f, %f) side = %d, reflective = %d, distance = %f", intersection->getPoint().x, intersection->getPoint().y, intersection->getPoint().z, intersection->getPointSide(), intersection->isPlaneReflective(), intersection->getDistance());
+					//log("com.zenprogramming.reflection: laser origin (%f, %f), direction (%f, %f, %f), length = %f", laser->getRay()._origin.x, laser->getRay()._origin.y, laser->getRay()._direction.x, laser->getRay()._direction.y, laser->getRay()._direction.z, laser->getScaleX());
+					//log("com.zenprogramming.reflection: intersection at (%f, %f, %f) side = %d, reflective = %d, distance = %f", intersection->getPoint().x, intersection->getPoint().y, intersection->getPoint().z, intersection->getPointSide(), intersection->isPlaneReflective(), intersection->getDistance());
 
-				if (intersection->isPlaneReflective()) {
-					this->activateLaserChain(laser->getRay(), intersection->getPoint(), intersection->getPlane(), emitter->getColorType());
+					if (intersection->isPlaneReflective()) {
+						this->activateLaserChain(laser->getRay(), intersection->getPoint(), intersection->getPlane(), emitter->getColorType());
+					}
 				}
 			}
 		}
+
+		this->checkWinCondition();
 	}
 
 	//log("com.zenprogramming.reflection: END update");
