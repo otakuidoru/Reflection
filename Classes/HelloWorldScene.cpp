@@ -145,8 +145,6 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId) {
 	auto background = LayerGradient::create(Color4B(253, 158, 246, 255), Color4B(255, 255, 255, 255), Vec2(1.0f, 1.0f));
 	this->addChild(background, BACKGROUND_LAYER);
 
-	Director::getInstance()->setClearColor(Color4F(1.0f, 1.0f, 1.0f, 1.0f));
-
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 #define PATH_SEPARATOR "\\"
 #endif
@@ -204,9 +202,7 @@ void HelloWorld::addEmitters(tinyxml2::XMLElement* const emittersElement, float 
 
 			// create emitter
 			auto emitter = Emitter::create(id, colorType);
-			emitter->onAfterActivate = [&]() {
-				//this->checkWinCondition();
-			};
+			emitter->onAfterActivate = [&]() {};
 			this->emitters.insert(emitter);
 			this->objects.insert(emitter);
 
@@ -254,9 +250,7 @@ void HelloWorld::addMirrors(tinyxml2::XMLElement* const mirrorsElement, float sc
 
 			// create mirror
 			auto mirror = Mirror::create(id);
-			mirror->onAfterRotate = [&]() {
-					//this->checkWinCondition();
-			};
+			mirror->onAfterRotate = [&]() {};
 			this->mirrors.insert(mirror);
 			this->objects.insert(mirror);
 

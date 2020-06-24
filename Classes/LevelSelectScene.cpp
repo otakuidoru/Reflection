@@ -171,11 +171,9 @@ bool LevelSelect::init() {
 	/////////////////////////////
 	// 2. add your codes below...
 
-	auto background = Sprite::create("mountain_steps_background.png");
+	auto background = Sprite::create("worlds/forest/background.png");
 	background->setPositionNormalized(Vec2(0.5f, 0.5f));
 	this->addChild(background, -1);
-
-	Director::getInstance()->setClearColor(Color4F(0.0f, 0.0f, 0.0f, 1.0f));
 
 	/////////////////////////////////////////////////////////////////////////////
 

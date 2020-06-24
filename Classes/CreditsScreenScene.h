@@ -22,31 +22,23 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __PORTAL_H__
-#define __PORTAL_H__
+#ifndef __CREDITS_SCREEN_SCENE_H__
+#define __CREDITS_SCREEN_SCENE_H__
 
+#include <map>
 #include <string>
 #include "cocos2d.h"
-#include "Direction.h"
-#include "GameObject.h"
 
-class Portal : public GameObject {
-protected:
-	Portal* otherPortal;
-
-	Portal(int id);
-
+class CreditsScreen : public cocos2d::Scene {
 public:
-	static Portal* create(int id);
-	virtual ~Portal();
+	std::map<cocos2d::Sprite*, std::string> sprites;
 
-	virtual bool initWithFile(const std::string& filename) override;
+	static cocos2d::Scene* createScene();
 
-	virtual cocos2d::Plane getPlane(unsigned int index) override;
-
-	inline Portal* getOtherPortal() const { return otherPortal; }
-	inline void setOtherPortal(Portal* const otherPortal) { this->otherPortal = otherPortal; }
+	// implement the "static create()" method manually
+	CREATE_FUNC(CreditsScreen);
+	virtual bool init() override;
 };
 
-#endif // __PORTAL_H__
+#endif // __CREDITS_SCREEN_SCENE_H__
 

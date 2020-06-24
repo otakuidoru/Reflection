@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include "AppDelegate.h"
-#include "LevelSelectScene.h"
+#include "TitleScreenScene.h"
 
 // #define USE_AUDIO_ENGINE 1
 
@@ -79,6 +79,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
     // turn on display FPS
     director->setDisplayStats(true);
 
+    director->setClearColor(Color4F(0.0f, 0.0f, 0.0f, 1.0f));
+
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval(1.0f / 60);
 
@@ -89,7 +91,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     register_all_packages();
 
     // create a scene. it's an autorelease object
-    auto scene = LevelSelect::createScene();
+    auto scene = TitleScreen::createScene();
 
     // run
     director->runWithScene(scene);

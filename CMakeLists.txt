@@ -60,6 +60,7 @@ list(APPEND GAME_SOURCE
      Classes/BackArrow.cpp
      Classes/Block.cpp
      Classes/Combiner.cpp
+     Classes/CreditsScreenScene.cpp
      Classes/Emitter.cpp
      Classes/GameObject.cpp
      Classes/HelloWorldScene.cpp
@@ -70,15 +71,17 @@ list(APPEND GAME_SOURCE
      Classes/Portal.cpp
      Classes/Receptor.cpp
      Classes/Splitter.cpp
-     Classes/shell.c
      Classes/sqlite3.c
      Classes/tinyxml2.cpp
+     Classes/TitleScreenScene.cpp
+     Classes/WorldSelectScene.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/BackArrow.h
      Classes/Block.h
      Classes/Combiner.h
+     Classes/CreditsScreenScene.h
      Classes/Direction.h
      Classes/Emitter.h
      Classes/GameObject.h
@@ -93,6 +96,8 @@ list(APPEND GAME_HEADER
      Classes/sqlite3.h
      Classes/sqlite3ext.h
      Classes/tinyxml2.h
+     Classes/TitleScreenScene.h
+     Classes/WorldSelectScene.h
      )
 
 if(ANDROID)

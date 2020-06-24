@@ -22,31 +22,23 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __PORTAL_H__
-#define __PORTAL_H__
+#ifndef __WORLD_SELECT_SCENE_H__
+#define __WORLD_SELECT_SCENE_H__
 
-#include <string>
+#include <map>
 #include "cocos2d.h"
-#include "Direction.h"
-#include "GameObject.h"
 
-class Portal : public GameObject {
+class WorldSelect : public cocos2d::Scene {
 protected:
-	Portal* otherPortal;
-
-	Portal(int id);
+	std::map<cocos2d::Sprite*, cocos2d::Scene*> sprites;
 
 public:
-	static Portal* create(int id);
-	virtual ~Portal();
+	static cocos2d::Scene* createScene();
 
-	virtual bool initWithFile(const std::string& filename) override;
-
-	virtual cocos2d::Plane getPlane(unsigned int index) override;
-
-	inline Portal* getOtherPortal() const { return otherPortal; }
-	inline void setOtherPortal(Portal* const otherPortal) { this->otherPortal = otherPortal; }
+	// implement the "static create()" method manually
+	CREATE_FUNC(WorldSelect);
+	virtual bool init() override;
 };
 
-#endif // __PORTAL_H__
+#endif // __WORLD_SELECT_SCENE_H__
 
