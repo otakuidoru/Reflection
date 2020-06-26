@@ -108,10 +108,10 @@ bool TitleScreen::init() {
 			consuming = true;
 			auto scene = WorldSelect::createScene();
 			Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B(0, 0, 0)));
-		} else if (this->creditsLabel->getBoundingBox().containsPoint(touch->getLocation())) {
-			consuming = true;
-			auto scene = CreditsScreen::createScene();
-			Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B(0, 0, 0)));
+//		} else if (this->creditsLabel->getBoundingBox().containsPoint(touch->getLocation())) {
+//			consuming = true;
+//			auto scene = CreditsScreen::createScene();
+//			Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B(0, 0, 0)));
 		}
 
 		return consuming;

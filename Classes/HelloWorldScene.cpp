@@ -43,8 +43,8 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Scene* HelloWorld::createScene(const std::string& levelFilename, int levelId) {
-	return HelloWorld::create(levelFilename, levelId);
+Scene* HelloWorld::createScene(const std::string& levelFilename, int levelId, int worldId) {
+	return HelloWorld::create(levelFilename, levelId, worldId);
 }
 
 /**
@@ -65,9 +65,9 @@ static int levelUnlockCallback(void* object, int argc, char** data, char** azCol
 /**
  *
  */
-HelloWorld* HelloWorld::create(const std::string& levelFilename, int levelId) {
+HelloWorld* HelloWorld::create(const std::string& levelFilename, int levelId, int worldId) {
 	HelloWorld* ret = new (std::nothrow) HelloWorld();
-	if (ret && ret->init(levelFilename, levelId)) {
+	if (ret && ret->init(levelFilename, levelId, worldId)) {
 		ret->autorelease();
 		return ret;
 	} else {
@@ -79,7 +79,7 @@ HelloWorld* HelloWorld::create(const std::string& levelFilename, int levelId) {
 /**
  * on "init" you need to initialize your instance
  */
-bool HelloWorld::init(const std::string& levelFilename, int levelId) {
+bool HelloWorld::init(const std::string& levelFilename, int levelId, int worldId) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Scene::init()) {
@@ -87,6 +87,7 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId) {
 	}
 
 	this->levelId = levelId;
+	this->worldId = worldId;
 
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
 	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -675,7 +676,7 @@ bool HelloWorld::checkWinCondition() {
 		}
 
 		std::stringstream sql;
-		sql << "UPDATE levels SET locked = 0 WHERE id = (SELECT next_level_id FROM levels WHERE id = " << this->levelId << ")";
+		sql << "UPDATE game_levels SET locked = 0 WHERE id = (SELECT next_level_id FROM game_levels WHERE id = " << this->levelId << ")";
 		rc = sqlite3_exec(db, sql.str().c_str(), levelUnlockCallback, static_cast<void*>(this), &errMsg);
 		if (rc != SQLITE_OK) {
 			log("com.zenprogramming.reflection: SQL error: %s", errMsg);

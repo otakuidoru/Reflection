@@ -29,13 +29,6 @@
 
 USING_NS_CC;
 
-/**
- *
- */
-Scene* LevelSelect::createScene(int worldId) {
-	return LevelSelect::create(worldId);
-}
-
 // Print useful error message instead of segfaulting when files are not there.
 static void problemLoading(const char* filename) {
 	log("Error while loading: %s\n", filename);
@@ -46,8 +39,8 @@ static void problemLoading(const char* filename) {
  *
  */
 static int levelSpriteCallback(void* object, int argc, char** data, char** azColName) {
-// 0   1      2         3          4          5       6          7             8           9
-// id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id
+	// 0   1      2         3          4          5       6          7             8           9
+	// id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id
 
 	if (LevelSelect* const scene = static_cast<LevelSelect*>(object)) {
 		const Size visibleSize = Director::getInstance()->getVisibleSize();
@@ -97,6 +90,13 @@ static int levelSpriteCallback(void* object, int argc, char** data, char** azCol
 	}
 
 	return 0;
+}
+
+/**
+ *
+ */
+Scene* LevelSelect::createScene(int worldId) {
+	return LevelSelect::create(worldId);
 }
 
 /**
@@ -213,7 +213,7 @@ bool LevelSelect::init(int worldId) {
 	}
 
 	std::stringstream ss;
-	ss << "SELECT id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id FROM levels WHERE world_id = " << this->worldId << " ORDER BY level_num ASC";
+	ss << "SELECT id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id FROM game_levels WHERE world_id = " << this->worldId << " ORDER BY level_num ASC";
 	rc = sqlite3_exec(db, ss.str().c_str(), levelSpriteCallback, static_cast<void*>(this), &zErrMsg);
 	if (rc != SQLITE_OK) {
 		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
@@ -238,7 +238,7 @@ bool LevelSelect::init(int worldId) {
 		for (std::map<cocos2d::Sprite*, std::string>::iterator itr=levelSprites.begin(); itr!=levelSprites.end(); ++itr) {
 			if (itr->first->getBoundingBox().containsPoint(touch->getLocation()) && !levelSpriteLockedMap[itr->first]) {
 				consuming = true;
-				auto levelScene = HelloWorld::createScene(itr->second, levelSpriteLevelIdMap[itr->first]);
+				auto levelScene = HelloWorld::createScene(itr->second, levelSpriteLevelIdMap[itr->first], this->worldId);
 				Director::getInstance()->replaceScene(TransitionFade::create(0.5, levelScene, Color3B(0, 0, 0)));
 				break;
 			}

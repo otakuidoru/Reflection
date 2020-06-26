@@ -68,6 +68,7 @@ protected:
 	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
 
 	int levelId;
+	int worldId;
 	bool ready;
 
 	// level methods
@@ -89,11 +90,11 @@ protected:
 	Laser* addLaser(float angle, const cocos2d::Vec2& position, const cocos2d::Color3B& color);
 
 public:
-	static cocos2d::Scene* createScene(const std::string& levelFilename, int levelId);
+	static cocos2d::Scene* createScene(const std::string& levelFilename, int levelId, int worldId);
 
 	// implement the "static create()" method manually
-	static HelloWorld* create(const std::string& levelFilename, int levelId);
-	virtual bool init(const std::string& levelFilename, int levelId);
+	static HelloWorld* create(const std::string& levelFilename, int levelId, int worldId);
+	virtual bool init(const std::string& levelFilename, int levelId, int worldId);
 
 	virtual void update(float dt) override;
 };

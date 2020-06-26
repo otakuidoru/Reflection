@@ -65,21 +65,50 @@ static int register_all_packages()
     return 0; //flag for packages manager
 }
 
+void execSQL(sqlite3* const db, const std::string& stmt) {
+	char* zErrMsg = 0;
+
+	//log("com.zenprogramming.reflection: %s", stmt.c_str());
+
+	int rc = sqlite3_exec(db, stmt.c_str(), nullptr, nullptr, &zErrMsg);
+	if (rc != SQLITE_OK) {
+		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+}
+
+/**
+ *
+ */
 bool AppDelegate::applicationDidFinishLaunching() {
 	std::string DB_FILENAME = "levels.db";
 
-	std::stringstream source;
-	source << DB_FILENAME;
-	//log("com.zenprogramming.reflection: Source Filename = %s", source.str().c_str());
-
 	std::stringstream target;
 	target << FileUtils::getInstance()->getWritablePath() << DB_FILENAME;
-	//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
 
-	if (!FileUtils::getInstance()->isFileExist(target.str())) {
-		// copy the file to the writable area on the device
-		FileUtils::getInstance()->writeDataToFile(FileUtils::getInstance()->getDataFromFile(source.str()), target.str());
-		//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
+	if (!UserDefault::getInstance()->getBoolForKey("launched_before")) {
+		sqlite3* db;
+		char* zErrMsg = 0;
+		int rc;
+
+		// open the database
+		rc = sqlite3_open(target.str().c_str(), &db);
+		if (rc) {
+			log("com.zenprogramming.reflection: 2 Can't open database: %s", sqlite3_errmsg(db));
+			sqlite3_close(db);
+			return false;
+		}
+
+		std::string stmt;
+		std::stringstream ss(FileUtils::getInstance()->getStringFromFile("db.sql"));
+		while (std::getline(ss, stmt)) {
+			execSQL(db, stmt);
+		}
+
+		// close the database
+		rc = sqlite3_close(db);
+
+		UserDefault::getInstance()->setBoolForKey("launched_before", true);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
