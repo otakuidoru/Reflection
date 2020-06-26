@@ -26,6 +26,8 @@
 #include <sqlite3.h>
 #include "LevelSelectScene.h"
 #include "HelloWorldScene.h"
+#include "WorldSelectScene.h"
+#include "BackArrow.h"
 
 USING_NS_CC;
 
@@ -190,6 +192,15 @@ bool LevelSelect::init(int worldId) {
 	background->setPositionNormalized(Vec2(0.5f, 0.5f));
 	this->addChild(background, -1);
 
+	// create the back arrow
+	auto backArrow = BackArrow::create();
+	backArrow->onClick = []() {
+		auto worldSelectScene = WorldSelect::createScene();
+		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, worldSelectScene, Color3B(0, 0, 0)));
+	};
+	backArrow->setPosition(Vec2(96.0f, 1968.0f));
+	this->addChild(backArrow, 255);
+
 	/////////////////////////////////////////////////////////////////////////////
 
 	// create the level sprites
@@ -239,7 +250,7 @@ bool LevelSelect::init(int worldId) {
 			if (itr->first->getBoundingBox().containsPoint(touch->getLocation()) && !levelSpriteLockedMap[itr->first]) {
 				consuming = true;
 				auto levelScene = HelloWorld::createScene(itr->second, levelSpriteLevelIdMap[itr->first], this->worldId);
-				Director::getInstance()->replaceScene(TransitionFade::create(0.5, levelScene, Color3B(0, 0, 0)));
+				Director::getInstance()->replaceScene(TransitionFade::create(0.5f, levelScene, Color3B(0, 0, 0)));
 				break;
 			}
 		}

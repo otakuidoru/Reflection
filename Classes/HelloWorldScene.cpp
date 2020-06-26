@@ -171,12 +171,12 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId, int worldId
 
 	// create the back arrow
 	auto backArrow = BackArrow::create();
-	backArrow->onClick = []() {
-		auto levelSelectScene = LevelSelect::create(1);
+	backArrow->onClick = [&]() {
+		auto levelSelectScene = LevelSelect::create(this->worldId);
 		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, levelSelectScene, Color3B(0, 0, 0)));
 	};
 	backArrow->setPosition(Vec2(96.0f, 1968.0f));
-	this->addChild(backArrow, BACK_ARROW_LAYER);
+	this->addChild(backArrow, 254);
 
 	this->ready = true;
 
@@ -621,13 +621,13 @@ bool HelloWorld::checkWinCondition() {
 		////////////////////////////////////////////////////////////////////////////
 
 		// create and copy the scene to a RenderTexture
-		RenderTexture* renderTexture = RenderTexture::create(this->getBoundingBox().size.width, this->getBoundingBox().size.height, PixelFormat::RGBA8888);
-		renderTexture->begin();
-		this->visit();
-		renderTexture->end();
+//		RenderTexture* renderTexture = RenderTexture::create(this->getBoundingBox().size.width, this->getBoundingBox().size.height, PixelFormat::RGBA8888);
+//		renderTexture->begin();
+//		this->visit();
+//		renderTexture->end();
 
-		renderTexture->setPositionNormalized(Vec2(0.5f, 0.5f));
-		this->addChild(renderTexture, 250);
+//		renderTexture->setPositionNormalized(Vec2(0.5f, 0.5f));
+//		this->addChild(renderTexture, 250);
 
 		////////////////////////////////////////////////////////////////////////////
 		//
@@ -640,9 +640,27 @@ bool HelloWorld::checkWinCondition() {
 		winBanner->setOpacity(0);
 		winBanner->setScale(5.0f);
 		this->addChild(winBanner, 255);
-		winBanner->runAction(Spawn::create(
-			FadeIn::create(0.5f),
-			ScaleTo::create(0.5f, 1.75f),
+		winBanner->runAction(Sequence::create(
+			CallFunc::create([&]() {
+				auto emitter = ParticleExplosion::create();
+				emitter->setPositionNormalized(Vec2(0.5f, 0.5f));
+				// set the duration
+//				emitter->setDuration(ParticleSystem::DURATION_INFINITY);
+//				// radius mode
+//				emitter->setEmitterMode(ParticleSystem::Mode::RADIUS);
+				// radius mode: 100 pixels from center
+				emitter->setStartRadius(0);
+				emitter->setStartRadiusVar(0);
+				emitter->setEndRadius(ParticleSystem::START_RADIUS_EQUAL_TO_END_RADIUS);
+				emitter->setEndRadiusVar(500);    // not used when start == end
+				this->addChild(emitter, 254);
+			}),
+			DelayTime::create(1.0f),	// pause
+			Spawn::create(
+				FadeIn::create(0.5f),
+				ScaleTo::create(0.5f, 1.75f),
+				nullptr
+			),
 			nullptr
 		));
 
