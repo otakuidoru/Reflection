@@ -32,8 +32,8 @@ USING_NS_CC;
 /**
  *
  */
-Scene* LevelSelect::createScene() {
-	return LevelSelect::create();
+Scene* LevelSelect::createScene(int worldId) {
+	return LevelSelect::create(worldId);
 }
 
 // Print useful error message instead of segfaulting when files are not there.
@@ -57,39 +57,38 @@ static int levelSpriteCallback(void* object, int argc, char** data, char** azCol
 		const int levelId = std::atoi(data[0]);
 		const int levelNum = std::atoi(data[3]);
 		std::string levelNumFilename(scene->levelNumFilePathMap[levelNum]);
-		log("com.zenprogramming.reflection: level filename num %s", levelNumFilename.c_str());
+		//log("com.zenprogramming.reflection: level filename num %s", levelNumFilename.c_str());
 		std::string levelFilename(data[4]);
-		log("com.zenprogramming.reflection: level filename %s", levelFilename.c_str());
+		//log("com.zenprogramming.reflection: level filename %s", levelFilename.c_str());
 		const Vec2& position = scene->levelNumPositionMap[levelNum];
-		log("com.zenprogramming.reflection: position (%f, %f)", position.x, position.y);
+		//log("com.zenprogramming.reflection: position (%f, %f)", position.x, position.y);
 		const bool locked = std::atoi(data[5]) == 1;
 		const int numStars = std::atoi(data[6]);
 
-		std::string levelSpriteFilename;
-		if (locked) {
-			levelSpriteFilename = "level_sprite_locked.png";
-		} else if (numStars == 0) {
-			levelSpriteFilename = "level_sprite_0_stars.png";
-		} else if (numStars == 1) {
-			levelSpriteFilename = "level_sprite_1_stars.png";
-		} else if (numStars == 2) {
-			levelSpriteFilename = "level_sprite_2_stars.png";
-		} else if (numStars == 3) {
-			levelSpriteFilename = "level_sprite_3_stars.png";
-		}
-
-		//log("com.zenprogramming.reflection: levelSpriteFilename = %s", levelSpriteFilename.c_str());
-
-		auto levelSelectSprite = Sprite::create(levelSpriteFilename);
+		// create the background
+		auto levelSelectSprite = Sprite::create("level_sprite_300x300.png");
 		levelSelectSprite->setPosition(position);
 		levelSelectSprite->setScale(SCALE);
 		scene->addChild(levelSelectSprite);
 
-		if (!locked) {
+		if (locked) {
+			auto lockedSprite = Sprite::create("locked.png");
+			lockedSprite->setPositionNormalized(Vec2(0.5f, 0.5f));
+			levelSelectSprite->addChild(lockedSprite);
+		} else {
 			auto levelNumSprite = Sprite::create(levelNumFilename);
 			levelNumSprite->setPositionNormalized(Vec2(0.5f, 0.5f));
-			levelSelectSprite->setScale(SCALE);
-			levelSelectSprite->addChild(levelNumSprite, 10);
+			levelSelectSprite->addChild(levelNumSprite);
+
+			std::string numStarsSpriteFilename;
+			if (numStars == 0)      { numStarsSpriteFilename = "0_star.png"; }
+			else if (numStars == 1) { numStarsSpriteFilename = "1_star.png"; }
+			else if (numStars == 2) { numStarsSpriteFilename = "2_star.png"; }
+			else if (numStars == 3) { numStarsSpriteFilename = "3_star.png"; }
+
+			auto numStarsSprite = Sprite::create(numStarsSpriteFilename);
+			numStarsSprite->setPositionNormalized(Vec2(0.5f, 0.5f));
+			levelSelectSprite->addChild(numStarsSprite);
 		}
 
 		scene->levelSprites[levelSelectSprite] = levelFilename;
@@ -100,13 +99,29 @@ static int levelSpriteCallback(void* object, int argc, char** data, char** azCol
 	return 0;
 }
 
+/**
+ *
+ */
+LevelSelect* LevelSelect::create(int worldId) {
+	LevelSelect* ret = new (std::nothrow) LevelSelect();
+	if (ret && ret->init(worldId)) {
+		ret->autorelease();
+		return ret;
+	} else {
+		CC_SAFE_DELETE(ret);
+		return nullptr;
+	}
+}
+
 // on "init" you need to initialize your instance
-bool LevelSelect::init() {
+bool LevelSelect::init(int worldId) {
 	//////////////////////////////
 	// 1. super init first
 	if (!Scene::init()) {
 		return false;
 	}
+
+	this->worldId = worldId;
 
 	this->levelNumFilePathMap = {
 		{  1,  "numbers/1.png" },
@@ -177,25 +192,13 @@ bool LevelSelect::init() {
 
 	/////////////////////////////////////////////////////////////////////////////
 
-	std::string DB_FILENAME = "levels.db";
+	// create the level sprites
 
-	std::stringstream source;
-	source << DB_FILENAME;
-	//log("com.zenprogramming.reflection: Source Filename = %s", source.str().c_str());
+	std::string DB_FILENAME = "levels.db";
 
 	std::stringstream target;
 	target << FileUtils::getInstance()->getWritablePath() << DB_FILENAME;
 	//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
-
-	if (!FileUtils::getInstance()->isFileExist(target.str())) {
-		// copy the file to the writable area on the device
-		FileUtils::getInstance()->writeDataToFile(FileUtils::getInstance()->getDataFromFile(source.str()), target.str());
-		//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
-	}
-
-	/////////////////////////////////////////////////////////////////////////////
-
-	// create the level sprites
 
 	sqlite3* db;
 	char* zErrMsg = 0;
@@ -209,8 +212,9 @@ bool LevelSelect::init() {
 		return false;
 	}
 
-	std::string sql = "SELECT id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id FROM levels WHERE world_id = 1";
-	rc = sqlite3_exec(db, sql.c_str(), levelSpriteCallback, static_cast<void*>(this), &zErrMsg);
+	std::stringstream ss;
+	ss << "SELECT id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id FROM levels WHERE world_id = " << this->worldId << " ORDER BY level_num ASC";
+	rc = sqlite3_exec(db, ss.str().c_str(), levelSpriteCallback, static_cast<void*>(this), &zErrMsg);
 	if (rc != SQLITE_OK) {
 		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
 		sqlite3_free(zErrMsg);

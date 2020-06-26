@@ -30,6 +30,9 @@
 #include "cocos2d.h"
 
 class LevelSelect : public cocos2d::Scene {
+protected:
+	int worldId;
+
 public:
 	std::map<cocos2d::Sprite*, std::string> levelSprites;
 	std::map<int, std::string> levelNumFilePathMap;
@@ -40,8 +43,11 @@ public:
 	static cocos2d::Scene* createScene();
 
 	// implement the "static create()" method manually
-	CREATE_FUNC(LevelSelect);
-	virtual bool init() override;
+	static cocos2d::Scene* createScene(const int worldId);
+
+	// implement the "static create()" method manually
+	static LevelSelect* create(int worldId);
+	virtual bool init(int worldId);
 };
 
 #endif // __LEVEL_SELECT_SCENE_H__

@@ -171,7 +171,7 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId) {
 	// create the back arrow
 	auto backArrow = BackArrow::create();
 	backArrow->onClick = []() {
-		auto levelSelectScene = LevelSelect::create();
+		auto levelSelectScene = LevelSelect::create(1);
 		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, levelSelectScene, Color3B(0, 0, 0)));
 	};
 	backArrow->setPosition(Vec2(96.0f, 1968.0f));

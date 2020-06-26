@@ -22,11 +22,79 @@
  THE SOFTWARE.
  ****************************************************************************/
 
+#include <sqlite3.h>
 #include "ui/CocosGUI.h"
 #include "WorldSelectScene.h"
 #include "LevelSelectScene.h"
 
 USING_NS_CC;
+
+/**
+ *
+ */
+static int numWorldsSelectCallback(void* object, int count, char** data, char** azColName) {
+	if (ui::ScrollView* const scrollView = static_cast<ui::ScrollView*>(object)) {
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		const int numLevels = std::atoi(data[0]);
+
+		const float contentWidth = visibleSize.width;
+		const float contentHeight = std::min(visibleSize.height, numLevels*386.0f);
+		const Size contentSize(contentWidth, contentHeight);
+
+		scrollView->setContentSize(contentSize);
+		scrollView->setInnerContainerSize(Size(visibleSize.width, numLevels*386.0f));
+	}
+
+	return 0;
+}
+
+/**
+ *
+ */
+static int worldSelectCallback(void* object, int count, char** data, char** azColName) {
+	// 0   1     2          3
+	// id, name, file_path, total_rows
+
+	if (ui::ScrollView* const scrollView = static_cast<ui::ScrollView*>(object)) {
+		const int levelId = std::atoi(data[0]);
+		std::string name(data[1]);
+		std::string filepath(data[2]);
+		const int totalRows = std::atoi(data[3]);
+
+		Vec2 position(768.0f, 193.0f*((levelId-1)*2+1));
+		//log("com.zenprogramming.reflection %f, %f", position.x, position.y);
+		//log("com.zenprogramming.reflection %s", name.c_str());
+
+		auto sprite = ui::ImageView::create(data[2]);
+		sprite->setScale(0.95f);
+		sprite->setPosition(Vec2(768.0f, 193.0f*((totalRows-levelId)*2+1)));
+		auto label = Label::createWithTTF(name, "fonts/centurygothic.ttf", 160);
+		label->setPositionNormalized(Vec2(0.5f, 0.5f));
+		sprite->addChild(label);
+		scrollView->addChild(sprite, 10);
+
+		WorldSelect* scene = static_cast<WorldSelect*>(scrollView->getParent());
+		scene->worldSpritesLevelMap[sprite] = levelId;
+
+		sprite->setTouchEnabled(true);
+		sprite->setPropagateTouchEvents(true);
+		sprite->addTouchEventListener([&](Ref* ref, ui::Widget::TouchEventType type) {
+			WorldSelect* scene = static_cast<WorldSelect*>(Director::getInstance()->getRunningScene());
+			switch (type) {
+				case ui::Widget::TouchEventType::BEGAN: {
+				} break;
+				case ui::Widget::TouchEventType::MOVED: {
+				} break;
+				case ui::Widget::TouchEventType::ENDED: {
+					auto levelSelectScene = LevelSelect::createScene(scene->worldSpritesLevelMap[ref]);
+					Director::getInstance()->replaceScene(TransitionFade::create(0.5f, levelSelectScene, Color3B(0, 0, 0)));
+				} break;
+			}
+		});
+	}
+
+	return 0;
+}
 
 /**
  *
@@ -52,31 +120,60 @@ bool WorldSelect::init() {
 	/////////////////////////////
 	// 2. add your codes below...
 
-	std::vector<std::string> levelNames { "Astral Plane", "Deep Space", "Zen Garden", "Restful Mountain", "Placid Ocean", "Calming River", "Quiet Meadow", "Tranquil Forest" };
-	const float deltaY = 193.0f;//2048.0f / (levelNames.size() * 2);
+	auto background = Sprite::create("reflection_no_title.png");
+	background->setPositionNormalized(Vec2(0.5f, 0.5f));
+	this->addChild(background, -1);
+
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  
+	//
+	//////////////////////////////////////////////////////////////////////////////
 
 	ui::ScrollView* scrollView = ui::ScrollView::create();
 	scrollView->setDirection(ui::ScrollView::Direction::VERTICAL);
-	scrollView->setContentSize(visibleSize);
-	scrollView->setInnerContainerSize(Size(visibleSize.width, levelNames.size()*2*deltaY));
-	scrollView->setBackGroundImage("reflection_with_title.png");
+	scrollView->setSwallowTouches(false);
 	scrollView->setBounceEnabled(true);
 	scrollView->setAnchorPoint(Vec2(0.5f, 0.5f));
-	scrollView->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+	scrollView->setPosition(Vec2(visibleSize.width/2+origin.x, visibleSize.height/2+origin.y));
 	this->addChild(scrollView);
 
-	for (unsigned int i=0; i<levelNames.size(); ++i) {
-		auto sprite = Sprite::create("worlds/forest/level_select.png");
-		sprite->setScale(0.95f);
-		sprite->setPosition(Vec2(768.0f, deltaY * (i * 2 + 1)));
-		auto label = Label::createWithTTF(levelNames[i], "fonts/centurygothic.ttf", 160);
-		label->setPositionNormalized(Vec2(0.5f, 0.5f));
-		sprite->addChild(label);
-		scrollView->addChild(sprite, 10);
+	std::stringstream target;
+	target << FileUtils::getInstance()->getWritablePath() << "levels.db";
+	//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
+
+	sqlite3* db;
+	char* zErrMsg = 0;
+	int rc;
+
+	// open the database
+	rc = sqlite3_open(target.str().c_str(), &db);
+	if (rc) {
+		log("com.zenprogramming.reflection: Can't open database: %s", sqlite3_errmsg(db));
+		sqlite3_close(db);
+		return false;
 	}
+
+	std::string countWorldsSql = "SELECT COUNT(*) FROM worlds WHERE locked = 0";
+	rc = sqlite3_exec(db, countWorldsSql.c_str(), numWorldsSelectCallback, static_cast<void*>(scrollView), &zErrMsg);
+	if (rc != SQLITE_OK) {
+		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+
+	std::string selectAllSql = "WITH result AS (SELECT id, name, file_path FROM worlds WHERE locked = 0 ORDER BY id DESC) SELECT *, (SELECT COUNT(*) FROM result) AS total_rows FROM result";
+	rc = sqlite3_exec(db, selectAllSql.c_str(), worldSelectCallback, static_cast<void*>(scrollView), &zErrMsg);
+	if (rc != SQLITE_OK) {
+		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+
+	// close the database
+	rc = sqlite3_close(db);
 
 	scrollView->jumpToTop();
 
+/*
 	//////////////////////////////////////////////////////////////////////////////
 	//
 	//  Create a "one by one" touch event listener (processes one touch at a time)
@@ -89,14 +186,15 @@ bool WorldSelect::init() {
 	// triggered when pressed
 	touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
 		bool consuming = false;
-//		for (std::map<cocos2d::Sprite*, std::string>::iterator itr=sprites.begin(); itr!=sprites.end(); ++itr) {
-//			if (itr->first->getBoundingBox().containsPoint(touch->getLocation()) && !levelSpriteLockedMap[itr->first]) {
+		for (std::map<cocos2d::ui::ImageView*, int>::iterator itr=worldSpritesLevelMap.begin(); itr!=worldSpritesLevelMap.end(); ++itr) {
+			if (itr->first->getBoundingBox().containsPoint(touch->getLocation())) {
+				log("com.zenprogramming.reflection: selecting level %d", itr->second);
 				consuming = true;
-//				auto levelSelectScene = LevelSelect::createScene(itr->second, levelSpriteLevelIdMap[itr->first]);
-//				Director::getInstance()->replaceScene(TransitionFade::create(0.5f, levelSelectScene, Color3B(0, 0, 0)));
-//				break;
-//			}
-//		}
+				auto levelSelectScene = LevelSelect::createScene(itr->second);
+				Director::getInstance()->replaceScene(TransitionFade::create(0.5f, levelSelectScene, Color3B(0, 0, 0)));
+				break;
+			}
+		}
 
 		return consuming;
 	};
@@ -109,7 +207,7 @@ bool WorldSelect::init() {
 
 	// add listener
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
-
+*/
 	return true;
 }
 

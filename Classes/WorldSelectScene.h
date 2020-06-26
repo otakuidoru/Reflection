@@ -29,10 +29,9 @@
 #include "cocos2d.h"
 
 class WorldSelect : public cocos2d::Scene {
-protected:
-	std::map<cocos2d::Sprite*, cocos2d::Scene*> sprites;
-
 public:
+	std::map<cocos2d::Ref*, int> worldSpritesLevelMap;
+
 	static cocos2d::Scene* createScene();
 
 	// implement the "static create()" method manually

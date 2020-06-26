@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level>
+	<!-- Initial Setup -->
+	<setup>
+		<!-- Emitters -->
+		<emitters>
+			<emitter id="1">
+				<position x="768.0" y="96.0"></position>
+				<direction>NORTH</direction>
+				<colortype>RED</colortype>
+				<active>false</active>
+			</emitter>
+		</emitters>
+
+		<!-- Receptors -->
+		<receptors>
+			<receptor id="2">
+				<position x="96.0" y="1024.0"></position>
+				<direction>EAST</direction>
+				<colortype>RED</colortype>
+			</receptor>
+		</receptors>
+
+		<!-- Mirrors -->
+		<mirrors>
+			<mirror id="3">
+				<position x="768.0" y="1024.0"></position>
+				<direction>EAST</direction>
+			</mirror>
+		</mirrors>
+	</setup>
+
+	<!-- Win Condition -->
+	<wincondition>
+		<!-- Emitters -->
+		<emitters>
+			<emitter id="1" active="true"></emitter>
+		</emitters>
+
+		<!-- Mirrors -->
+		<mirrors>
+			<mirror id="3" direction="WEST"></mirror>
+		</mirrors>
+	</wincondition>
+</level>
+

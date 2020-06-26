@@ -22,6 +22,8 @@
  THE SOFTWARE.
  ****************************************************************************/
 
+#include <sstream>
+#include <sqlite3.h>
 #include "AppDelegate.h"
 #include "TitleScreenScene.h"
 
@@ -64,6 +66,24 @@ static int register_all_packages()
 }
 
 bool AppDelegate::applicationDidFinishLaunching() {
+	std::string DB_FILENAME = "levels.db";
+
+	std::stringstream source;
+	source << DB_FILENAME;
+	//log("com.zenprogramming.reflection: Source Filename = %s", source.str().c_str());
+
+	std::stringstream target;
+	target << FileUtils::getInstance()->getWritablePath() << DB_FILENAME;
+	//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
+
+	if (!FileUtils::getInstance()->isFileExist(target.str())) {
+		// copy the file to the writable area on the device
+		FileUtils::getInstance()->writeDataToFile(FileUtils::getInstance()->getDataFromFile(source.str()), target.str());
+		//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
+	}
+
+	/////////////////////////////////////////////////////////////////////////////
+
     // initialize director
     auto director = Director::getInstance();
     auto glview = director->getOpenGLView();
