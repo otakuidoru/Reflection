@@ -40,6 +40,35 @@ static void problemLoading(const char* filename) {
 /**
  *
  */
+static int worldNameCallback(void* object, int argc, char** data, char** azColName) {
+	// 0
+	// name
+
+	if (LevelSelect* const scene = static_cast<LevelSelect*>(object)) {
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+		const float SCALE = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
+
+		std::string levelName(data[0]);
+
+		auto label = Label::createWithTTF(levelName, "fonts/centurygothic.ttf", 160);
+		if (label == nullptr) {
+			problemLoading("'fonts/centurygothic.ttf'");
+		} else {
+			// position the label on the top center of the screen
+			label->setPosition(Vec2(768.0f, 1808.0f));
+
+			// add the label as a child to this layer
+			scene->addChild(label, 10);
+		}
+	}
+
+	return 0;
+}
+
+/**
+ *
+ */
 static int levelSpriteCallback(void* object, int argc, char** data, char** azColName) {
 	// 0   1      2         3          4          5       6          7             8           9
 	// id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id
@@ -221,6 +250,14 @@ bool LevelSelect::init(int worldId) {
 		log("com.zenprogramming.reflection: Can't open database: %s", sqlite3_errmsg(db));
 		sqlite3_close(db);
 		return false;
+	}
+
+	std::stringstream worldNameSs;
+	worldNameSs << "SELECT name FROM game_worlds WHERE id = " << this->worldId;
+	rc = sqlite3_exec(db, worldNameSs.str().c_str(), worldNameCallback, static_cast<void*>(this), &zErrMsg);
+	if (rc != SQLITE_OK) {
+		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
+		sqlite3_free(zErrMsg);
 	}
 
 	std::stringstream ss;
