@@ -126,7 +126,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     }
 
     // turn on display FPS
-    director->setDisplayStats(true);
+    //director->setDisplayStats(true);
 
     director->setClearColor(Color4F(0.0f, 0.0f, 0.0f, 1.0f));
 

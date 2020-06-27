@@ -26,6 +26,8 @@
 #include "ui/CocosGUI.h"
 #include "WorldSelectScene.h"
 #include "LevelSelectScene.h"
+#include "TitleScreenScene.h"
+#include "BackArrow.h"
 
 USING_NS_CC;
 
@@ -128,6 +130,15 @@ bool WorldSelect::init() {
 	background->setPositionNormalized(Vec2(0.5f, 0.5f));
 	this->addChild(background, -1);
 
+	// create the back arrow
+	auto backArrow = BackArrow::create();
+	backArrow->onClick = []() {
+		auto titleScreenScene = TitleScreen::createScene();
+		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, titleScreenScene, Color3B(0, 0, 0)));
+	};
+	backArrow->setPosition(Vec2(116.0f, 100.0f));
+	this->addChild(backArrow, 255);
+
 	//////////////////////////////////////////////////////////////////////////////
 	//
 	//  
@@ -144,7 +155,7 @@ bool WorldSelect::init() {
 
 	std::stringstream target;
 	target << FileUtils::getInstance()->getWritablePath() << "levels.db";
-	log("com.zenprogramming.reflection: W Target Filename = %s", target.str().c_str());
+	//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
 
 	sqlite3* db;
 	char* zErrMsg = 0;
@@ -153,7 +164,7 @@ bool WorldSelect::init() {
 	// open the database
 	rc = sqlite3_open(target.str().c_str(), &db);
 	if (rc) {
-		log("com.zenprogramming.reflection: W Can't open database: %s", sqlite3_errmsg(db));
+		//log("com.zenprogramming.reflection: Can't open database: %s", sqlite3_errmsg(db));
 		sqlite3_close(db);
 		return false;
 	}
@@ -161,7 +172,7 @@ bool WorldSelect::init() {
 	std::string countWorldsSql = "SELECT COUNT(*) FROM game_worlds WHERE locked = 0";
 	rc = sqlite3_exec(db, countWorldsSql.c_str(), numWorldsSelectCallback, static_cast<void*>(scrollView), &zErrMsg);
 	if (rc != SQLITE_OK) {
-		log("com.zenprogramming.reflection: W0 SQL error: %s", zErrMsg);
+		//log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
 		sqlite3_free(zErrMsg);
 	}
 

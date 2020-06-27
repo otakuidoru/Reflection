@@ -56,7 +56,7 @@ static int worldNameCallback(void* object, int argc, char** data, char** azColNa
 			problemLoading("'fonts/centurygothic.ttf'");
 		} else {
 			// position the label on the top center of the screen
-			label->setPosition(Vec2(768.0f, 1808.0f));
+			label->setPosition(Vec2(768.0f, 1928.0f));
 
 			// add the label as a child to this layer
 			scene->addChild(label, 10);
@@ -227,7 +227,7 @@ bool LevelSelect::init(int worldId) {
 		auto worldSelectScene = WorldSelect::createScene();
 		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, worldSelectScene, Color3B(0, 0, 0)));
 	};
-	backArrow->setPosition(Vec2(96.0f, 1968.0f));
+	backArrow->setPosition(Vec2(116.0f, 100.0f));
 	this->addChild(backArrow, 255);
 
 	/////////////////////////////////////////////////////////////////////////////

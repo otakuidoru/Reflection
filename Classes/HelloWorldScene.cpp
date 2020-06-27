@@ -175,7 +175,7 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId, int worldId
 		auto levelSelectScene = LevelSelect::create(this->worldId);
 		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, levelSelectScene, Color3B(0, 0, 0)));
 	};
-	backArrow->setPosition(Vec2(96.0f, 1968.0f));
+	backArrow->setPosition(Vec2(116.0f, 100.0f));
 	this->addChild(backArrow, 254);
 
 	this->ready = true;
@@ -621,13 +621,13 @@ bool HelloWorld::checkWinCondition() {
 		////////////////////////////////////////////////////////////////////////////
 
 		// create and copy the scene to a RenderTexture
-//		RenderTexture* renderTexture = RenderTexture::create(this->getBoundingBox().size.width, this->getBoundingBox().size.height, PixelFormat::RGBA8888);
-//		renderTexture->begin();
-//		this->visit();
-//		renderTexture->end();
+		RenderTexture* renderTexture = RenderTexture::create(this->getBoundingBox().size.width, this->getBoundingBox().size.height, PixelFormat::RGBA8888);
+		renderTexture->begin();
+		this->visit();
+		renderTexture->end();
 
-//		renderTexture->setPositionNormalized(Vec2(0.5f, 0.5f));
-//		this->addChild(renderTexture, 250);
+		renderTexture->setPositionNormalized(Vec2(0.5f, 0.5f));
+		this->addChild(renderTexture, 250);
 
 		////////////////////////////////////////////////////////////////////////////
 		//
