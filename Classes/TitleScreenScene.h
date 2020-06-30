@@ -32,11 +32,9 @@
 class TitleScreen : public cocos2d::Scene {
 protected:
 	cocos2d::Label* worldSelectLabel;
-	cocos2d::Label* creditsLabel;
+	cocos2d::Sprite* creditsSprite;
 
 public:
-	std::map<cocos2d::Sprite*, std::string> sprites;
-
 	static cocos2d::Scene* createScene();
 
 	// implement the "static create()" method manually

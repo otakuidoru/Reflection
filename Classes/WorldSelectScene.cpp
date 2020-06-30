@@ -56,14 +56,16 @@ static int numWorldsSelectCallback(void* object, int count, char** data, char** 
  *
  */
 static int worldSelectCallback(void* object, int count, char** data, char** azColName) {
-	// 0   1     2          3
-	// id, name, file_path, total_rows
+	// 0   1     2                  3                4       5
+	// id, name, level_select_path, background_path, locked, total_rows
 
 	if (ui::ScrollView* const scrollView = static_cast<ui::ScrollView*>(object)) {
 		const int levelId = std::atoi(data[0]);
 		std::string name(data[1]);
-		std::string filepath(data[2]);
-		const int totalRows = std::atoi(data[3]);
+		std::string levelSelectPath(data[2]);
+		std::string backgroundPath(data[3]);
+		std::string locked(data[4]);
+		const int totalRows = std::atoi(data[5]);
 
 		Vec2 position(768.0f, 193.0f*((levelId-1)*2+1));
 		//log("com.zenprogramming.reflection %f, %f", position.x, position.y);
@@ -132,11 +134,12 @@ bool WorldSelect::init() {
 
 	// create the back arrow
 	auto backArrow = BackArrow::create();
+	backArrow->setColor(Color3B(255, 255, 255));
+	backArrow->setPosition(Vec2(116.0f, 100.0f));
 	backArrow->onClick = []() {
 		auto titleScreenScene = TitleScreen::createScene();
 		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, titleScreenScene, Color3B(0, 0, 0)));
 	};
-	backArrow->setPosition(Vec2(116.0f, 100.0f));
 	this->addChild(backArrow, 255);
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -176,10 +179,10 @@ bool WorldSelect::init() {
 		sqlite3_free(zErrMsg);
 	}
 
-	std::string selectAllSql = "WITH result AS (SELECT id, name, file_path FROM game_worlds WHERE locked = 0 ORDER BY id DESC) SELECT *, (SELECT COUNT(*) FROM result) AS total_rows FROM result";
+	std::string selectAllSql = "WITH result AS (SELECT id, name, level_select_path, background_path, locked FROM game_worlds WHERE locked = 0 ORDER BY id DESC) SELECT *, (SELECT COUNT(*) FROM result) AS total_rows FROM result";
 	rc = sqlite3_exec(db, selectAllSql.c_str(), worldSelectCallback, static_cast<void*>(scrollView), &zErrMsg);
 	if (rc != SQLITE_OK) {
-		log("com.zenprogramming.reflection: W1 SQL error: %s", zErrMsg);
+		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
 		sqlite3_free(zErrMsg);
 	}
 

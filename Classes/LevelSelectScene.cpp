@@ -22,8 +22,8 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#include <sstream>
 #include <sqlite3.h>
+#include <sstream>
 #include "LevelSelectScene.h"
 #include "HelloWorldScene.h"
 #include "WorldSelectScene.h"
@@ -41,8 +41,8 @@ static void problemLoading(const char* filename) {
  *
  */
 static int worldNameCallback(void* object, int argc, char** data, char** azColName) {
-	// 0
-	// name
+	// 0     1
+	// name, background_path
 
 	if (LevelSelect* const scene = static_cast<LevelSelect*>(object)) {
 		const Size visibleSize = Director::getInstance()->getVisibleSize();
@@ -50,6 +50,11 @@ static int worldNameCallback(void* object, int argc, char** data, char** azColNa
 		const float SCALE = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
 
 		std::string levelName(data[0]);
+		std::string backgroundName(data[1]);
+
+		auto background = Sprite::create(backgroundName);
+		background->setPositionNormalized(Vec2(0.5f, 0.5f));
+		scene->addChild(background, -1);
 
 		auto label = Label::createWithTTF(levelName, "fonts/centurygothic.ttf", 160);
 		if (label == nullptr) {
@@ -217,27 +222,22 @@ bool LevelSelect::init(int worldId) {
 	/////////////////////////////
 	// 2. add your codes below...
 
-	auto background = Sprite::create("worlds/forest/background.png");
-	background->setPositionNormalized(Vec2(0.5f, 0.5f));
-	this->addChild(background, -1);
-
 	// create the back arrow
 	auto backArrow = BackArrow::create();
+	backArrow->setPosition(Vec2(116.0f, 100.0f));
+	backArrow->setColor(Color3B(255, 255, 255));
 	backArrow->onClick = []() {
 		auto worldSelectScene = WorldSelect::createScene();
 		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, worldSelectScene, Color3B(0, 0, 0)));
 	};
-	backArrow->setPosition(Vec2(116.0f, 100.0f));
 	this->addChild(backArrow, 255);
 
 	/////////////////////////////////////////////////////////////////////////////
-
+	//
 	// create the level sprites
 
-	std::string DB_FILENAME = "levels.db";
-
 	std::stringstream target;
-	target << FileUtils::getInstance()->getWritablePath() << DB_FILENAME;
+	target << FileUtils::getInstance()->getWritablePath() << "levels.db";
 	//log("com.zenprogramming.reflection: Target Filename = %s", target.str().c_str());
 
 	sqlite3* db;
@@ -253,7 +253,7 @@ bool LevelSelect::init(int worldId) {
 	}
 
 	std::stringstream worldNameSs;
-	worldNameSs << "SELECT name FROM game_worlds WHERE id = " << this->worldId;
+	worldNameSs << "SELECT name, background_path FROM game_worlds WHERE id = " << this->worldId;
 	rc = sqlite3_exec(db, worldNameSs.str().c_str(), worldNameCallback, static_cast<void*>(this), &zErrMsg);
 	if (rc != SQLITE_OK) {
 		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);

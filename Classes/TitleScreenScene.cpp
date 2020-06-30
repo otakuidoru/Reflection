@@ -67,6 +67,8 @@ bool TitleScreen::init() {
 	if (worldSelectLabel == nullptr) {
 		problemLoading("'fonts/motioncontrol-bold.ttf'");
 	} else {
+		this->worldSelectLabel->setScale(SCALE);
+
 		// position the label on the top center of the screen
 		this->worldSelectLabel->setPosition(Vec2(768.0f, 768.0f));
 
@@ -77,20 +79,11 @@ bool TitleScreen::init() {
 		this->addChild(this->worldSelectLabel, 10);
 	}
 
-	// create the WorldSelect Label
-	this->creditsLabel = Label::createWithTTF("Credits", "fonts/centurygothic.ttf", 160);
-	if (creditsLabel == nullptr) {
-		problemLoading("'fonts/motioncontrol-bold.ttf'");
-	} else {
-		// position the label on the top center of the screen
-		this->creditsLabel->setPosition(Vec2(768.0f, 512.0f));
-
-		// set the label color to white
-		this->creditsLabel->setColor(Color3B(255, 255, 255));
-
-		// add the label as a child to this layer
-		this->addChild(this->creditsLabel, 10);
-	}
+	// create the credits sprite
+	this->creditsSprite = Sprite::create("credits.png");
+	this->creditsSprite->setScale(SCALE);
+	this->creditsSprite->setPosition(Vec2(1452, 84));
+	this->addChild(this->creditsSprite, 255);
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
