@@ -22,6 +22,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
+#include "AppDelegate.h"
 #include "TitleScreenScene.h"
 #include "WorldSelectScene.h"
 #include "CreditsScreenScene.h"
@@ -62,8 +63,15 @@ bool TitleScreen::init() {
 	background->setPositionNormalized(Vec2(0.5f, 0.5f));
 	this->addChild(background, -1);
 
+	std::string journeyPhrase;
+	if (!UserDefault::getInstance()->getBoolForKey("launched_before")) {
+		journeyPhrase = "Begin Journey";
+	} else {
+		journeyPhrase = "Continue Journey";
+	}
+
 	// create the WorldSelect Label
-	this->worldSelectLabel = Label::createWithTTF("Worlds", "fonts/centurygothic.ttf", 160);
+	this->worldSelectLabel = Label::createWithTTF(journeyPhrase, "fonts/centurygothic.ttf", 160);
 	if (worldSelectLabel == nullptr) {
 		problemLoading("'fonts/motioncontrol-bold.ttf'");
 	} else {
