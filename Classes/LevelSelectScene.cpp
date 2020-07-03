@@ -75,8 +75,8 @@ static int worldNameCallback(void* object, int argc, char** data, char** azColNa
  *
  */
 static int levelSpriteCallback(void* object, int argc, char** data, char** azColName) {
-	// 0   1      2         3          4          5       6          7             8           9
-	// id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id
+	// 0   1      2         3          4          5       6          7             8           9              10
+	// id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id, level_sprite_path
 
 	if (LevelSelect* const scene = static_cast<LevelSelect*>(object)) {
 		const Size visibleSize = Director::getInstance()->getVisibleSize();
@@ -93,9 +93,10 @@ static int levelSpriteCallback(void* object, int argc, char** data, char** azCol
 		//log("com.zenprogramming.reflection: position (%f, %f)", position.x, position.y);
 		const bool locked = std::atoi(data[5]) == 1;
 		const int numStars = std::atoi(data[6]);
+		std::string levelSpriteFilename(data[10]);
 
 		// create the background
-		auto levelSelectSprite = Sprite::create("level_sprite_300x300.png");
+		auto levelSelectSprite = Sprite::create(levelSpriteFilename);
 		levelSelectSprite->setPosition(position);
 		levelSelectSprite->setScale(SCALE);
 		scene->addChild(levelSelectSprite);
@@ -261,7 +262,7 @@ bool LevelSelect::init(int worldId) {
 	}
 
 	std::stringstream ss;
-	ss << "SELECT id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id FROM game_levels WHERE world_id = " << this->worldId << " ORDER BY level_num ASC";
+	ss << "SELECT game_levels.id, game_levels.title, game_levels.world_id, game_levels.level_num, game_levels.file_path, game_levels.locked, game_levels.num_stars, game_levels.fastest_time, game_levels.first_play, game_levels.next_level_id, game_worlds.level_sprite_path FROM game_levels INNER JOIN game_worlds ON game_levels.world_id = game_worlds.id WHERE world_id = " << this->worldId << " ORDER BY level_num ASC";
 	rc = sqlite3_exec(db, ss.str().c_str(), levelSpriteCallback, static_cast<void*>(this), &zErrMsg);
 	if (rc != SQLITE_OK) {
 		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);

@@ -32,7 +32,8 @@
 class TitleScreen : public cocos2d::Scene {
 protected:
 	cocos2d::Label* worldSelectLabel;
-	cocos2d::Sprite* creditsSprite;
+	cocos2d::Sprite* infoSprite;
+	cocos2d::Sprite* resetSprite;
 
 public:
 	static cocos2d::Scene* createScene();

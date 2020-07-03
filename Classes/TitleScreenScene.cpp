@@ -44,7 +44,9 @@ Scene* TitleScreen::createScene() {
 	return TitleScreen::create();
 }
 
-// on "init" you need to initialize your instance
+/**
+ * on "init" you need to initialize your instance
+ */
 bool TitleScreen::init() {
 	//////////////////////////////
 	// 1. super init first
@@ -87,11 +89,17 @@ bool TitleScreen::init() {
 		this->addChild(this->worldSelectLabel, 10);
 	}
 
-	// create the credits sprite
-	this->creditsSprite = Sprite::create("credits.png");
-	this->creditsSprite->setScale(SCALE);
-	this->creditsSprite->setPosition(Vec2(1452, 84));
-	this->addChild(this->creditsSprite, 255);
+	// create the info sprite
+	this->infoSprite = Sprite::create("info.png");
+	this->infoSprite->setScale(SCALE);
+	this->infoSprite->setPosition(Vec2(104, 104));
+	this->addChild(this->infoSprite, 255);
+
+	// create the reset sprite
+	this->resetSprite = Sprite::create("reset.png");
+	this->resetSprite->setScale(SCALE);
+	this->resetSprite->setPosition(Vec2(1432, 104));
+	this->addChild(this->resetSprite, 255);
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
@@ -109,9 +117,14 @@ bool TitleScreen::init() {
 			consuming = true;
 			auto scene = WorldSelect::createScene();
 			Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B(0, 0, 0)));
-//		} else if (this->creditsLabel->getBoundingBox().containsPoint(touch->getLocation())) {
+//		} else if (this->infoSprite->getBoundingBox().containsPoint(touch->getLocation())) {
 //			consuming = true;
-//			auto scene = CreditsScreen::createScene();
+//			auto scene = InfoScreen::createScene();
+//			Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B(0, 0, 0)));
+//		}
+//		} else if (this->resetSprite->getBoundingBox().containsPoint(touch->getLocation())) {
+//			consuming = true;
+//			auto scene = ResetScreen::createScene();
 //			Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B(0, 0, 0)));
 		}
 
