@@ -121,7 +121,6 @@ bool TitleScreen::init() {
 //			consuming = true;
 //			auto scene = InfoScreen::createScene();
 //			Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B(0, 0, 0)));
-//		}
 //		} else if (this->resetSprite->getBoundingBox().containsPoint(touch->getLocation())) {
 //			consuming = true;
 //			auto scene = ResetScreen::createScene();
