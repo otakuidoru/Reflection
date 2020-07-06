@@ -151,6 +151,7 @@ void Mirror::rotate() {
 				// before rotation
 				CallFunc::create([&]() {
 					//log("com.zenprogramming.reflection: BEGIN MIRROR[%d] ROTATION", this->getId());
+					this->onBeforeRotate();
 					this->setRotating(true);
 				}),
 				// on rotation

@@ -1,7 +1,7 @@
 /****************************************************************************
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020 ZenProgramming.com, Ltd.
  
- http://www.cocos2d-x.org
+ http://www.zenprogramming.com
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -124,6 +124,40 @@ static int levelSpriteCallback(void* object, int argc, char** data, char** azCol
 		scene->levelSprites[levelSelectSprite] = levelFilename;
 		scene->levelSpriteLockedMap[levelSelectSprite] = locked;
 		scene->levelSpriteLevelIdMap[levelSelectSprite] = levelId;
+	}
+
+	return 0;
+}
+
+/**
+ *
+ */
+static int numStarsCallback(void* object, int argc, char** data, char** azColName) {
+	// 0
+	// num_stars
+
+	if (LevelSelect* const scene = static_cast<LevelSelect*>(object)) {
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+		const float SCALE = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
+
+		const int numStars = std::atoi(data[0]);
+
+		std::stringstream ss;
+		ss << numStars << "/75";
+		auto label = Label::createWithTTF(ss.str(), "fonts/centurygothic.ttf", 96);
+		if (label == nullptr) {
+			problemLoading("'fonts/centurygothic.ttf'");
+		} else {
+			label->setAnchorPoint(Vec2(1.0f, 0.5f));
+			label->setHorizontalAlignment(TextHAlignment::RIGHT);
+
+			// position the label on the top center of the screen
+			label->setPosition(Vec2(1496.0f, 100.0f));
+
+			// add the label as a child to this layer
+			scene->addChild(label, 255);
+		}
 	}
 
 	return 0;
@@ -264,6 +298,14 @@ bool LevelSelect::init(int worldId) {
 	std::stringstream ss;
 	ss << "SELECT game_levels.id, game_levels.title, game_levels.world_id, game_levels.level_num, game_levels.file_path, game_levels.locked, game_levels.num_stars, game_levels.fastest_time, game_levels.first_play, game_levels.next_level_id, game_worlds.level_sprite_path FROM game_levels INNER JOIN game_worlds ON game_levels.world_id = game_worlds.id WHERE world_id = " << this->worldId << " ORDER BY level_num ASC";
 	rc = sqlite3_exec(db, ss.str().c_str(), levelSpriteCallback, static_cast<void*>(this), &zErrMsg);
+	if (rc != SQLITE_OK) {
+		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+
+	std::stringstream numStarsSs;
+	numStarsSs << "SELECT SUM(num_stars) FROM game_levels WHERE world_id = " << this->worldId;
+	rc = sqlite3_exec(db, numStarsSs.str().c_str(), numStarsCallback, static_cast<void*>(this), &zErrMsg);
 	if (rc != SQLITE_OK) {
 		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
 		sqlite3_free(zErrMsg);

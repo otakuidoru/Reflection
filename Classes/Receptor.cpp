@@ -104,7 +104,7 @@ Plane Receptor::getPlane(unsigned int index) {
 			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
 		} break;
-		case 4: { // fourth plane - non-reflective
+		case 4: { // fifth plane - non-reflective
 			// TODO
 		} break;
 	}

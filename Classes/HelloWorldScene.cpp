@@ -251,6 +251,7 @@ void HelloWorld::addMirrors(tinyxml2::XMLElement* const mirrorsElement, float sc
 
 			// create mirror
 			auto mirror = Mirror::create(id);
+			mirror->onBeforeRotate = [&]() {};
 			mirror->onAfterRotate = [&]() {};
 			this->mirrors.insert(mirror);
 			this->objects.insert(mirror);

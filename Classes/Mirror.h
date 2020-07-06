@@ -56,6 +56,7 @@ public:
 
 	void rotate();
 
+	std::function<void()> onBeforeRotate;
 	std::function<void()> onAfterRotate;
 };
 
