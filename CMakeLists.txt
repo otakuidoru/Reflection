@@ -58,6 +58,7 @@ endif()
 list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
      Classes/BackArrow.cpp
+     Classes/Battery.cpp
      Classes/Block.cpp
      Classes/Combiner.cpp
      Classes/CreditsScreenScene.cpp
@@ -70,6 +71,7 @@ list(APPEND GAME_SOURCE
      Classes/Mirror.cpp
      Classes/Portal.cpp
      Classes/Receptor.cpp
+     Classes/ResetButton.cpp
      Classes/Splitter.cpp
      Classes/sqlite3.c
      Classes/tinyxml2.cpp
@@ -79,6 +81,7 @@ list(APPEND GAME_SOURCE
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/BackArrow.h
+     Classes/Battery.h
      Classes/Block.h
      Classes/Combiner.h
      Classes/CreditsScreenScene.h
@@ -92,6 +95,7 @@ list(APPEND GAME_HEADER
      Classes/Mirror.h
      Classes/Portal.h
      Classes/Receptor.h
+     Classes/ResetButton.h
      Classes/Splitter.h
      Classes/sqlite3.h
      Classes/sqlite3ext.h

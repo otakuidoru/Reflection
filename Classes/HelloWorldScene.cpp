@@ -28,6 +28,7 @@
 #include "LevelSelectScene.h"
 #include "HelloWorldScene.h"
 #include "BackArrow.h"
+#include "ResetButton.h"
 
 #define BACKGROUND_LAYER -1
 #define LASER_LAYER 1
@@ -88,6 +89,7 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId, int worldId
 
 	this->levelId = levelId;
 	this->worldId = worldId;
+	this->levelFilename = levelFilename;
 
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
 	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -157,7 +159,7 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId, int worldId
 #endif
 
 	std::stringstream source;
-	source << levelFilename;
+	source << this->levelFilename;
 	//log("com.zenprogramming.reflection: Source Filename = %s", source.str().c_str());
 
 	std::stringstream target;
@@ -175,8 +177,18 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId, int worldId
 		auto levelSelectScene = LevelSelect::create(this->worldId);
 		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, levelSelectScene, Color3B(0, 0, 0)));
 	};
-	backArrow->setPosition(Vec2(116.0f, 100.0f));
+	backArrow->setScale(visibleSize.width / 1536.0f);
+	backArrow->setPosition(Vec2(origin.x + backArrow->getContentSize().width / 2.0f, origin.y + backArrow->getContentSize().height / 2.0f));
 	this->addChild(backArrow, 254);
+
+	auto resetButton = ResetButton::create();
+	resetButton->onClick = [&]() {
+		auto levelScene = HelloWorld::createScene(this->levelFilename, this->levelId, this->worldId);
+		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, levelScene, Color3B(0, 0, 0)));
+	};
+	resetButton->setScale(visibleSize.width / 1536.0f);
+	resetButton->setPosition(Vec2(origin.x + visibleSize.width - backArrow->getContentSize().width / 2.0f, origin.y + backArrow->getContentSize().height / 2.0f));
+	this->addChild(resetButton, 254);
 
 	this->ready = true;
 

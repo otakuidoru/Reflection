@@ -69,6 +69,7 @@ protected:
 
 	int levelId;
 	int worldId;
+	std::string levelFilename;
 	bool ready;
 
 	// level methods

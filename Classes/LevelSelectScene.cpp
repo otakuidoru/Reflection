@@ -100,7 +100,7 @@ static int levelSpriteCallback(void* object, int argc, char** data, char** azCol
 		// create the background
 		auto levelSelectSprite = Sprite::create(levelSpriteFilename);
 		levelSelectSprite->setPosition(position);
-		levelSelectSprite->setScale(SCALE);
+		//levelSelectSprite->setScale(SCALE);	// CHUCK
 		scene->addChild(levelSelectSprite);
 
 		if (locked) {
