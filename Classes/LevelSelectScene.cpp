@@ -22,8 +22,8 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#include <sqlite3.h>
 #include <sstream>
+#include <sqlite3.h>
 #include "LevelSelectScene.h"
 #include "HelloWorldScene.h"
 #include "WorldSelectScene.h"
@@ -47,21 +47,23 @@ static int worldNameCallback(void* object, int argc, char** data, char** azColNa
 	if (LevelSelect* const scene = static_cast<LevelSelect*>(object)) {
 		const Size visibleSize = Director::getInstance()->getVisibleSize();
 		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
-		const float SCALE = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
 
-		std::string levelName(data[0]);
+		std::string worldName(data[0]);
 		std::string backgroundName(data[1]);
 
 		auto background = Sprite::create(backgroundName);
+		const float scale = std::max(visibleSize.width / background->getContentSize().width, visibleSize.height / background->getContentSize().height);
+		background->setScale(scale);
 		background->setPositionNormalized(Vec2(0.5f, 0.5f));
 		scene->addChild(background, -1);
 
-		auto label = Label::createWithTTF(levelName, "fonts/centurygothic.ttf", 160);
+		auto label = Label::createWithTTF(worldName, "fonts/centurygothic.ttf", 160);
 		if (label == nullptr) {
 			problemLoading("'fonts/centurygothic.ttf'");
 		} else {
 			// position the label on the top center of the screen
 			label->setPosition(Vec2(768.0f, 1928.0f));
+			label->setScale(visibleSize.width / 1536.0f);
 
 			// add the label as a child to this layer
 			scene->addChild(label, 10);
@@ -259,7 +261,8 @@ bool LevelSelect::init(int worldId) {
 
 	// create the back arrow
 	auto backArrow = BackArrow::create();
-	backArrow->setPosition(Vec2(116.0f, 100.0f));
+	backArrow->setPosition(Vec2(origin.x + backArrow->getContentSize().width / 2.0f, origin.y + backArrow->getContentSize().height / 2.0f));
+	backArrow->setScale(visibleSize.width / 1536.0f);
 	backArrow->setColor(Color3B(255, 255, 255));
 	backArrow->onClick = []() {
 		auto worldSelectScene = WorldSelect::createScene();

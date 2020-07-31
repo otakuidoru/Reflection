@@ -373,11 +373,10 @@ void HelloWorld::createLevel(const std::string& filename) {
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
-	//  Add the initial setup objects
+	//  Add the initial objects
 	//
 	//////////////////////////////////////////////////////////////////////////////
 
-	// add initial objects
 	this->addEmitters(document.RootElement()->FirstChildElement("setup")->FirstChildElement("emitters"), scale);
 	this->addMirrors(document.RootElement()->FirstChildElement("setup")->FirstChildElement("mirrors"), scale);
 	this->addReceptors(document.RootElement()->FirstChildElement("setup")->FirstChildElement("receptors"), scale);

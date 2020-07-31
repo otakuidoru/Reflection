@@ -22,8 +22,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#include <cmath>
-#include "Combiner.h"
+#include "Battery.h"
 
 USING_NS_CC;
 
@@ -33,32 +32,32 @@ static const float RADTODEG = 57.295779513082320876f;
 /**
  *
  */
-Combiner::Combiner(int id) : GameObject(id, ColorType::NONE, 8) {
+Battery::Battery(int id) : GameObject(id, ColorType::NONE, 8) {
 }
 
 /**
  *
  */
-Combiner::~Combiner() {
+Battery::~Battery() {
 }
 
 /**
  *
  */
-Combiner* Combiner::create(int id) {
-	Combiner* combiner = new (std::nothrow) Combiner(id);
-	if (combiner && combiner->initWithFile("combiner.png")) {
-		combiner->autorelease();
-		return combiner;
+Battery* Battery::create(int id) {
+	Battery* battery = new (std::nothrow) Battery(id);
+	if (battery && battery->initWithFile("battery_empty.png")) {
+		battery->autorelease();
+		return battery;
 	}
-	CC_SAFE_DELETE(combiner);
+	CC_SAFE_DELETE(battery);
 	return nullptr;
 }
 
 /**
  * on "init" you need to initialize your instance
  */
-bool Combiner::initWithFile(const std::string& filename) {
+bool Battery::initWithFile(const std::string& filename) {
 	//////////////////////////////
 	// 1. super init first
 	if (!GameObject::initWithFile(filename)) {
@@ -81,45 +80,53 @@ bool Combiner::initWithFile(const std::string& filename) {
 /**
  *
  */
-Plane Combiner::getPlane(unsigned int index) {
+Plane Battery::getPlane(unsigned int index) {
 	Plane plane;
 
 	const Vec2 worldPos = this->getParent()->convertToWorldSpace(this->getPosition());
 	const Size contentSize = this->getContentSize() * this->getScale();
 
-	switch (index) {	
+	// FIXME: fix the planes
+	switch (index) {
 		case 0: { // first plane - non-reflective
-			const float angle = -(this->getRotation() - 45.0f) * DEGTORAD;
-			Vec3 pos(worldPos.x, worldPos.y, 0.0f);
+			const float angle = -(this->getRotation()) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
-			//log("com.zenprogramming.reflection: mirror[%d] plane[0]: pos = (%f, %f, %f) normal = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z, plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
 		} break;
 		case 1: { // second plane - non-reflective
 			const float angle = -(this->getRotation() + 90.0f) * DEGTORAD;
 			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
-			//log("com.zenprogramming.reflection: mirror[%d] plane[1]: pos = (%f, %f, %f) normal = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z, plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
 		} break;
 		case 2: { // third plane - non-reflective
 			const float angle = -(this->getRotation() + 180.0f) * DEGTORAD;
 			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
-			//log("com.zenprogramming.reflection: mirror[%d] plane[2]: pos = (%f, %f, %f) normal = (%f, %f, %f)", this->getId(), pos.x, pos.y, pos.z, plane.getNormal().x, plane.getNormal().y, plane.getNormal().z);
 		} break;
-		case 3: { // third plane - non-reflective
-			// TODO
+		case 3: { // fourth plane - non-reflective
+			const float angle = -(this->getRotation() + 270.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
 		} break;
-		case 4: { // third plane - non-reflective
-			// TODO
+		case 4: { // first plane - non-reflective
+			const float angle = -(this->getRotation()) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
 		} break;
-		case 5: { // third plane - non-reflective
-			// TODO
+		case 5: { // second plane - non-reflective
+			const float angle = -(this->getRotation() + 90.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
 		} break;
 		case 6: { // third plane - non-reflective
-			// TODO
+			const float angle = -(this->getRotation() + 180.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
 		} break;
-		case 7: { // third plane - non-reflective
-			// TODO
+		case 7: { // fourth plane - non-reflective
+			const float angle = -(this->getRotation() + 270.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
 		} break;
 	}
 

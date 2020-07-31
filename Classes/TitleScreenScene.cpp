@@ -56,14 +56,19 @@ bool TitleScreen::init() {
 
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
 	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	const float SCALE = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
 
 	/////////////////////////////
 	// 2. add your codes below...
 
-	auto background = Sprite::create("reflection_with_title.png");
+	auto background = Sprite::create("reflection_title_1536x2048.png");
 	background->setPositionNormalized(Vec2(0.5f, 0.5f));
-	this->addChild(background, -1);
+	this->addChild(background, -2);
+
+	auto backgroundText = Sprite::create("reflection_title_text_1536x2048.png");
+	const float textScale = visibleSize.width / backgroundText->getContentSize().width;
+	backgroundText->setPositionNormalized(Vec2(0.5f, 0.5f));
+	backgroundText->setScale(textScale);
+	this->addChild(backgroundText, -1);
 
 	std::string journeyPhrase;
 	if (!UserDefault::getInstance()->getBoolForKey("launched_before")) {
@@ -75,9 +80,9 @@ bool TitleScreen::init() {
 	// create the WorldSelect Label
 	this->worldSelectLabel = Label::createWithTTF(journeyPhrase, "fonts/centurygothic.ttf", 160);
 	if (worldSelectLabel == nullptr) {
-		problemLoading("'fonts/motioncontrol-bold.ttf'");
+		problemLoading("'fonts/centurygothic.ttf'");
 	} else {
-		this->worldSelectLabel->setScale(SCALE);
+		this->worldSelectLabel->setScale(textScale);
 
 		// position the label on the top center of the screen
 		this->worldSelectLabel->setPosition(Vec2(768.0f, 768.0f));
@@ -91,14 +96,14 @@ bool TitleScreen::init() {
 
 	// create the info sprite
 	this->infoSprite = Sprite::create("info.png");
-	this->infoSprite->setScale(SCALE);
-	this->infoSprite->setPosition(Vec2(104, 104));
+	this->infoSprite->setScale(textScale);
+	this->infoSprite->setPosition(Vec2(104.0f, 104.0f));
 	this->addChild(this->infoSprite, 255);
 
 	// create the reset sprite
 	this->resetSprite = Sprite::create("reset.png");
-	this->resetSprite->setScale(SCALE);
-	this->resetSprite->setPosition(Vec2(1432, 104));
+	this->resetSprite->setScale(textScale);
+	this->resetSprite->setPosition(Vec2(1432.0f, 104.0f));
 	this->addChild(this->resetSprite, 255);
 
 	//////////////////////////////////////////////////////////////////////////////

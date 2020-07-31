@@ -22,6 +22,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
+#include <sstream>
 #include <sqlite3.h>
 #include "ui/CocosGUI.h"
 #include "WorldSelectScene.h"
@@ -41,12 +42,12 @@ static int numWorldsSelectCallback(void* object, int count, char** data, char** 
 		//log("com.zenprogramming.reflection: numLevels %i", numLevels);
 
 		const float contentWidth = visibleSize.width;
-		const float contentHeight = std::min(visibleSize.height, numLevels*386.0f);
+		const float contentHeight = std::min(visibleSize.height, (float)(numLevels*std::atof(data[1])));
 		const Size contentSize(contentWidth, contentHeight);
 		//log("com.zenprogramming.reflection: size %f, %f", contentWidth, contentHeight);
 
 		scrollView->setContentSize(contentSize);
-		scrollView->setInnerContainerSize(Size(visibleSize.width, numLevels*386.0f));
+		scrollView->setInnerContainerSize(Size(visibleSize.width, (float)(numLevels*std::atof(data[1]))));
 	}
 
 	return 0;
@@ -60,6 +61,8 @@ static int worldSelectCallback(void* object, int count, char** data, char** azCo
 	// id, name, level_select_path, background_path, locked, total_rows
 
 	if (ui::ScrollView* const scrollView = static_cast<ui::ScrollView*>(object)) {
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+
 		const int levelId = std::atoi(data[0]);
 		std::string name(data[1]);
 		std::string levelSelectPath(data[2]);
@@ -67,13 +70,14 @@ static int worldSelectCallback(void* object, int count, char** data, char** azCo
 		std::string locked(data[4]);
 		const int totalRows = std::atoi(data[5]);
 
-		Vec2 position(768.0f, 193.0f*((levelId-1)*2+1));
+		//Vec2 position(visibleSize.width/2.0f, 193.0f*((levelId-1)*2+1));
 		//log("com.zenprogramming.reflection %f, %f", position.x, position.y);
 		//log("com.zenprogramming.reflection %s", name.c_str());
 
 		auto sprite = ui::ImageView::create(data[2]);
-		sprite->setScale(0.95f);
-		sprite->setPosition(Vec2(768.0f, 193.0f*((totalRows-levelId)*2+1)));
+		const float scale = visibleSize.width / sprite->getContentSize().width;
+		sprite->setScale(0.95f * scale);
+		sprite->setPosition(Vec2(visibleSize.width/2.0f, (sprite->getContentSize().height/2.0f)*((totalRows-levelId)*2+1)*scale));
 		auto label = Label::createWithTTF(name, "fonts/centurygothic.ttf", 160);
 		label->setPositionNormalized(Vec2(0.5f, 0.5f));
 		sprite->addChild(label);
@@ -128,14 +132,15 @@ bool WorldSelect::init() {
 	/////////////////////////////
 	// 2. add your codes below...
 
-	auto background = Sprite::create("reflection_no_title.png");
+	auto background = Sprite::create("reflection_title_1536x2048.png");
 	background->setPositionNormalized(Vec2(0.5f, 0.5f));
 	this->addChild(background, -1);
 
 	// create the back arrow
 	auto backArrow = BackArrow::create();
 	backArrow->setColor(Color3B(255, 255, 255));
-	backArrow->setPosition(Vec2(116.0f, 100.0f));
+	backArrow->setPosition(Vec2(origin.x + backArrow->getContentSize().width / 2.0f, origin.y + backArrow->getContentSize().height / 2.0f));
+	backArrow->setScale(visibleSize.width / 1536.0f);
 	backArrow->onClick = []() {
 		auto titleScreenScene = TitleScreen::createScene();
 		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, titleScreenScene, Color3B(0, 0, 0)));
@@ -167,15 +172,17 @@ bool WorldSelect::init() {
 	// open the database
 	rc = sqlite3_open(target.str().c_str(), &db);
 	if (rc) {
-		//log("com.zenprogramming.reflection: Can't open database: %s", sqlite3_errmsg(db));
+		log("com.zenprogramming.reflection: Can't open database: %s", sqlite3_errmsg(db));
 		sqlite3_close(db);
 		return false;
 	}
 
-	std::string countWorldsSql = "SELECT COUNT(*) FROM game_worlds WHERE locked = 0";
+	std::stringstream countWorldsSqlSS;
+	countWorldsSqlSS << "SELECT COUNT(*), " << (386.0f*visibleSize.width/1536.0f) << " FROM game_worlds WHERE locked = 0";
+	std::string countWorldsSql = countWorldsSqlSS.str();
 	rc = sqlite3_exec(db, countWorldsSql.c_str(), numWorldsSelectCallback, static_cast<void*>(scrollView), &zErrMsg);
 	if (rc != SQLITE_OK) {
-		//log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
+		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);
 		sqlite3_free(zErrMsg);
 	}
 
