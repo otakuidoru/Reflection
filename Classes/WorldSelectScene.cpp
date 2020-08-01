@@ -186,7 +186,7 @@ bool WorldSelect::init() {
 		sqlite3_free(zErrMsg);
 	}
 
-	std::string selectAllSql = "WITH result AS (SELECT id, name, level_select_path, background_path, locked FROM game_worlds WHERE locked = 0 ORDER BY id DESC) SELECT *, (SELECT COUNT(*) FROM result) AS total_rows FROM result";
+	std::string selectAllSql = "WITH result AS (SELECT id, name, level_select_path, background_path, locked FROM game_worlds WHERE locked = 0 ORDER BY id DESC) SELECT id, name, level_select_path, background_path, locked, (SELECT COUNT(*) FROM result) AS total_rows FROM result";
 	rc = sqlite3_exec(db, selectAllSql.c_str(), worldSelectCallback, static_cast<void*>(scrollView), &zErrMsg);
 	if (rc != SQLITE_OK) {
 		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);

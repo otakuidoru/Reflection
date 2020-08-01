@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS game_worlds;
+DROP TABLE IF EXISTS game_levels;
 CREATE TABLE "game_worlds" ( `id` INTEGER NOT NULL, `name` TEXT NOT NULL, `level_select_path` TEXT NOT NULL, `background_path` TEXT NOT NULL, `level_sprite_path` TEXT NOT NULL, `locked` INTEGER NOT NULL, PRIMARY KEY(`id`) );
 CREATE INDEX `game_worlds_idx` ON `game_worlds` ( `id` );
 INSERT INTO game_worlds (id, name, level_select_path, background_path, level_sprite_path, locked) VALUES (1, 'Tranquil Forest', 'worlds/forest/level_select.png', 'worlds/forest/background.png', 'worlds/forest/level_sprite.png', 0);
@@ -8,7 +10,7 @@ INSERT INTO game_worlds (id, name, level_select_path, background_path, level_spr
 INSERT INTO game_worlds (id, name, level_select_path, background_path, level_sprite_path, locked) VALUES (6, 'Zen Garden', 'worlds/garden/level_select.png', 'worlds/garden/background.png', 'worlds/garden/level_sprite.png', 0);
 INSERT INTO game_worlds (id, name, level_select_path, background_path, level_sprite_path, locked) VALUES (7, 'Deep Space', 'worlds/space/level_select.png', 'worlds/space/background.png', 'worlds/space/level_sprite.png', 0);
 INSERT INTO game_worlds (id, name, level_select_path, background_path, level_sprite_path, locked) VALUES (8, 'Astral Plane', 'worlds/astral/level_select.png', 'worlds/astral/background.png', 'worlds/astral/level_sprite.png', 0);
-CREATE TABLE game_levels ( `id` INTEGER NOT NULL, `title` TEXT NOT NULL, `world_id` INTEGER NOT NULL, `level_num` INTEGER NOT NULL, `file_path` TEXT NOT NULL, `locked` INTEGER NOT NULL, `num_stars` INTEGER NOT NULL, `fastest_time` REAL, `first_play` INTEGER, `next_level_id` INTEGER, PRIMARY KEY(`id`) );
+CREATE TABLE "game_levels" ( `id` INTEGER NOT NULL, `title` TEXT NOT NULL, `world_id` INTEGER NOT NULL, `level_num` INTEGER NOT NULL, `file_path` TEXT NOT NULL, `locked` INTEGER NOT NULL, `num_stars` INTEGER NOT NULL, `fastest_time` REAL, `first_play` INTEGER, `next_level_id` INTEGER, PRIMARY KEY(`id`) );
 CREATE INDEX `game_levels_idx` ON `game_levels` ( `id` );
 INSERT INTO game_levels (id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id) VALUES (1, 'Start Simply', 1, 1, 'worlds/forest/1.xml', 0, 0, NULL, 1, 2);
 INSERT INTO game_levels (id, title, world_id, level_num, file_path, locked, num_stars, fastest_time, first_play, next_level_id) VALUES (2, '...On The Wall', 1, 2, 'worlds/forest/2.xml', 1, 0, NULL, 1, 3);

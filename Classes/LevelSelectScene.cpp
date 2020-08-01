@@ -91,7 +91,7 @@ static int levelSpriteCallback(void* object, int argc, char** data, char** azCol
 		//log("com.zenprogramming.reflection: level filename num %s", levelNumFilename.c_str());
 		std::string levelFilename(data[4]);
 		//log("com.zenprogramming.reflection: level filename %s", levelFilename.c_str());
-		const Vec2& position = scene->levelNumPositionMap[levelNum];
+
 		//log("com.zenprogramming.reflection: position (%f, %f)", position.x, position.y);
 		const bool locked = std::atoi(data[5]) == 1;
 		const int numStars = std::atoi(data[6]);
@@ -99,8 +99,12 @@ static int levelSpriteCallback(void* object, int argc, char** data, char** azCol
 
 		// create the background
 		auto levelSelectSprite = Sprite::create(levelSpriteFilename);
+		const Vec2 position(
+			origin.x + (visibleSize.width  / 2.0f) + levelSelectSprite->getContentSize().width * SCALE * scene->levelNumRelativePositionMap[levelNum].x,
+			origin.y + (visibleSize.height / 2.0f) + levelSelectSprite->getContentSize().height * SCALE * scene->levelNumRelativePositionMap[levelNum].y
+		);
 		levelSelectSprite->setPosition(position);
-		//levelSelectSprite->setScale(SCALE);	// CHUCK
+		levelSelectSprite->setScale(SCALE);
 		scene->addChild(levelSelectSprite);
 
 		if (locked) {
@@ -224,32 +228,32 @@ bool LevelSelect::init(int worldId) {
 		{ 25, "numbers/25.png" },
 	};
 
-	this->levelNumPositionMap = {
-		{  1, Vec2(168.0f,  1596.0f) },
-		{  2, Vec2(468.0f,  1596.0f) },
-		{  3, Vec2(768.0f,  1596.0f) },
-		{  4, Vec2(1068.0f, 1596.0f) },
-		{  5, Vec2(1368.0f, 1596.0f) },
-		{  6, Vec2(168.0f,  1296.0f) },
-		{  7, Vec2(468.0f,  1296.0f) },
-		{  8, Vec2(768.0f,  1296.0f) },
-		{  9, Vec2(1068.0f, 1296.0f) },
-		{ 10, Vec2(1368.0f, 1296.0f) },
-		{ 11, Vec2(168.0f,   996.0f) },
-		{ 12, Vec2(468.0f,   996.0f) },
-		{ 13, Vec2(768.0f,   996.0f) },
-		{ 14, Vec2(1068.0f,  996.0f) },
-		{ 15, Vec2(1368.0f,  996.0f) },
-		{ 16, Vec2(168.0f,   696.0f) },
-		{ 17, Vec2(468.0f,   696.0f) },
-		{ 18, Vec2(768.0f,   696.0f) },
-		{ 19, Vec2(1068.0f,  696.0f) },
-		{ 20, Vec2(1368.0f,  696.0f) },
-		{ 21, Vec2(168.0f,   396.0f) },
-		{ 22, Vec2(468.0f,   396.0f) },
-		{ 23, Vec2(768.0f,   396.0f) },
-		{ 24, Vec2(1068.0f,  396.0f) },
-		{ 25, Vec2(1368.0f,  396.0f) }
+	this->levelNumRelativePositionMap = {
+		{  1, Vec2(-2.0f,  2.0f) },
+		{  2, Vec2(-1.0f,  2.0f) },
+		{  3, Vec2( 0.0f,  2.0f) },
+		{  4, Vec2( 1.0f,  2.0f) },
+		{  5, Vec2( 2.0f,  2.0f) },
+		{  6, Vec2(-2.0f,  1.0f) },
+		{  7, Vec2(-1.0f,  1.0f) },
+		{  8, Vec2( 0.0f,  1.0f) },
+		{  9, Vec2( 1.0f,  1.0f) },
+		{ 10, Vec2( 2.0f,  1.0f) },
+		{ 11, Vec2(-2.0f,  0.0f) },
+		{ 12, Vec2(-1.0f,  0.0f) },
+		{ 13, Vec2( 0.0f,  0.0f) },
+		{ 14, Vec2( 1.0f,  0.0f) },
+		{ 15, Vec2( 2.0f,  0.0f) },
+		{ 16, Vec2(-2.0f, -1.0f) },
+		{ 17, Vec2(-1.0f, -1.0f) },
+		{ 18, Vec2( 0.0f, -1.0f) },
+		{ 19, Vec2( 1.0f, -1.0f) },
+		{ 20, Vec2( 2.0f, -1.0f) },
+		{ 21, Vec2(-2.0f, -2.0f) },
+		{ 22, Vec2(-1.0f, -2.0f) },
+		{ 23, Vec2( 0.0f, -2.0f) },
+		{ 24, Vec2( 1.0f, -2.0f) },
+		{ 25, Vec2( 2.0f, -2.0f) }
 	};
 
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
@@ -273,6 +277,8 @@ bool LevelSelect::init(int worldId) {
 	/////////////////////////////////////////////////////////////////////////////
 	//
 	// create the level sprites
+	//
+	/////////////////////////////////////////////////////////////////////////////
 
 	std::stringstream target;
 	target << FileUtils::getInstance()->getWritablePath() << "levels.db";

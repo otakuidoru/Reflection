@@ -37,7 +37,7 @@ public:
 	std::map<cocos2d::Sprite*, std::string> levelSprites;
 	std::map<int, std::string> levelNumFilePathMap;
 	std::map<cocos2d::Sprite*, bool> levelSpriteLockedMap;
-	std::map<int, cocos2d::Vec2> levelNumPositionMap;
+	std::map<int, cocos2d::Vec2> levelNumRelativePositionMap;
 	std::map<cocos2d::Sprite*, int> levelSpriteLevelIdMap;
 
 	static cocos2d::Scene* createScene();

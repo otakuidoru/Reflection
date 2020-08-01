@@ -177,17 +177,20 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId, int worldId
 		auto levelSelectScene = LevelSelect::create(this->worldId);
 		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, levelSelectScene, Color3B(0, 0, 0)));
 	};
+	backArrow->setColor(Color3B(255, 255, 255));
 	backArrow->setScale(visibleSize.width / 1536.0f);
 	backArrow->setPosition(Vec2(origin.x + backArrow->getContentSize().width / 2.0f, origin.y + backArrow->getContentSize().height / 2.0f));
 	this->addChild(backArrow, 254);
 
+	// create the reset button
 	auto resetButton = ResetButton::create();
 	resetButton->onClick = [&]() {
 		auto levelScene = HelloWorld::createScene(this->levelFilename, this->levelId, this->worldId);
 		Director::getInstance()->replaceScene(TransitionFade::create(0.5f, levelScene, Color3B(0, 0, 0)));
 	};
+	resetButton->setColor(Color3B(255, 255, 255));
 	resetButton->setScale(visibleSize.width / 1536.0f);
-	resetButton->setPosition(Vec2(origin.x + visibleSize.width - backArrow->getContentSize().width / 2.0f, origin.y + backArrow->getContentSize().height / 2.0f));
+	resetButton->setPosition(Vec2(origin.x + visibleSize.width - resetButton->getContentSize().width / 2.0f, origin.y + resetButton->getContentSize().height / 2.0f));
 	this->addChild(resetButton, 254);
 
 	this->ready = true;

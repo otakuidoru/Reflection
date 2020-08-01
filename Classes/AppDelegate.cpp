@@ -72,7 +72,7 @@ static int register_all_packages() {
 void execSQL(sqlite3* const db, const std::string& stmt) {
 	char* zErrMsg = 0;
 
-	//log("com.zenprogramming.reflection: %s", stmt.c_str());
+	log("com.zenprogramming.reflection: %s", stmt.c_str());
 
 	int rc = sqlite3_exec(db, stmt.c_str(), nullptr, nullptr, &zErrMsg);
 	if (rc != SQLITE_OK) {
@@ -85,12 +85,14 @@ void execSQL(sqlite3* const db, const std::string& stmt) {
  *
  */
 bool AppDelegate::applicationDidFinishLaunching() {
-	std::string DB_FILENAME = "levels.db";
-
-	std::stringstream target;
-	target << FileUtils::getInstance()->getWritablePath() << DB_FILENAME;
-
 	if (!UserDefault::getInstance()->getBoolForKey("launched_before")) {
+		std::string DB_FILENAME = "levels.db";
+
+		std::stringstream target;
+		target << FileUtils::getInstance()->getWritablePath() << DB_FILENAME;
+
+		FileUtils::getInstance()->removeFile(target.str());
+
 		sqlite3* db;
 		char* zErrMsg = 0;
 		int rc;
