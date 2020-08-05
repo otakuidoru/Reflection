@@ -44,6 +44,7 @@
 #include "Receptor.h"
 #include "Portal.h"
 #include "Splitter.h"
+#include "WinCondition.h"
 
 class HelloWorld : public cocos2d::Scene {
 protected:
@@ -64,8 +65,10 @@ protected:
 
 	std::vector<cocos2d::Layer*> introLayers;
 
-	std::map<Emitter*, bool> emitterActiveWinConditions;
-	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
+	std::vector<std::shared_ptr<WinCondition>> winConditions;
+
+//	std::map<Emitter*, bool> emitterActiveWinConditions;
+//	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
 
 	int levelId;
 	int worldId;
@@ -87,7 +90,7 @@ protected:
 	void addSplitters(tinyxml2::XMLElement* const splittersElement, float scale);
 	void createLevel(const std::string& filename);
 
-	bool checkWinCondition();
+	bool checkWinConditions();
 	Laser* addLaser(float angle, const cocos2d::Vec2& position, const cocos2d::Color3B& color);
 
 public:

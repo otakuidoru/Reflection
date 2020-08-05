@@ -462,58 +462,67 @@ void HelloWorld::createLevel(const std::string& filename) {
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
-	//  Add the win condition
+	//  Add the win conditions
 	//
 	//////////////////////////////////////////////////////////////////////////////
 
-	// get the <wincondition> element
-	tinyxml2::XMLElement* winConditionElement = document.RootElement()->FirstChildElement("wincondition");
-	if (winConditionElement) {
-		{ // parse the win condition - emitters
-			tinyxml2::XMLElement* winConditionEmittersElement = winConditionElement->FirstChildElement("emitters");
-			if (winConditionEmittersElement) {
-				tinyxml2::XMLElement* winConditionEmitterElement = winConditionEmittersElement->FirstChildElement("emitter");
-				while (winConditionEmitterElement) {
-					// get emitter id
-					int emitterId;
-					winConditionEmitterElement->QueryIntAttribute("id", &emitterId);
+	// get the <winconditions> element
+	tinyxml2::XMLElement* winConditionsElement = document.RootElement()->FirstChildElement("winconditions");
+	if (winConditionsElement) {
 
-					// get emitter activity
-					const std::string emitterActiveStr(winConditionEmitterElement->Attribute("active"));
-					const bool emitterActive = !emitterActiveStr.compare("true");
+		// get the <wincondition> element
+		tinyxml2::XMLElement* winConditionElement = winConditionsElement->FirstChildElement("wincondition");
+		if (winConditionElement) {
+			std::shared_ptr<WinCondition> winCondition(new WinCondition());
 
-					for (auto emitter : this->emitters) {
-						if (emitter->getId() == emitterId) {
-							this->emitterActiveWinConditions[emitter] = emitterActive;
+			{ // parse the win condition - emitters
+				tinyxml2::XMLElement* winConditionEmittersElement = winConditionElement->FirstChildElement("emitters");
+				if (winConditionEmittersElement) {
+					tinyxml2::XMLElement* winConditionEmitterElement = winConditionEmittersElement->FirstChildElement("emitter");
+					while (winConditionEmitterElement) {
+						// get emitter id
+						int emitterId;
+						winConditionEmitterElement->QueryIntAttribute("id", &emitterId);
+
+						// get emitter activity
+						const std::string emitterActiveStr(winConditionEmitterElement->Attribute("active"));
+						const bool emitterActive = !emitterActiveStr.compare("true");
+
+						for (auto emitter : this->emitters) {
+							if (emitter->getId() == emitterId) {
+								winCondition->addEmitterActivation(emitter, emitterActive);
+							}
 						}
-					}
 
-					winConditionEmitterElement = winConditionEmitterElement->NextSiblingElement("emitter");
+						winConditionEmitterElement = winConditionEmitterElement->NextSiblingElement("emitter");
+					}
 				}
 			}
-		}
-		{ // parse the win condition - mirrors
-			tinyxml2::XMLElement* winConditionMirrorsElement = winConditionElement->FirstChildElement("mirrors");
-			if (winConditionMirrorsElement) {
-				tinyxml2::XMLElement* winConditionMirrorElement = winConditionMirrorsElement->FirstChildElement("mirror");
-				while (winConditionMirrorElement) {
-					// get mirror id
-					int mirrorId;
-					winConditionMirrorElement->QueryIntAttribute("id", &mirrorId);
+			{ // parse the win condition - mirrors
+				tinyxml2::XMLElement* winConditionMirrorsElement = winConditionElement->FirstChildElement("mirrors");
+				if (winConditionMirrorsElement) {
+					tinyxml2::XMLElement* winConditionMirrorElement = winConditionMirrorsElement->FirstChildElement("mirror");
+					while (winConditionMirrorElement) {
+						// get mirror id
+						int mirrorId;
+						winConditionMirrorElement->QueryIntAttribute("id", &mirrorId);
 
-					// get mirror direction
-					const std::string mirrorDirectionStr(winConditionMirrorElement->Attribute("direction"));
-					const Direction mirrorDirection = strToDirectionMap[mirrorDirectionStr];
+						// get mirror direction
+						const std::string mirrorDirectionStr(winConditionMirrorElement->Attribute("direction"));
+						const Direction mirrorDirection = strToDirectionMap[mirrorDirectionStr];
 
-					for (auto mirror : this->mirrors) {
-						if (mirror->getId() == mirrorId) {
-							this->mirrorDirectionWinConditions[mirror] = mirrorDirection;
+						for (auto mirror : this->mirrors) {
+							if (mirror->getId() == mirrorId) {
+								winCondition->addMirrorDirection(mirror, mirrorDirection);
+							}
 						}
-					}
 
-					winConditionMirrorElement = winConditionMirrorElement->NextSiblingElement("mirror");
+						winConditionMirrorElement = winConditionMirrorElement->NextSiblingElement("mirror");
+					}
 				}
 			}
+
+			this->winConditions.push_back(winCondition);
 		}
 	}
 }
@@ -600,8 +609,8 @@ std::shared_ptr<Intersection> HelloWorld::getClosestIntersection(const Ray& ray)
 /**
  *
  */
-bool HelloWorld::checkWinCondition() {
-	//log("com.zenprogramming.reflection: BEGIN checkWinCondition");
+bool HelloWorld::checkWinConditions() {
+	//log("com.zenprogramming.reflection: BEGIN checkWinConditions");
 
 	if (this->ready) {
 		////////////////////////////////////////////////////////////////////////////
@@ -610,23 +619,13 @@ bool HelloWorld::checkWinCondition() {
 		//
 		////////////////////////////////////////////////////////////////////////////
 
-		// check the emitters active state for win condition
-		for (std::map<Emitter*, bool>::iterator itr=emitterActiveWinConditions.begin(); itr!=emitterActiveWinConditions.end(); ++itr) {
-			Emitter* const emitter = itr->first;
-			if (emitter->isActive() != itr->second) {
+		for (auto winCondition : this->winConditions) {
+			if (!winCondition->evaluate()) {
 				return false;
 			}
 		}
 
-		// check the mirrors direction state for win condition
-		for (std::map<Mirror*, Direction>::iterator itr=mirrorDirectionWinConditions.begin(); itr!=mirrorDirectionWinConditions.end(); ++itr) {
-			Mirror* const mirror = itr->first;
-			if (mirror->getDirection() != itr->second) {
-				return false;
-			}
-		}
-
-		// set the ready to false
+		// player won, so set the ready to false
 		this->ready = false;
 
 		////////////////////////////////////////////////////////////////////////////
@@ -689,7 +688,7 @@ bool HelloWorld::checkWinCondition() {
 
 		//////////////////////////////////////////////////////////////////////////////
 		//
-		//  Update the database to open the next level
+		//  Update the database to unlock the next level
 		//
 		//////////////////////////////////////////////////////////////////////////////
 
@@ -720,7 +719,7 @@ bool HelloWorld::checkWinCondition() {
 		rc = sqlite3_close(db);
 	}
 
-	//log("com.zenprogramming.reflection: END checkWinCondition");
+	//log("com.zenprogramming.reflection: END checkWinConditions");
 
 	return true;
 }
@@ -777,7 +776,7 @@ void HelloWorld::update(float dt) {
 			}
 		}
 
-		this->checkWinCondition();
+		this->checkWinConditions();
 	}
 
 	//log("com.zenprogramming.reflection: END update");

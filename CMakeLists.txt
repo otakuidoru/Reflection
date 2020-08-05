@@ -76,6 +76,7 @@ list(APPEND GAME_SOURCE
      Classes/sqlite3.c
      Classes/tinyxml2.cpp
      Classes/TitleScreenScene.cpp
+     Classes/WinCondition.cpp
      Classes/WorldSelectScene.cpp
      )
 list(APPEND GAME_HEADER
@@ -101,6 +102,7 @@ list(APPEND GAME_HEADER
      Classes/sqlite3ext.h
      Classes/tinyxml2.h
      Classes/TitleScreenScene.h
+     Classes/WinCondition.h
      Classes/WorldSelectScene.h
      )
 
