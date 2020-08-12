@@ -30,12 +30,14 @@
 		</layer>
 	</intro>
 
-	<!-- Win Condition -->
-	<wincondition>
-		<!-- Emitters -->
-		<emitters>
-			<emitter id="1" active="true"></emitter>
-		</emitters>
-	</wincondition>
+	<!-- Win Conditions -->
+	<winconditions>
+		<wincondition>
+			<!-- Emitters -->
+			<emitters>
+				<emitter id="1" active="true"></emitter>
+			</emitters>
+		</wincondition>
+	</winconditions>
 </level>
 

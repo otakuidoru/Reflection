@@ -96,14 +96,20 @@ bool TitleScreen::init() {
 
 	// create the info sprite
 	this->infoSprite = Sprite::create("info.png");
-	this->infoSprite->setScale(textScale);
-	this->infoSprite->setPosition(Vec2(104.0f, 104.0f));
+	this->infoSprite->setPosition(Vec2(
+		origin.x + this->infoSprite->getContentSize().width/2.0f,
+		origin.y + this->infoSprite->getContentSize().height/2.0f
+	));
+	this->infoSprite->setScale(visibleSize.width / 1536.0f);
 	this->addChild(this->infoSprite, 255);
 
 	// create the reset sprite
 	this->resetSprite = Sprite::create("reset.png");
-	this->resetSprite->setScale(textScale);
-	this->resetSprite->setPosition(Vec2(1432.0f, 104.0f));
+	this->resetSprite->setPosition(Vec2(
+		origin.x + visibleSize.width - this->infoSprite->getContentSize().width/2.0f,
+		origin.y + this->infoSprite->getContentSize().height/2.0f
+	));
+	this->resetSprite->setScale(visibleSize.width / 1536.0f);
 	this->addChild(this->resetSprite, 255);
 
 	//////////////////////////////////////////////////////////////////////////////

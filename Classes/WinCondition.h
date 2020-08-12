@@ -29,11 +29,13 @@
 #include "Direction.h"
 #include "Emitter.h"
 #include "Mirror.h"
+#include "BonusStar.h"
 
 class WinCondition {
 protected:
 	std::map<Emitter*, bool> emitterActiveWinConditions;
 	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
+	std::set<BonusStar*> bonusStarsWinConditions;
 
 public:
 	WinCondition();
@@ -41,6 +43,7 @@ public:
 
 	void addEmitterActivation(Emitter* emitter, bool active);
 	void addMirrorDirection(Mirror* mirror, Direction direction);
+	void addBonusStar(BonusStar* bonusStar);
 
 	bool evaluate();
 };

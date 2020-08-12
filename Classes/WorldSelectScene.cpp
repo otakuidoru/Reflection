@@ -78,7 +78,7 @@ static int worldSelectCallback(void* object, int count, char** data, char** azCo
 		const float scale = visibleSize.width / sprite->getContentSize().width;
 		sprite->setScale(0.95f * scale);
 		sprite->setPosition(Vec2(visibleSize.width/2.0f, (sprite->getContentSize().height/2.0f)*((totalRows-levelId)*2+1)*scale));
-		auto label = Label::createWithTTF(name, "fonts/centurygothic.ttf", 160);
+		auto label = Label::createWithTTF(name, "fonts/centurygothic_bold.ttf", 160);
 		label->setPositionNormalized(Vec2(0.5f, 0.5f));
 		sprite->addChild(label);
 		scrollView->addChild(sprite, 10);

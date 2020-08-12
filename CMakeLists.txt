@@ -60,6 +60,7 @@ list(APPEND GAME_SOURCE
      Classes/BackArrow.cpp
      Classes/Battery.cpp
      Classes/Block.cpp
+     Classes/BonusStar.cpp
      Classes/Combiner.cpp
      Classes/CreditsScreenScene.cpp
      Classes/Emitter.cpp
@@ -84,6 +85,7 @@ list(APPEND GAME_HEADER
      Classes/BackArrow.h
      Classes/Battery.h
      Classes/Block.h
+     Classes/BonusStar.h
      Classes/Combiner.h
      Classes/CreditsScreenScene.h
      Classes/Direction.h

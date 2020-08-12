@@ -22,64 +22,25 @@
  THE SOFTWARE.
  ****************************************************************************/
 
+#ifndef __BONUS_STAR_H__
+#define __BONUS_STAR_H__
+
+#include <string>
 #include "cocos2d.h"
-#include "WinCondition.h"
+#include "GameObject.h"
 
-USING_NS_CC;
+class BonusStar : public GameObject {
+protected:
+	BonusStar(int id);
 
-/**
- *
- */
-WinCondition::WinCondition() {
-}
+public:
+	static BonusStar* create(int id);
+	virtual ~BonusStar();
 
-/**
- *
- */
-WinCondition::~WinCondition() {
-}
+	virtual bool initWithFile(const std::string& filename) override;
 
-/**
- *
- */
-void WinCondition::addEmitterActivation(Emitter* emitter, bool active) {
-	this->emitterActiveWinConditions[emitter] = active;
-}
+	virtual cocos2d::Plane getPlane(unsigned int index) override;
+};
 
-/**
- *
- */
-void WinCondition::addMirrorDirection(Mirror* mirror, Direction direction) {
-	this->mirrorDirectionWinConditions[mirror] = direction;
-}
-
-/**
- *
- */
-void WinCondition::addBonusStar(BonusStar* bonusStar) {
-	this->bonusStarsWinConditions.insert(bonusStar);
-}
-
-/**
- * Check all objects for their win condition
- */
-bool WinCondition::evaluate() {
-	// check the emitters active state for win condition
-	for (std::map<Emitter*, bool>::iterator itr=emitterActiveWinConditions.begin(); itr!=emitterActiveWinConditions.end(); ++itr) {
-		Emitter* const emitter = itr->first;
-		if (emitter->isActive() != itr->second) {
-			return false;
-		}
-	}
-
-	// check the mirrors direction state for win condition
-	for (std::map<Mirror*, Direction>::iterator itr=mirrorDirectionWinConditions.begin(); itr!=mirrorDirectionWinConditions.end(); ++itr) {
-		Mirror* const mirror = itr->first;
-		if (mirror->getDirection() != itr->second) {
-			return false;
-		}
-	}
-
-	return true;
-}
+#endif // __BONUS_STAR_H__
 

@@ -207,6 +207,9 @@ void HelloWorld::addEmitters(tinyxml2::XMLElement* const emittersElement, float 
 	if (emittersElement) {
 		tinyxml2::XMLElement* emitterElement = emittersElement->FirstChildElement("emitter");
 
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
 		while (emitterElement) {
 			// id
 			int id;
@@ -234,7 +237,8 @@ void HelloWorld::addEmitters(tinyxml2::XMLElement* const emittersElement, float 
 			tinyxml2::XMLElement* positionElement = emitterElement->FirstChildElement("position");
 			positionElement->QueryFloatAttribute("x", &x);
 			positionElement->QueryFloatAttribute("y", &y);
-			emitter->setPosition(Vec2(x, y));
+//			emitter->setPosition(Vec2(x, y));
+			emitter->setPosition(Vec2(origin.x + visibleSize.width * x, origin.y + visibleSize.height * y));
 
 			// set emitter direction
 			std::string directionStr(emitterElement->FirstChildElement("direction")->GetText());
@@ -259,6 +263,9 @@ void HelloWorld::addMirrors(tinyxml2::XMLElement* const mirrorsElement, float sc
 	if (mirrorsElement) {
 		tinyxml2::XMLElement* mirrorElement = mirrorsElement->FirstChildElement("mirror");
 
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
 		while (mirrorElement) {
 			// id
 			int id;
@@ -279,7 +286,7 @@ void HelloWorld::addMirrors(tinyxml2::XMLElement* const mirrorsElement, float sc
 			tinyxml2::XMLElement* positionElement = mirrorElement->FirstChildElement("position");
 			positionElement->QueryFloatAttribute("x", &x);
 			positionElement->QueryFloatAttribute("y", &y);
-			mirror->setPosition(Vec2(x, y));
+			mirror->setPosition(Vec2(origin.x + visibleSize.width * x, origin.y + visibleSize.height * y));
 
 			// set mirror direction
 			std::string directionStr(mirrorElement->FirstChildElement("direction")->GetText());
@@ -299,6 +306,9 @@ void HelloWorld::addMirrors(tinyxml2::XMLElement* const mirrorsElement, float sc
 void HelloWorld::addReceptors(tinyxml2::XMLElement* const receptorsElement, float scale) {
 	if (receptorsElement) {
 		tinyxml2::XMLElement* receptorElement = receptorsElement->FirstChildElement("receptor");
+
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 		while (receptorElement) {
 			// id
@@ -326,7 +336,7 @@ void HelloWorld::addReceptors(tinyxml2::XMLElement* const receptorsElement, floa
 			tinyxml2::XMLElement* positionElement = receptorElement->FirstChildElement("position");
 			positionElement->QueryFloatAttribute("x", &x);
 			positionElement->QueryFloatAttribute("y", &y);
-			receptor->setPosition(Vec2(x, y));
+			receptor->setPosition(Vec2(origin.x + visibleSize.width * x, origin.y + visibleSize.height * y));
 
 			// set receptor direction
 			std::string directionStr(receptorElement->FirstChildElement("direction")->GetText());
@@ -347,6 +357,9 @@ void HelloWorld::addBlocks(tinyxml2::XMLElement* const blocksElement, float scal
 	if (blocksElement) {
 		tinyxml2::XMLElement* blockElement = blocksElement->FirstChildElement("block");
 
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
 		while (blockElement) {
 			// id
 			int id;
@@ -365,12 +378,50 @@ void HelloWorld::addBlocks(tinyxml2::XMLElement* const blocksElement, float scal
 			tinyxml2::XMLElement* positionElement = blockElement->FirstChildElement("position");
 			positionElement->QueryFloatAttribute("x", &x);
 			positionElement->QueryFloatAttribute("y", &y);
-			block->setPosition(Vec2(x, y));
+			block->setPosition(Vec2(origin.x + visibleSize.width * x, origin.y + visibleSize.height * y));
 
 			// add the block to the scene
 			this->addChild(block, OBJECT_LAYER);
 
 			blockElement = blockElement->NextSiblingElement("block");
+		}
+	}
+}
+
+/**
+ *
+ */
+void HelloWorld::addBonusStars(tinyxml2::XMLElement* const bonusStarsElement, float scale) {
+	if (bonusStarsElement) {
+		tinyxml2::XMLElement* bonusStarElement = bonusStarsElement->FirstChildElement("bonusstar");
+
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+		while (bonusStarElement) {
+			// id
+			int id;
+			bonusStarElement->QueryIntAttribute("id", &id);
+
+			// create block
+			auto bonusStar = BonusStar::create(id);
+			this->bonusStars.insert(bonusStar);
+			this->objects.insert(bonusStar);
+
+			// set block scale
+			bonusStar->setScale(scale);
+
+			// set block position
+			float x, y;
+			tinyxml2::XMLElement* positionElement = bonusStarElement->FirstChildElement("position");
+			positionElement->QueryFloatAttribute("x", &x);
+			positionElement->QueryFloatAttribute("y", &y);
+			bonusStar->setPosition(Vec2(origin.x + visibleSize.width * x, origin.y + visibleSize.height * y));
+
+			// add the block to the scene
+			this->addChild(bonusStar, OBJECT_LAYER);
+
+			bonusStarElement = bonusStarElement->NextSiblingElement("bonusstar");
 		}
 	}
 }
@@ -396,6 +447,7 @@ void HelloWorld::createLevel(const std::string& filename) {
 	this->addMirrors(document.RootElement()->FirstChildElement("setup")->FirstChildElement("mirrors"), scale);
 	this->addReceptors(document.RootElement()->FirstChildElement("setup")->FirstChildElement("receptors"), scale);
 	this->addBlocks(document.RootElement()->FirstChildElement("setup")->FirstChildElement("blocks"), scale);
+	this->addBonusStars(document.RootElement()->FirstChildElement("setup")->FirstChildElement("bonusstars"), scale);
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
@@ -407,6 +459,10 @@ void HelloWorld::createLevel(const std::string& filename) {
 	tinyxml2::XMLElement* introElement = document.RootElement()->FirstChildElement("intro");
 	if (introElement) {
 		tinyxml2::XMLElement* layerElement = introElement->FirstChildElement("layer");
+
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
 		while (layerElement) {
 			auto layer = Layer::create();
 			this->addChild(layer, 255);

@@ -58,19 +58,21 @@
 	<!-- </intro> -->
 
 	<!-- Win Condition -->
-	<wincondition>
-		<!-- Emitters -->
-		<emitters>
-			<emitter id="1" active="true"></emitter>
-		</emitters>
-
-		<!-- Mirrors -->
-		<mirrors>
-			<mirror id="3" direction="SOUTH"></mirror>
-			<mirror id="4" direction="NORTH"></mirror>
-			<mirror id="5" direction="EAST"></mirror>
-			<mirror id="6" direction="WEST"></mirror>
-		</mirrors>
-	</wincondition>
+	<winconditions>
+		<wincondition>
+			<!-- Emitters -->
+			<emitters>
+				<emitter id="1" active="true"></emitter>
+			</emitters>
+	
+			<!-- Mirrors -->
+			<mirrors>
+				<mirror id="3" direction="SOUTH"></mirror>
+				<mirror id="4" direction="NORTH"></mirror>
+				<mirror id="5" direction="EAST"></mirror>
+				<mirror id="6" direction="WEST"></mirror>
+			</mirrors>
+		</wincondition>
+	</winconditions>
 </level>
 

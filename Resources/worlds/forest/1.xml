@@ -5,7 +5,8 @@
 		<!-- Emitters -->
 		<emitters>
 			<emitter id="1">
-				<position x="768.0" y="96.0"></position>
+				<!--<position x="768.0" y="96.0"></position>-->
+				<position x="0.5" y="0.046875"></position>
 				<direction>NORTH</direction>
 				<colortype>RED</colortype>
 				<active>false</active>
@@ -15,17 +16,30 @@
 		<!-- Receptors -->
 		<receptors>
 			<receptor id="2">
-				<position x="768.0" y="1952.0"></position>
+				<position x="0.5" y="0.8"></position>
 				<direction>SOUTH</direction>
 				<colortype>RED</colortype>
 			</receptor>
 		</receptors>
+
+		<!-- Bonus Stars -->
+		<bonusstars>
+			<bonusstar id="3">
+				<position x="0.5" y="0.375"></position>
+			</bonusstar>
+			<bonusstar id="4">
+				<position x="0.5" y="0.5"></position>
+			</bonusstar>
+			<bonusstar id="5">
+				<position x="0.5" y="0.625"></position>
+			</bonusstar>
+		</bonusstars>
 	</setup>
 
 	<!-- Intro -->
 	<intro>
 		<layer id="0">
-			<position y="768.0"></position>
+			<position y="0.5"></position>
 			<text>Welcome to Reflection</text>
 		</layer>
 	</intro>
@@ -37,6 +51,15 @@
 			<emitters>
 				<emitter id="1" active="true"></emitter>
 			</emitters>
+			<!-- Bonus Stars -->
+			<bonusstars>
+				<bonusstar id="3">
+				</bonusstar>
+				<bonusstar id="4">
+				</bonusstar>
+				<bonusstar id="5">
+				</bonusstar>
+			</bonusstars>
 		</wincondition>
 	</winconditions>
 </level>

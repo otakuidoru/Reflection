@@ -83,29 +83,33 @@ Plane Receptor::getPlane(unsigned int index) {
 	const Vec2 worldPos = this->getParent()->convertToWorldSpace(this->getPosition());
 	const Size contentSize = this->getContentSize() * this->getScale();
 
+
+
 	switch (index) {	
 		case 0: { // first plane - non-reflective
-			const float angle = -(this->getRotation()) * DEGTORAD;
-			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
+			const float angle = -(this->getRotation() - 45.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x, worldPos.y, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
 		} break;
-		case 1: { // second plane - non-reflective
+		case 1: { // first plane - non-reflective
+			const float angle = -(this->getRotation() + 45.0f) * DEGTORAD;
+			Vec3 pos(worldPos.x, worldPos.y, 0.0f);
+			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
+		} break;
+		case 2: { // second plane - non-reflective
 			const float angle = -(this->getRotation() + 90.0f) * DEGTORAD;
 			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
 		} break;
-		case 2: { // third plane - non-reflective
+		case 3: { // third plane - non-reflective
 			const float angle = -(this->getRotation() + 180.0f) * DEGTORAD;
 			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
 		} break;
-		case 3: { // fourth plane - non-reflective
+		case 4: { // fourth plane - non-reflective
 			const float angle = -(this->getRotation() + 270.0f) * DEGTORAD;
 			Vec3 pos(worldPos.x + std::cosf(angle) * contentSize.width / 2.0f, worldPos.y + std::sinf(angle) * contentSize.height / 2.0f, 0.0f);
 			plane = Plane(Vec3(std::cosf(angle), std::sinf(angle), 0.0f), pos);
-		} break;
-		case 4: { // fifth plane - non-reflective
-			// TODO
 		} break;
 	}
 

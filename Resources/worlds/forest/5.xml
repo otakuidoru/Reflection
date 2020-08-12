@@ -11,25 +11,10 @@
 				<active>false</active>
 			</emitter>
 		</emitters>
-		<emitters>
-			<emitter id="2">
-				<position x="768.0" y="1952.0"></position>
-				<direction>SOUTH</direction>
-				<colortype>RED</colortype>
-				<active>false</active>
-			</emitter>
-		</emitters>
 
 		<!-- Receptors -->
 		<receptors>
-			<receptor id="3">
-				<position x="768.0" y="1952.0"></position>
-				<direction>SOUTH</direction>
-				<colortype>BLUE</colortype>
-			</receptor>
-		</receptors>
-		<receptors>
-			<receptor id="4">
+			<receptor id="2">
 				<position x="768.0" y="1952.0"></position>
 				<direction>SOUTH</direction>
 				<colortype>BLUE</colortype>
@@ -38,19 +23,19 @@
 
 		<!-- Mirrors -->
 		<mirrors>
-			<mirror id="5">
+			<mirror id="3">
 				<position x="512.0" y="1280.0"></position>
 				<direction>EAST</direction>
 			</mirror>
-			<mirror id="6">
+			<mirror id="4">
 				<position x="768.0" y="1280.0"></position>
 				<direction>EAST</direction>
 			</mirror>
-			<mirror id="7">
+			<mirror id="5">
 				<position x="512.0" y="768.0"></position>
 				<direction>EAST</direction>
 			</mirror>
-			<mirror id="8">
+			<mirror id="6">
 				<position x="768.0" y="768.0"></position>
 				<direction>EAST</direction>
 			</mirror>
@@ -58,7 +43,7 @@
 
 		<!-- Blocks -->
 		<blocks>
-			<block id="9">
+			<block id="7">
 				<position x="768.0" y="1024.0"></position>
 			</block>
 		</blocks>
@@ -73,19 +58,21 @@
 	<!-- </intro> -->
 
 	<!-- Win Condition -->
-	<wincondition>
-		<!-- Emitters -->
-		<emitters>
-			<emitter id="1" active="true"></emitter>
-		</emitters>
-
-		<!-- Mirrors -->
-		<mirrors>
-			<mirror id="3" direction="SOUTH"></mirror>
-			<mirror id="4" direction="NORTH"></mirror>
-			<mirror id="5" direction="EAST"></mirror>
-			<mirror id="6" direction="WEST"></mirror>
-		</mirrors>
-	</wincondition>
+	<winconditions>
+		<wincondition>
+			<!-- Emitters -->
+			<emitters>
+				<emitter id="1" active="true"></emitter>
+			</emitters>
+	
+			<!-- Mirrors -->
+			<mirrors>
+				<mirror id="3" direction="SOUTH"></mirror>
+				<mirror id="4" direction="NORTH"></mirror>
+				<mirror id="5" direction="EAST"></mirror>
+				<mirror id="6" direction="WEST"></mirror>
+			</mirrors>
+		</wincondition>
+	</winconditions>
 </level>
 

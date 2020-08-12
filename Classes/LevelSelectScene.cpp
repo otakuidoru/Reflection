@@ -41,15 +41,18 @@ static void problemLoading(const char* filename) {
  *
  */
 static int worldNameCallback(void* object, int argc, char** data, char** azColName) {
-	// 0     1
-	// name, background_path
+	// 0     1             2,            3,            4
+	// name, name_color_r, name_color_g, name_color_b, background_path
 
 	if (LevelSelect* const scene = static_cast<LevelSelect*>(object)) {
 		const Size visibleSize = Director::getInstance()->getVisibleSize();
 		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 		std::string worldName(data[0]);
-		std::string backgroundName(data[1]);
+		const int worldNameColorR = std::atoi(data[1]);
+		const int worldNameColorG = std::atoi(data[2]);
+		const int worldNameColorB = std::atoi(data[3]);
+		std::string backgroundName(data[4]);
 
 		auto background = Sprite::create(backgroundName);
 		const float scale = std::max(visibleSize.width / background->getContentSize().width, visibleSize.height / background->getContentSize().height);
@@ -57,13 +60,14 @@ static int worldNameCallback(void* object, int argc, char** data, char** azColNa
 		background->setPositionNormalized(Vec2(0.5f, 0.5f));
 		scene->addChild(background, -1);
 
-		auto label = Label::createWithTTF(worldName, "fonts/centurygothic.ttf", 160);
+		auto label = Label::createWithTTF(worldName, "fonts/centurygothic_bold.ttf", 160);
 		if (label == nullptr) {
-			problemLoading("'fonts/centurygothic.ttf'");
+			problemLoading("'fonts/centurygothic_bold.ttf'");
 		} else {
 			// position the label on the top center of the screen
-			label->setPosition(Vec2(768.0f, 1928.0f));
 			label->setScale(visibleSize.width / 1536.0f);
+			label->setPosition(Vec2(768.0f, origin.y + visibleSize.height - label->getContentSize().height * 2.0f * label->getScale()));
+			label->setTextColor(Color4B(worldNameColorR, worldNameColorG, worldNameColorB, 255));
 
 			// add the label as a child to this layer
 			scene->addChild(label, 10);
@@ -151,9 +155,9 @@ static int numStarsCallback(void* object, int argc, char** data, char** azColNam
 
 		std::stringstream ss;
 		ss << numStars << "/75";
-		auto label = Label::createWithTTF(ss.str(), "fonts/centurygothic.ttf", 96);
+		auto label = Label::createWithTTF(ss.str(), "fonts/centurygothic_bold.ttf", 96);
 		if (label == nullptr) {
-			problemLoading("'fonts/centurygothic.ttf'");
+			problemLoading("'fonts/centurygothic_bold.ttf'");
 		} else {
 			label->setAnchorPoint(Vec2(1.0f, 0.5f));
 			label->setHorizontalAlignment(TextHAlignment::RIGHT);
@@ -297,7 +301,7 @@ bool LevelSelect::init(int worldId) {
 	}
 
 	std::stringstream worldNameSs;
-	worldNameSs << "SELECT name, background_path FROM game_worlds WHERE id = " << this->worldId;
+	worldNameSs << "SELECT name, name_color_r, name_color_g, name_color_b, background_path FROM game_worlds WHERE id = " << this->worldId;
 	rc = sqlite3_exec(db, worldNameSs.str().c_str(), worldNameCallback, static_cast<void*>(this), &zErrMsg);
 	if (rc != SQLITE_OK) {
 		log("com.zenprogramming.reflection: SQL error: %s", zErrMsg);

@@ -44,6 +44,7 @@
 #include "Receptor.h"
 #include "Portal.h"
 #include "Splitter.h"
+#include "BonusStar.h"
 #include "WinCondition.h"
 
 class HelloWorld : public cocos2d::Scene {
@@ -62,13 +63,11 @@ protected:
 	std::set<Portal*> portals;
 	std::set<Combiner*> combiners;
 	std::set<Splitter*> splitters;
+	std::set<BonusStar*> bonusStars;
 
 	std::vector<cocos2d::Layer*> introLayers;
 
 	std::vector<std::shared_ptr<WinCondition>> winConditions;
-
-//	std::map<Emitter*, bool> emitterActiveWinConditions;
-//	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
 
 	int levelId;
 	int worldId;
@@ -85,6 +84,7 @@ protected:
 	void addMirrors(tinyxml2::XMLElement* const mirrorsElement, float scale);
 	void addReceptors(tinyxml2::XMLElement* const receptorsElement, float scale);
 	void addBlocks(tinyxml2::XMLElement* const blocksElement, float scale);
+	void addBonusStars(tinyxml2::XMLElement* const bonusStarsElement, float scale);
 	void addPortals(tinyxml2::XMLElement* const portalsElement, float scale);
 	void addCombiners(tinyxml2::XMLElement* const combinersElement, float scale);
 	void addSplitters(tinyxml2::XMLElement* const splittersElement, float scale);
