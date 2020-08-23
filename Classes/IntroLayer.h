@@ -22,34 +22,31 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __WIN_CONDITION_H__
-#define __WIN_CONDITION_H__
+#ifndef __INTRO_LAYER_H__
+#define __INTRO_LAYER_H__
 
-#include <map>
-#include <set>
-#include "Direction.h"
-#include "Emitter.h"
-#include "Mirror.h"
-#include "BonusStar.h"
+#include <string>
+#include "cocos2d.h"
 
-class WinCondition {
+class IntroLayer : public cocos2d::Layer {
 protected:
-	std::map<Emitter*, bool> emitterActiveWinConditions;
-	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
-	std::set<BonusStar*> bonusStars;
+	int id;
+	std::string text;
+
+	IntroLayer();
 
 public:
-	WinCondition();
-	virtual ~WinCondition();
+	static IntroLayer* create();
+	virtual ~IntroLayer();
 
-	void addEmitterActivation(Emitter* emitter, bool active);
-	void addMirrorDirection(Mirror* mirror, Direction direction);
-	void addBonusStar(BonusStar* bonusStar);
+	virtual bool init();
 
-	std::set<BonusStar*> getBonusStars();
+	inline int getId() const { return this->id; }
+	inline void setId(int id) { this->id = id; }
 
-	bool evaluate();
+	inline std::string getText() const { return this->text; }
+	inline void setText(const std::string& text) { this->text = text; }
 };
 
-#endif // __WIN_CONDITION_H__
+#endif // __INTRO_LAYER_H__
 

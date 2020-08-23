@@ -29,12 +29,14 @@
 #include "HelloWorldScene.h"
 #include "BackArrow.h"
 #include "ResetButton.h"
+#include "Indicator.h"
 
 #define BACKGROUND_LAYER -1
 #define LASER_LAYER 1
 #define OBJECT_LAYER 2
-#define BACK_ARROW_LAYER 254
-#define INTRO_LAYER 255
+#define BACK_ARROW_LAYER 255
+#define RESET_LAYER 253
+#define INTRO_LAYER 254
 
 USING_NS_CC;
 
@@ -87,13 +89,16 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId, int worldId
 		return false;
 	}
 
-	this->levelId = levelId;
-	this->worldId = worldId;
-	this->levelFilename = levelFilename;
-
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
 	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
 	const float scale = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
+
+	this->levelId = levelId;
+	this->worldId = worldId;
+	this->levelFilename = levelFilename;
+	this->introLayers = IntroLayerMultiplex::create();
+	//this->introLayers->setPosition(Vec2(origin.x + visibleSize.width/2.0f, origin.y + visibleSize.height/2.0f));
+	this->addChild(this->introLayers, 255);
 
 	/////////////////////////////
 	// 2. add your codes below...
@@ -170,6 +175,9 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId, int worldId
 	// (have to do this for TinyXML to read the file)
 	FileUtils::getInstance()->writeStringToFile(FileUtils::getInstance()->getStringFromFile(source.str()), target.str());
 	this->createLevel(target.str());
+	if (!this->introLayers->isEmpty()) {
+		this->introLayers->switchTo(0);
+	}
 
 	// create the back arrow
 	auto backArrow = BackArrow::create();
@@ -180,7 +188,7 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId, int worldId
 	backArrow->setColor(Color3B(255, 255, 255));
 	backArrow->setScale(visibleSize.width / 1536.0f);
 	backArrow->setPosition(Vec2(origin.x + backArrow->getContentSize().width / 2.0f, origin.y + backArrow->getContentSize().height / 2.0f));
-	this->addChild(backArrow, 254);
+	this->addChild(backArrow, BACK_ARROW_LAYER);
 
 	// create the reset button
 	auto resetButton = ResetButton::create();
@@ -191,7 +199,53 @@ bool HelloWorld::init(const std::string& levelFilename, int levelId, int worldId
 	resetButton->setColor(Color3B(255, 255, 255));
 	resetButton->setScale(visibleSize.width / 1536.0f);
 	resetButton->setPosition(Vec2(origin.x + visibleSize.width - resetButton->getContentSize().width / 2.0f, origin.y + resetButton->getContentSize().height / 2.0f));
-	this->addChild(resetButton, 254);
+	this->addChild(resetButton, RESET_LAYER);
+
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  Create a "one by one" touch event listener (processes one touch at a time)
+	//
+	//////////////////////////////////////////////////////////////////////////////
+
+	auto touchListener = EventListenerTouchOneByOne::create();
+	touchListener->setSwallowTouches(true);
+
+	// triggered when pressed
+	touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
+		bool consuming = false;
+
+		if (this->introLayers->getEnabledLayerIndex() < this->introLayers->getNumLayers()) {
+			consuming = true;
+			this->introLayers->getEnabledLayer()->runAction(Sequence::create(
+				FadeOut::create(1.0f),
+				CallFunc::create([&]() {
+					if (this->introLayers->getEnabledLayerIndex() < this->introLayers->getNumLayers()-1) {
+						this->introLayers->switchTo(this->introLayers->getEnabledLayerIndex()+1);
+					} else if (this->introLayers->getEnabledLayerIndex() == this->introLayers->getNumLayers()-1) {
+						this->introLayers->removeFromParent();
+					}
+				}),
+				nullptr
+			));
+		}
+
+		return consuming;
+	};
+
+	// triggered when moving touch
+	touchListener->onTouchMoved = [&](Touch* touch, Event* event) {};
+
+	// triggered when released
+	touchListener->onTouchEnded = [&](Touch* touch, Event* event) {};
+
+	// add listener
+	this->introLayers->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this->introLayers);
+
+	//////////////////////////////////////////////////////////////////////////////
+	//
+	//  
+	//
+	//////////////////////////////////////////////////////////////////////////////
 
 	this->ready = true;
 
@@ -237,7 +291,6 @@ void HelloWorld::addEmitters(tinyxml2::XMLElement* const emittersElement, float 
 			tinyxml2::XMLElement* positionElement = emitterElement->FirstChildElement("position");
 			positionElement->QueryFloatAttribute("x", &x);
 			positionElement->QueryFloatAttribute("y", &y);
-//			emitter->setPosition(Vec2(x, y));
 			emitter->setPosition(Vec2(origin.x + visibleSize.width * x, origin.y + visibleSize.height * y));
 
 			// set emitter direction
@@ -430,7 +483,8 @@ void HelloWorld::addBonusStars(tinyxml2::XMLElement* const bonusStarsElement, fl
  *
  */
 void HelloWorld::createLevel(const std::string& filename) {
-	auto visibleSize = Director::getInstance()->getVisibleSize();
+	const Size visibleSize = Director::getInstance()->getVisibleSize();
+	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
 	const float scale = std::min(visibleSize.width/1536.0f, visibleSize.height/2048.0f);
 
 	tinyxml2::XMLDocument document;
@@ -464,53 +518,62 @@ void HelloWorld::createLevel(const std::string& filename) {
 		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 		while (layerElement) {
-			auto layer = Layer::create();
-			this->addChild(layer, 255);
-			this->introLayers.push_back(layer);
+//			auto layer = LayerGradient::create(Color4B(255, 255, 255, 64), Color4B(255, 255, 255, 64));
+			Layer* layer = Layer::create();
 
 			const std::string text = layerElement->FirstChildElement("text")->GetText();
+			//log("com.zenprogramming.reflection: %s", text.c_str());
 
-			auto label = Label::createWithTTF(text, "fonts/motioncontrol-bold.ttf", 160);
+			auto label = Label::createWithTTF(text, "fonts/centurygothic_bold.ttf", 160);
 			if (label == nullptr) {
-				problemLoading("'fonts/motioncontrol-bold.ttf'");
+				problemLoading("'fonts/centurygothic_bold.ttf'");
 			} else {
 				// position the label on the top center of the screen
-				label->setPosition(Vec2(768.0f, 1024.0f));
+				label->setPosition(Vec2(origin.x + visibleSize.width/2.0f, origin.y + visibleSize.height*3.0f/4.0f));
+				label->setScale(scale);
+				label->setColor(Color3B(0, 0, 0));
+
+				Sprite* background = Sprite::create("intro_layer.png");
+				background->setPosition(label->getPosition());
+				background->setScaleX(scale);
+				layer->addChild(background, INTRO_LAYER);
 
 				// add the label as a child to this layer
 				layer->addChild(label, INTRO_LAYER);
+				layer->setCascadeOpacityEnabled(true);
 
-				//////////////////////////////////////////////////////////////////////////////
-				//
-				//  Create a "one by one" touch event listener (processes one touch at a time)
-				//
-				//////////////////////////////////////////////////////////////////////////////
-
-				auto touchListener = EventListenerTouchOneByOne::create();
-				touchListener->setSwallowTouches(true);
-
-				// triggered when pressed
-				touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
-					bool consuming = false;
-
-					if (!this->introLayers.empty()) {
-						if (this->introLayers[0]->getBoundingBox().containsPoint(touch->getLocation())) {
-							this->introLayers[0]->removeFromParent();
-						}
-					}
-
-					return consuming;
-				};
-
-				// triggered when moving touch
-				touchListener->onTouchMoved = [&](Touch* touch, Event* event) {};
-
-				// triggered when released
-				touchListener->onTouchEnded = [&](Touch* touch, Event* event) {};
-
-				// add listener
-				layer->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, layer);
+				Label* continueLabel = Label::createWithTTF("Touch to continue", "fonts/centurygothic_bold.ttf", 60);
+				continueLabel->setPosition(Vec2(background->getPositionX(), background->getPositionY() - background->getContentSize().height/2.0f + continueLabel->getContentSize().height));
+				continueLabel->setScale(scale);
+				continueLabel->setColor(Color3B(0, 0, 0));
+				layer->addChild(continueLabel, INTRO_LAYER);
 			}
+
+			tinyxml2::XMLElement* indicatorElement = layerElement->FirstChildElement("indicator");
+			if (indicatorElement) {
+				// set indicator position
+				float x, y;
+				tinyxml2::XMLElement* positionElement = indicatorElement->FirstChildElement("position");
+				positionElement->QueryFloatAttribute("x", &x);
+				positionElement->QueryFloatAttribute("y", &y);
+
+				Indicator* indicator = Indicator::create();
+				indicator->setPosition(Vec2(origin.x + visibleSize.width * x, origin.y + visibleSize.height * y));
+				indicator->setColor(Color3B(0, 0, 255));
+//				indicator->setOnEnterCallback([&]() {
+//					indicator->runAction(ScaleTo::create(2.0f, 0.0f));
+//				});
+				layer->addChild(indicator);
+				indicator->runAction(RepeatForever::create(
+					Sequence::create(
+						ScaleTo::create(2.0f, 0.0f),
+						ScaleTo::create(2.0f, 1.0f),
+						nullptr
+					)
+				));
+			}
+
+			this->introLayers->addLayer(layer);
 
 			layerElement = layerElement->NextSiblingElement("layer");
 		}
@@ -675,13 +738,20 @@ bool HelloWorld::checkWinConditions() {
 		//
 		////////////////////////////////////////////////////////////////////////////
 
+		std::shared_ptr<WinCondition> currentWinCondition = nullptr;
 		for (auto winCondition : this->winConditions) {
 			if (!winCondition->evaluate()) {
 				return false;
 			}
+			currentWinCondition = winCondition;
 		}
 
-		// player won, so set the ready to false
+//		// remove all bonus stars
+//		for (auto bonusStar : currentWinCondition->getBonusStars()) {
+//			bonusStar->removeFromParent();
+//		}
+
+		// player has won, so set the ready to false
 		this->ready = false;
 
 		////////////////////////////////////////////////////////////////////////////

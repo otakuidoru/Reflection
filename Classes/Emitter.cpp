@@ -72,37 +72,37 @@ bool Emitter::initWithFile(const std::string& filename) {
 	this->setPlaneReflective(2, false);
 	this->setPlaneReflective(3, false);
 
-	//////////////////////////////////////////////////////////////////////////////
-	//
-	//  Create a "one by one" touch event listener (processes one touch at a time)
-	//
-	//////////////////////////////////////////////////////////////////////////////
-
-	auto touchListener = EventListenerTouchOneByOne::create();
-	touchListener->setSwallowTouches(true);
-
-	// triggered when pressed
-	touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
-		bool consuming = false;
-
-		if (this->getBoundingBox().containsPoint(touch->getLocation())) {
-			consuming = true;
-			this->setActive(!this->isActive());
-		}
-
-		return consuming;
-	};
-
-	// triggered when moving touch
-	touchListener->onTouchMoved = [&](Touch* touch, Event* event) {
-	};
-
-	// triggered when released
-	touchListener->onTouchEnded = [&](Touch* touch, Event* event) {
-	};
-
-	// add listener
-	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
+//	//////////////////////////////////////////////////////////////////////////////
+//	//
+//	//  Create a "one by one" touch event listener (processes one touch at a time)
+//	//
+//	//////////////////////////////////////////////////////////////////////////////
+//
+//	auto touchListener = EventListenerTouchOneByOne::create();
+//	touchListener->setSwallowTouches(true);
+//
+//	// triggered when pressed
+//	touchListener->onTouchBegan = [&](Touch* touch, Event* event) -> bool {
+//		bool consuming = false;
+//
+//		if (this->getBoundingBox().containsPoint(touch->getLocation())) {
+//			consuming = true;
+//			this->setActive(!this->isActive());
+//		}
+//
+//		return consuming;
+//	};
+//
+//	// triggered when moving touch
+//	touchListener->onTouchMoved = [&](Touch* touch, Event* event) {
+//	};
+//
+//	// triggered when released
+//	touchListener->onTouchEnded = [&](Touch* touch, Event* event) {
+//	};
+//
+//	// add listener
+//	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
 
 	return true;
 }

@@ -39,6 +39,7 @@
 #include "Emitter.h"
 #include "GameObject.h"
 #include "Intersection.h"
+#include "IntroLayerMultiplex.h"
 #include "Laser.h"
 #include "Mirror.h"
 #include "Receptor.h"
@@ -65,7 +66,7 @@ protected:
 	std::set<Splitter*> splitters;
 	std::set<BonusStar*> bonusStars;
 
-	std::vector<cocos2d::Layer*> introLayers;
+	IntroLayerMultiplex* introLayers;
 
 	std::vector<std::shared_ptr<WinCondition>> winConditions;
 

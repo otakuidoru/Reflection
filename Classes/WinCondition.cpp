@@ -57,7 +57,14 @@ void WinCondition::addMirrorDirection(Mirror* mirror, Direction direction) {
  *
  */
 void WinCondition::addBonusStar(BonusStar* bonusStar) {
-	this->bonusStarsWinConditions.insert(bonusStar);
+	this->bonusStars.insert(bonusStar);
+}
+
+/**
+ *
+ */
+std::set<BonusStar*> WinCondition::getBonusStars() {
+	return this->bonusStars;
 }
 
 /**

@@ -66,7 +66,10 @@ list(APPEND GAME_SOURCE
      Classes/Emitter.cpp
      Classes/GameObject.cpp
      Classes/HelloWorldScene.cpp
+     Classes/Indicator.cpp
      Classes/Intersection.cpp
+     Classes/IntroLayer.cpp
+     Classes/IntroLayerMultiplex.cpp
      Classes/Laser.cpp
      Classes/LevelSelectScene.cpp
      Classes/Mirror.cpp
@@ -92,7 +95,10 @@ list(APPEND GAME_HEADER
      Classes/Emitter.h
      Classes/GameObject.h
      Classes/HelloWorldScene.h
+     Classes/Indicator.h
      Classes/Intersection.h
+     Classes/IntroLayer.h
+     Classes/IntroLayerMultiplex.h
      Classes/Laser.h
      Classes/LevelSelectScene.h
      Classes/Mirror.h

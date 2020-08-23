@@ -22,34 +22,46 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __WIN_CONDITION_H__
-#define __WIN_CONDITION_H__
+#include "IntroLayer.h"
 
-#include <map>
-#include <set>
-#include "Direction.h"
-#include "Emitter.h"
-#include "Mirror.h"
-#include "BonusStar.h"
+USING_NS_CC;
 
-class WinCondition {
-protected:
-	std::map<Emitter*, bool> emitterActiveWinConditions;
-	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
-	std::set<BonusStar*> bonusStars;
+/**
+ *
+ */
+IntroLayer::IntroLayer() : Layer() {
+}
 
-public:
-	WinCondition();
-	virtual ~WinCondition();
+/**
+ *
+ */
+IntroLayer::~IntroLayer() {
+}
 
-	void addEmitterActivation(Emitter* emitter, bool active);
-	void addMirrorDirection(Mirror* mirror, Direction direction);
-	void addBonusStar(BonusStar* bonusStar);
+/**
+ *
+ */
+IntroLayer* IntroLayer::create() {
+	IntroLayer* ret = new (std::nothrow) IntroLayer();
+	if (ret && ret->init()) {
+		ret->autorelease();
+		return ret;
+	}
 
-	std::set<BonusStar*> getBonusStars();
+	CC_SAFE_DELETE(ret);
+	return nullptr;
+}
 
-	bool evaluate();
-};
+/**
+ * on "init" you need to initialize your instance
+ */
+bool IntroLayer::init() {
+	//////////////////////////////
+	// 1. super init first
+	if (!Layer::init()) {
+		return false;
+	}
 
-#endif // __WIN_CONDITION_H__
+	return true;
+}
 

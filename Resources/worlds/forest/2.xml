@@ -5,17 +5,17 @@
 		<!-- Emitters -->
 		<emitters>
 			<emitter id="1">
-				<position x="768.0" y="96.0"></position>
+				<position x="0.5" y="0.1"></position>
 				<direction>NORTH</direction>
 				<colortype>RED</colortype>
-				<active>false</active>
+				<active>true</active>
 			</emitter>
 		</emitters>
 
 		<!-- Receptors -->
 		<receptors>
 			<receptor id="2">
-				<position x="96.0" y="1024.0"></position>
+				<position x="0.1" y="0.5"></position>
 				<direction>EAST</direction>
 				<colortype>RED</colortype>
 			</receptor>
@@ -24,10 +24,23 @@
 		<!-- Mirrors -->
 		<mirrors>
 			<mirror id="3">
-				<position x="768.0" y="1024.0"></position>
-				<direction>EAST</direction>
+				<position x="0.5" y="0.5"></position>
+				<direction>SOUTH</direction>
 			</mirror>
 		</mirrors>
+
+		<!-- Bonus Stars -->
+		<bonusstars>
+			<bonusstar id="4">
+				<position x="0.5" y="0.375"></position>
+			</bonusstar>
+			<bonusstar id="5">
+				<position x="0.5" y="0.25"></position>
+			</bonusstar>
+			<bonusstar id="6">
+				<position x="0.3" y="0.5"></position>
+			</bonusstar>
+		</bonusstars>
 	</setup>
 
 	<!-- Win Conditions -->

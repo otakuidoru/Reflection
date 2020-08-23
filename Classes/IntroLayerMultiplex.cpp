@@ -22,34 +22,46 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __WIN_CONDITION_H__
-#define __WIN_CONDITION_H__
+#include "IntroLayerMultiplex.h"
 
-#include <map>
-#include <set>
-#include "Direction.h"
-#include "Emitter.h"
-#include "Mirror.h"
-#include "BonusStar.h"
+USING_NS_CC;
 
-class WinCondition {
-protected:
-	std::map<Emitter*, bool> emitterActiveWinConditions;
-	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
-	std::set<BonusStar*> bonusStars;
+/**
+ *
+ */
+IntroLayerMultiplex::IntroLayerMultiplex() : LayerMultiplex() {
+}
 
-public:
-	WinCondition();
-	virtual ~WinCondition();
+/**
+ *
+ */
+IntroLayerMultiplex::~IntroLayerMultiplex() {
+}
 
-	void addEmitterActivation(Emitter* emitter, bool active);
-	void addMirrorDirection(Mirror* mirror, Direction direction);
-	void addBonusStar(BonusStar* bonusStar);
+/**
+ *
+ */
+IntroLayerMultiplex* IntroLayerMultiplex::create() {
+	IntroLayerMultiplex* ret = new (std::nothrow) IntroLayerMultiplex();
+	if (ret && ret->init()) {
+		ret->autorelease();
+		return ret;
+	}
 
-	std::set<BonusStar*> getBonusStars();
+	CC_SAFE_DELETE(ret);
+	return nullptr;
+}
 
-	bool evaluate();
-};
+/**
+ * on "init" you need to initialize your instance
+ */
+bool IntroLayerMultiplex::init() {
+	//////////////////////////////
+	// 1. super init first
+	if (!LayerMultiplex::init()) {
+		return false;
+	}
 
-#endif // __WIN_CONDITION_H__
+	return true;
+}
 

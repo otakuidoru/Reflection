@@ -22,34 +22,29 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __WIN_CONDITION_H__
-#define __WIN_CONDITION_H__
+#ifndef __INTRO_LAYER_MULTIPLEX_H__
+#define __INTRO_LAYER_MULTIPLEX_H__
 
-#include <map>
-#include <set>
-#include "Direction.h"
-#include "Emitter.h"
-#include "Mirror.h"
-#include "BonusStar.h"
+#include "cocos2d.h"
 
-class WinCondition {
+class IntroLayerMultiplex : public cocos2d::LayerMultiplex {
 protected:
-	std::map<Emitter*, bool> emitterActiveWinConditions;
-	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
-	std::set<BonusStar*> bonusStars;
+	IntroLayerMultiplex();
 
 public:
-	WinCondition();
-	virtual ~WinCondition();
+	static IntroLayerMultiplex* create();
+	virtual ~IntroLayerMultiplex();
 
-	void addEmitterActivation(Emitter* emitter, bool active);
-	void addMirrorDirection(Mirror* mirror, Direction direction);
-	void addBonusStar(BonusStar* bonusStar);
+	virtual bool init();
 
-	std::set<BonusStar*> getBonusStars();
+	inline Layer* getEnabledLayer() const { return this->_layers.at(this->_enabledLayer); }
+	inline int getEnabledLayerIndex() const { return this->_enabledLayer; }
+	inline int getNumLayers() const { return this->_layers.size(); }
+	inline bool isEmpty() const { return this->_layers.empty(); }
 
-	bool evaluate();
+private:
+	CC_DISALLOW_COPY_AND_ASSIGN(IntroLayerMultiplex);
 };
 
-#endif // __WIN_CONDITION_H__
+#endif // __INTRO_LAYER_MULTIPLEX_H__
 

@@ -22,34 +22,22 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __WIN_CONDITION_H__
-#define __WIN_CONDITION_H__
+#ifndef __INDICATOR_H__
+#define __INDICATOR_H__
 
-#include <map>
-#include <set>
-#include "Direction.h"
-#include "Emitter.h"
-#include "Mirror.h"
-#include "BonusStar.h"
+#include <string>
+#include "cocos2d.h"
 
-class WinCondition {
+class Indicator : public cocos2d::Sprite {
 protected:
-	std::map<Emitter*, bool> emitterActiveWinConditions;
-	std::map<Mirror*, Direction> mirrorDirectionWinConditions;
-	std::set<BonusStar*> bonusStars;
+	Indicator();
 
 public:
-	WinCondition();
-	virtual ~WinCondition();
+	static Indicator* create();
+	virtual ~Indicator();
 
-	void addEmitterActivation(Emitter* emitter, bool active);
-	void addMirrorDirection(Mirror* mirror, Direction direction);
-	void addBonusStar(BonusStar* bonusStar);
-
-	std::set<BonusStar*> getBonusStars();
-
-	bool evaluate();
+	virtual bool initWithFile(const std::string& filename) override;
 };
 
-#endif // __WIN_CONDITION_H__
+#endif // __INDICATOR_H__
 
